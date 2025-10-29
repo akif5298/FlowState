@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Transparent Logo for App UI (same in dark mode) -->
+<!-- Uses the same transparent logo regardless of theme -->
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/app_logo_transparent"
+    android:gravity="center" />
+

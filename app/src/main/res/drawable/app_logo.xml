@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Transparent Logo for App UI -->
+<!-- Place your transparent logo PNG file in this directory (drawable/) and name it: app_logo_transparent.png -->
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/app_logo_transparent"
+    android:gravity="center" />
+

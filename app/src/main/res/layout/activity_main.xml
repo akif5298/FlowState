@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_light"
+    android:fitsSystemWindows="true">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/ThemeOverlay.Material3.Dark">
+
+        <!-- Gradient Header -->
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:layout_width="match_parent"
+            android:layout_height="280dp"
+            app:contentScrim="@drawable/gradient_background"
+            app:expandedTitleMarginStart="24dp"
+            app:expandedTitleMarginEnd="24dp"
+            app:expandedTitleMarginBottom="24dp"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/gradient_background"
+                android:padding="24dp">
+
+                <!-- App Icon -->
+                <ImageView
+                    android:id="@+id/logoIcons"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:layout_marginTop="16dp"
+                    android:src="@drawable/app_logo"
+                    android:scaleType="centerInside"
+                    android:contentDescription="Energy Predictor Logo"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <!-- Title -->
+                <TextView
+                    android:id="@+id/tvTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="Energy Predictor"
+                    android:textSize="36sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/white"
+                    android:layout_marginTop="16dp"
+                    android:elevation="8dp"
+                    app:layout_constraintTop_toBottomOf="@+id/logoIcons"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <!-- Status -->
+                <TextView
+                    android:id="@+id/tvStatus"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="Optimize your daily productivity"
+                    android:textSize="16sp"
+                    android:textColor="@android:color/white"
+                    android:alpha="0.95"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintTop_toBottomOf="@+id/tvTitle"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Content ScrollView -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:fillViewport="true">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="20dp">
+
+            <!-- Connect Google Fit - Featured Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardConnectFit"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="8dp"
+                app:strokeWidth="0dp"
+                android:layout_marginBottom="24dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnConnectFit"
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp"
+                    android:text="Connect Google Fit"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/white"
+                    android:backgroundTint="#636363"
+                    android:paddingStart="28dp"
+                    android:paddingEnd="28dp"
+                    app:cornerRadius="24dp"
+                    app:icon="@android:drawable/ic_menu_manage"
+                    app:iconGravity="start"
+                    app:iconPadding="16dp"
+                    app:iconTint="@android:color/white"
+                    style="@style/ModernButton" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Section: Cognitive Tests -->
+            <TextView
+                android:id="@+id/sectionCognitive"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Cognitive Tests"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:letterSpacing="0.05"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="20dp"
+                app:layout_constraintTop_toBottomOf="@+id/cardConnectFit"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- Typing Speed Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardTyping"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="4dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/border"
+                android:layout_marginBottom="20dp"
+                app:layout_constraintTop_toBottomOf="@+id/sectionCognitive"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnTypingSpeed"
+                    android:layout_width="match_parent"
+                    android:layout_height="72dp"
+                    android:text="Measure Typing Speed"
+                    android:textSize="17sp"
+                    android:textAlignment="textStart"
+                    android:textColor="@android:color/white"
+                    android:backgroundTint="#636363"
+                    android:paddingStart="24dp"
+                    android:paddingEnd="24dp"
+                    app:icon="@android:drawable/ic_menu_sort_by_size"
+                    app:iconGravity="start"
+                    app:iconPadding="16dp"
+                    app:cornerRadius="20dp"
+                    app:iconTint="@android:color/white"
+                    style="@style/Widget.Material3.Button" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Reaction Time Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardReaction"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="4dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/border"
+                android:layout_marginBottom="32dp"
+                app:layout_constraintTop_toBottomOf="@+id/cardTyping"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnReactionTime"
+                    android:layout_width="match_parent"
+                    android:layout_height="72dp"
+                    android:text="Measure Reaction Time"
+                    android:textSize="17sp"
+                    android:textAlignment="textStart"
+                    android:textColor="@android:color/white"
+                    android:backgroundTint="#636363"
+                    android:paddingStart="24dp"
+                    android:paddingEnd="24dp"
+                    app:icon="@android:drawable/ic_menu_revert"
+                    app:iconGravity="start"
+                    app:iconPadding="16dp"
+                    app:cornerRadius="20dp"
+                    app:iconTint="@android:color/white"
+                    style="@style/Widget.Material3.Button" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Section: Energy Analysis -->
+            <TextView
+                android:id="@+id/sectionEnergy"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Energy Analysis"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:letterSpacing="0.05"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="20dp"
+                app:layout_constraintTop_toBottomOf="@+id/cardReaction"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- Energy Prediction Card - Featured -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardEnergy"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="6dp"
+                app:strokeWidth="2dp"
+                app:strokeColor="@color/border"
+                android:background="@drawable/card_gradient"
+                android:layout_marginBottom="32dp"
+                app:layout_constraintTop_toBottomOf="@+id/sectionEnergy"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnEnergyPrediction"
+                    android:layout_width="match_parent"
+                    android:layout_height="88dp"
+                    android:text="View Energy Prediction"
+                    android:textSize="19sp"
+                    android:textStyle="bold"
+                    android:textAlignment="textStart"
+                    android:textColor="@android:color/white"
+                    android:backgroundTint="#636363"
+                    android:paddingStart="28dp"
+                    android:paddingEnd="28dp"
+                    app:icon="@android:drawable/btn_star_big_on"
+                    app:iconGravity="start"
+                    app:iconPadding="20dp"
+                    app:cornerRadius="24dp"
+                    app:iconTint="@android:color/white"
+                    style="@style/Widget.Material3.Button" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Info Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardInfo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="32dp"
+                app:layout_constraintTop_toBottomOf="@+id/cardEnergy"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="28dp">
+
+                    <View
+                        android:id="@+id/infoIcon"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:background="@drawable/app_icon_background"
+                        android:layout_marginBottom="4dp"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                    <TextView
+                        android:id="@+id/infoTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="About Energy Prediction"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_primary"
+                        android:gravity="center"
+                        android:layout_marginTop="20dp"
+                        app:layout_constraintTop_toBottomOf="@+id/infoIcon"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="This app uses biometric data and cognitive tests to predict your energy levels throughout the day, helping you schedule tasks at optimal times for maximum productivity."
+                        android:textSize="14sp"
+                        android:textColor="@color/text_secondary"
+                        android:gravity="center"
+                        android:lineSpacingMultiplier="1.8"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginBottom="4dp"
+                        app:layout_constraintTop_toBottomOf="@+id/infoTitle"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
