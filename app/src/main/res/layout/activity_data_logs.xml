@@ -29,7 +29,7 @@
                     android:layout_height="56dp"
                     android:src="@drawable/app_logo"
                     android:scaleType="centerInside"
-                    android:contentDescription="Energy Predictor Logo"
+                    android:contentDescription="FlowState Logo"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent" />

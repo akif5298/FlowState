@@ -7,7 +7,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.card.MaterialCardView;
-import com.personaleenergy.app.R;
+import com.flowstate.app.R;
 import com.personaleenergy.app.ui.settings.SettingsActivity;
 import com.personaleenergy.app.ui.data.DataLogsActivity;
 import com.personaleenergy.app.ui.schedule.AIScheduleActivity;
@@ -41,9 +41,17 @@ public class EnergyDashboardActivity extends AppCompatActivity {
         tvAIInsight = findViewById(R.id.tvAIInsight);
         cardGraph = findViewById(R.id.cardGraph);
         cardCognitive = findViewById(R.id.cardCognitive);
+        
+        // Null safety checks
+        if (bottomNav == null) {
+            android.util.Log.e("EnergyDashboard", "bottomNavigation not found in layout");
+        }
     }
     
     private void setupBottomNavigation() {
+        if (bottomNav == null) {
+            return;
+        }
         bottomNav.setOnNavigationItemSelectedListener(item -> {
             int itemId = item.getItemId();
             
@@ -67,33 +75,49 @@ public class EnergyDashboardActivity extends AppCompatActivity {
         });
         
         // Set dashboard as selected
-        bottomNav.setSelectedItemId(R.id.nav_dashboard);
+        if (bottomNav != null) {
+            bottomNav.setSelectedItemId(R.id.nav_dashboard);
+        }
     }
     
     private void setupClickListeners() {
         // Typing test button
-        findViewById(R.id.btnTypingTest).setOnClickListener(v -> {
-            startActivity(new Intent(this, TypingSpeedActivity.class));
-        });
+        View btnTypingTest = findViewById(R.id.btnTypingTest);
+        if (btnTypingTest != null) {
+            btnTypingTest.setOnClickListener(v -> {
+                startActivity(new Intent(this, TypingSpeedActivity.class));
+            });
+        }
         
         // Reaction test button
-        findViewById(R.id.btnReactionTest).setOnClickListener(v -> {
-            startActivity(new Intent(this, ReactionTimeActivity.class));
-        });
+        View btnReactionTest = findViewById(R.id.btnReactionTest);
+        if (btnReactionTest != null) {
+            btnReactionTest.setOnClickListener(v -> {
+                startActivity(new Intent(this, ReactionTimeActivity.class));
+            });
+        }
         
         // Manual feedback slider - will be handled in layout
         // Graph click to show details
-        cardGraph.setOnClickListener(v -> {
-            // Show detailed graph view
-            // TODO: Implement detailed graph modal/fragment
-        });
+        if (cardGraph != null) {
+            cardGraph.setOnClickListener(v -> {
+                // Show detailed graph view
+                // TODO: Implement detailed graph modal/fragment
+            });
+        }
     }
     
     private void loadEnergyData() {
         // TODO: Load actual data from ML model
-        tvCurrentEnergy.setText("75");
-        tvEnergyLevel.setText("HIGH");
-        tvAIInsight.setText("Energy dip expected in 25 min. Hydrate or take a short walk.");
+        if (tvCurrentEnergy != null) {
+            tvCurrentEnergy.setText("75");
+        }
+        if (tvEnergyLevel != null) {
+            tvEnergyLevel.setText("HIGH");
+        }
+        if (tvAIInsight != null) {
+            tvAIInsight.setText("Energy dip expected in 25 min. Hydrate or take a short walk.");
+        }
     }
 }
 

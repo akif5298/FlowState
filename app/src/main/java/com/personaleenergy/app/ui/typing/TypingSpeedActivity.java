@@ -7,9 +7,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
-import com.personaleenergy.app.R;
+import com.flowstate.app.R;
 import com.personaleenergy.app.data.collection.TypingSpeedCollector;
-import com.personaleenergy.app.data.models.TypingSpeedData;
+import com.flowstate.app.data.models.TypingSpeedData;
 
 public class TypingSpeedActivity extends AppCompatActivity {
     

@@ -1,4 +1,4 @@
-package com.personaleenergy.app.data.models;
+package com.flowstate.app.data.models;
 
 public enum EnergyLevel {
     HIGH, MEDIUM, LOW

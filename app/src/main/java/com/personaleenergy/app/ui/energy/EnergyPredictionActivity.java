@@ -4,11 +4,11 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
-import com.personaleenergy.app.R;
+import com.flowstate.app.R;
 import com.personaleenergy.app.data.collection.GoogleFitManager;
-import com.personaleenergy.app.data.models.BiometricData;
-import com.personaleenergy.app.data.models.EnergyPrediction;
-import com.personaleenergy.app.data.models.ProductivitySuggestion;
+import com.flowstate.app.data.models.BiometricData;
+import com.flowstate.app.data.models.EnergyPrediction;
+import com.flowstate.app.data.models.ProductivitySuggestion;
 import com.personaleenergy.app.ml.EnergyPredictor;
 import com.personaleenergy.app.llm.LLMService;
 

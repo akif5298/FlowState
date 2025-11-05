@@ -10,7 +10,7 @@ import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.Field;
 import com.google.android.gms.fitness.request.DataReadRequest;
 import com.google.android.gms.fitness.result.DataReadResponse;
-import com.personaleenergy.app.data.models.BiometricData;
+import com.flowstate.app.data.models.BiometricData;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 

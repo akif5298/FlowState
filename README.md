@@ -1,7 +1,7 @@
-# Personal Energy Cycle Predictor
+# FlowState
 
 ## Overview
-The Personal Energy Cycle Predictor is an Android application that predicts personal energy highs and lows throughout the day, helping users optimize their productivity by scheduling demanding tasks during peak energy periods and restorative activities during low energy periods.
+FlowState is an Android application that predicts personal energy highs and lows throughout the day, helping users optimize their productivity by scheduling demanding tasks during peak energy periods and restorative activities during low energy periods.
 
 ## Project Team
 - Bibek Chugh
@@ -78,7 +78,7 @@ The Personal Energy Cycle Predictor is an Android application that predicts pers
 1. Clone the repository:
 ```bash
 git clone [repository-url]
-cd PersonalEnergyCyclePredictor
+cd FlowState
 ```
 
 2. Open in Android Studio:
@@ -91,7 +91,7 @@ cd PersonalEnergyCyclePredictor
    - Place it in `app/` directory
 
 4. Configure API Keys:
-   - Add your OpenAI API key in `app/src/main/java/com/personaleenergy/app/llm/LLMService.java`
+   - Add your OpenAI API key in `app/src/main/java/com/flowstate/app/llm/LLMService.java`
    - Update `app/google-services.json` with your Firebase configuration
 
 5. Sync Gradle:
@@ -135,14 +135,14 @@ cd PersonalEnergyCyclePredictor
 app/
 ├── src/
 │   ├── main/
-│   │   ├── java/com/personaleenergy/app/
+│   │   ├── java/com/flowstate/app/
 │   │   │   ├── data/
 │   │   │   │   ├── models/          # Data models
 │   │   │   │   └── collection/      # Data collection classes
 │   │   │   ├── ml/                  # ML prediction module
 │   │   │   ├── llm/                 # LLM integration
 │   │   │   ├── ui/                  # UI activities
-│   │   │   └── EnergyPredictorApplication.java
+│   │   │   └── FlowStateApplication.java
 │   │   ├── res/
 │   │   │   ├── layout/              # XML layouts
 │   │   │   └── values/              # Strings, colors, themes

@@ -35,7 +35,7 @@
                     android:layout_marginTop="16dp"
                     android:src="@drawable/app_logo"
                     android:scaleType="centerInside"
-                    android:contentDescription="Energy Predictor Logo"
+                    android:contentDescription="FlowState Logo"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent" />
@@ -45,7 +45,7 @@
                     android:id="@+id/tvTitle"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Energy Predictor"
+                    android:text="FlowState"
                     android:textSize="36sp"
                     android:textStyle="bold"
                     android:textColor="@android:color/white"

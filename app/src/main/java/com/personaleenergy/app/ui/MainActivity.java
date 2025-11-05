@@ -10,7 +10,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.personaleenergy.app.R;
+import com.flowstate.app.R;
 import com.personaleenergy.app.data.collection.GoogleFitManager;
 import com.personaleenergy.app.ui.typing.TypingSpeedActivity;
 import com.personaleenergy.app.ui.reaction.ReactionTimeActivity;

@@ -1,13 +1,14 @@
-package com.personaleenergy.app;
+package com.flowstate.app;
 
 import android.app.Application;
-import com.google.firebase.FirebaseApp;
+import com.flowstate.app.supabase.SupabaseClient;
 
 public class EnergyPredictorApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        FirebaseApp.initializeApp(this);
+        // Initialize Supabase client
+        SupabaseClient.getInstance(this);
     }
 }
 

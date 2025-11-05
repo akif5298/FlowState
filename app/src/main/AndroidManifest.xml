@@ -16,12 +16,12 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.EnergyPredictor"
+        android:theme="@style/Theme.FlowState"
         tools:targetApi="31">
         <activity
             android:name=".ui.LoginActivity"
             android:exported="true"
-            android:theme="@style/Theme.EnergyPredictor">
+            android:theme="@style/Theme.FlowState">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -29,48 +29,53 @@
         </activity>
 
         <activity
-            android:name=".ui.MainActivity"
+            android:name=".ui.SignUpActivity"
             android:exported="false"
-            android:theme="@style/Theme.EnergyPredictor" />
+            android:theme="@style/Theme.FlowState" />
 
         <activity
-            android:name=".ui.typing.TypingSpeedActivity"
+            android:name="com.personaleenergy.app.ui.MainActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FlowState" />
+
+        <activity
+            android:name="com.personaleenergy.app.ui.typing.TypingSpeedActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".ui.reaction.ReactionTimeActivity"
+            android:name="com.personaleenergy.app.ui.reaction.ReactionTimeActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".ui.energy.EnergyPredictionActivity"
+            android:name="com.personaleenergy.app.ui.energy.EnergyPredictionActivity"
             android:exported="false" />
 
         <activity
-            android:name=".ui.EnergyDashboardActivity"
+            android:name="com.personaleenergy.app.ui.EnergyDashboardActivity"
             android:exported="false"
-            android:theme="@style/Theme.EnergyPredictor" />
+            android:theme="@style/Theme.FlowState" />
 
         <activity
-            android:name=".ui.settings.SettingsActivity"
+            android:name="com.personaleenergy.app.ui.settings.SettingsActivity"
             android:exported="false"
-            android:theme="@style/Theme.EnergyPredictor" />
+            android:theme="@style/Theme.FlowState" />
 
         <activity
-            android:name=".ui.data.DataLogsActivity"
+            android:name="com.personaleenergy.app.ui.data.DataLogsActivity"
             android:exported="false"
-            android:theme="@style/Theme.EnergyPredictor" />
+            android:theme="@style/Theme.FlowState" />
 
         <activity
-            android:name=".ui.schedule.AIScheduleActivity"
+            android:name="com.personaleenergy.app.ui.schedule.AIScheduleActivity"
             android:exported="false"
-            android:theme="@style/Theme.EnergyPredictor" />
+            android:theme="@style/Theme.FlowState" />
 
         <activity
-            android:name=".ui.insights.WeeklyInsightsActivity"
+            android:name="com.personaleenergy.app.ui.insights.WeeklyInsightsActivity"
             android:exported="false"
-            android:theme="@style/Theme.EnergyPredictor" />
+            android:theme="@style/Theme.FlowState" />
 
     </application>
 

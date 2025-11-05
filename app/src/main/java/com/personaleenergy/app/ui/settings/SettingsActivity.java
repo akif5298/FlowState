@@ -7,7 +7,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.switchmaterial.SwitchMaterial;
-import com.personaleenergy.app.R;
+import com.flowstate.app.R;
 import com.personaleenergy.app.ui.EnergyDashboardActivity;
 import com.personaleenergy.app.ui.data.DataLogsActivity;
 import com.personaleenergy.app.ui.schedule.AIScheduleActivity;

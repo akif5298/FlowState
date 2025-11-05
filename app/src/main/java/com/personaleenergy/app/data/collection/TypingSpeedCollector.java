@@ -1,6 +1,6 @@
 package com.personaleenergy.app.data.collection;
 
-import com.personaleenergy.app.data.models.TypingSpeedData;
+import com.flowstate.app.data.models.TypingSpeedData;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;

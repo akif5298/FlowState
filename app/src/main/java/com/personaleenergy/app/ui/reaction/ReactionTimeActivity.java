@@ -5,9 +5,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
-import com.personaleenergy.app.R;
+import com.flowstate.app.R;
 import com.personaleenergy.app.data.collection.ReactionTimeCollector;
-import com.personaleenergy.app.data.models.ReactionTimeData;
+import com.flowstate.app.data.models.ReactionTimeData;
 
 public class ReactionTimeActivity extends AppCompatActivity {
     

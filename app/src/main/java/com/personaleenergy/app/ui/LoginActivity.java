@@ -1,4 +1,4 @@
-package com.personaleenergy.app.ui;
+package com.flowstate.app.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -6,8 +6,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import com.personaleenergy.app.R;
+import com.google.android.material.snackbar.Snackbar;
+import com.flowstate.app.R;
+import com.flowstate.app.supabase.AuthService;
+import com.flowstate.app.supabase.api.SupabaseAuthApi;
 import com.personaleenergy.app.ui.EnergyDashboardActivity;
 
 public class LoginActivity extends AppCompatActivity {
@@ -16,12 +20,14 @@ public class LoginActivity extends AppCompatActivity {
     private Button btnLogin;
     private TextView tvForgotPassword, tvSignUp;
     private View cardView;
+    private AuthService authService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         
+        authService = new AuthService(this);
         initializeViews();
         setupClickListeners();
         
@@ -44,32 +50,78 @@ public class LoginActivity extends AppCompatActivity {
     
     private void setupClickListeners() {
         btnLogin.setOnClickListener(v -> {
-            String username = etUsername.getText().toString().trim();
+            String email = etUsername.getText().toString().trim(); // Using email as username
             String password = etPassword.getText().toString().trim();
             
-            if (username.isEmpty() || password.isEmpty()) {
+            if (email.isEmpty() || password.isEmpty()) {
                 // Show error
-                etUsername.setError(username.isEmpty() ? "Username required" : null);
+                etUsername.setError(email.isEmpty() ? "Email required" : null);
                 etPassword.setError(password.isEmpty() ? "Password required" : null);
             } else {
-                // Navigate directly to dashboard with navigation
-                Intent intent = new Intent(this, EnergyDashboardActivity.class);
-                startActivity(intent);
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                finish();
+                loginUser(email, password);
             }
         });
         
         tvForgotPassword.setOnClickListener(v -> {
-            // TODO: Implement forgot password flow
-            findViewById(R.id.tvLoginStatus).setVisibility(View.VISIBLE);
-            ((TextView) findViewById(R.id.tvLoginStatus)).setText("Forgot password - coming soon");
+            String email = etUsername.getText().toString().trim();
+            if (email.isEmpty()) {
+                etUsername.setError("Enter your email to reset password");
+                return;
+            }
+            resetPassword(email);
         });
         
         tvSignUp.setOnClickListener(v -> {
-            // TODO: Implement sign up flow
-            findViewById(R.id.tvLoginStatus).setVisibility(View.VISIBLE);
-            ((TextView) findViewById(R.id.tvLoginStatus)).setText("Sign up - coming soon");
+            // Navigate to sign up activity
+            Intent intent = new Intent(this, SignUpActivity.class);
+            startActivity(intent);
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        });
+    }
+    
+    private void loginUser(String email, String password) {
+        btnLogin.setEnabled(false);
+        btnLogin.setText("Logging in...");
+        
+        authService.signIn(email, password, new AuthService.AuthCallback() {
+            @Override
+            public void onSuccess(SupabaseAuthApi.UserResponse user) {
+                Snackbar.make(cardView, "Login successful!", Snackbar.LENGTH_SHORT).show();
+                // Navigate to dashboard
+                Intent intent = new Intent(LoginActivity.this, EnergyDashboardActivity.class);
+                startActivity(intent);
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                finish();
+            }
+            
+            @Override
+            public void onError(Throwable error) {
+                btnLogin.setEnabled(true);
+                btnLogin.setText("Login");
+                String errorMessage = error != null && error.getMessage() != null 
+                    ? error.getMessage() 
+                    : "Login failed. Please try again.";
+                Snackbar.make(cardView, errorMessage, Snackbar.LENGTH_LONG).show();
+            }
+        });
+    }
+    
+    private void resetPassword(String email) {
+        authService.resetPassword(email, new AuthService.AuthCallback() {
+            @Override
+            public void onSuccess(SupabaseAuthApi.UserResponse user) {
+                Snackbar.make(cardView, 
+                    "Password reset email sent. Please check your inbox.", 
+                    Snackbar.LENGTH_LONG).show();
+            }
+            
+            @Override
+            public void onError(Throwable error) {
+                String errorMessage = error != null && error.getMessage() != null 
+                    ? error.getMessage() 
+                    : "Failed to send reset email. Please try again.";
+                Snackbar.make(cardView, errorMessage, Snackbar.LENGTH_LONG).show();
+            }
         });
     }
     

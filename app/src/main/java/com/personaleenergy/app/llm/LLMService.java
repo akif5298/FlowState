@@ -1,8 +1,8 @@
 package com.personaleenergy.app.llm;
 
-import com.personaleenergy.app.data.models.EnergyPrediction;
-import com.personaleenergy.app.data.models.ProductivitySuggestion;
-import com.personaleenergy.app.data.models.EnergyLevel;
+import com.flowstate.app.data.models.EnergyPrediction;
+import com.flowstate.app.data.models.ProductivitySuggestion;
+import com.flowstate.app.data.models.EnergyLevel;
 import java.util.*;
 
 public class LLMService {

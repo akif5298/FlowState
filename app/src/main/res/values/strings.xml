@@ -1,8 +1,8 @@
 <resources>
-    <string name="app_name">Energy Predictor</string>
+    <string name="app_name">FlowState</string>
     
     <!-- Main Activity -->
-    <string name="welcome_text">Personal Energy Cycle Predictor</string>
+    <string name="welcome_text">FlowState</string>
     <string name="connect_fit">Connect Google Fit</string>
     <string name="measure_typing_speed">Measure Typing Speed</string>
     <string name="measure_reaction_time">Measure Reaction Time</string>

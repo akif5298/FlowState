@@ -7,7 +7,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.personaleenergy.app.R;
+import com.flowstate.app.R;
 import com.personaleenergy.app.ui.EnergyDashboardActivity;
 import com.personaleenergy.app.ui.data.DataLogsActivity;
 import com.personaleenergy.app.ui.settings.SettingsActivity;

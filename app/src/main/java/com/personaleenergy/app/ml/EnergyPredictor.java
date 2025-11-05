@@ -1,8 +1,8 @@
 package com.personaleenergy.app.ml;
 
-import com.personaleenergy.app.data.models.EnergyLevel;
-import com.personaleenergy.app.data.models.EnergyPrediction;
-import com.personaleenergy.app.data.models.BiometricData;
+import com.flowstate.app.data.models.EnergyLevel;
+import com.flowstate.app.data.models.EnergyPrediction;
+import com.flowstate.app.data.models.BiometricData;
 import java.util.*;
 import java.util.stream.Collectors;
 
