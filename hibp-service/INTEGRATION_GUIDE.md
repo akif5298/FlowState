@@ -6,38 +6,74 @@ This guide explains how to deploy the HIBP password checker service and integrat
 
 ### 1. Deploy the Service
 
+**You can keep the service in the same repository!** Most platforms support monorepo deployments (deploying from a subdirectory).
+
 Choose one of these deployment options:
 
-#### Option A: Railway (Recommended - Easiest)
-1. Push the `hibp-service/` directory to GitHub
+#### Option A: Railway (Recommended - Easiest, Monorepo Support)
+1. Push your entire project (including `hibp-service/`) to GitHub
 2. Go to [railway.app](https://railway.app)
 3. Click "New Project" → "Deploy from GitHub repo"
-4. Select your repository and the `hibp-service` directory
-5. Railway will auto-detect Spring Boot and deploy
-6. Copy the deployment URL (e.g., `https://your-app.railway.app`)
+4. Select your repository
+5. In the deployment settings, set **Root Directory** to `hibp-service`
+6. Railway will auto-detect Spring Boot and deploy
+7. Copy the deployment URL (e.g., `https://your-app.railway.app`)
 
-#### Option B: Heroku
+**Note**: Railway automatically detects the subdirectory if it contains a `pom.xml` or `build.gradle`.
+
+#### Option B: Heroku (Monorepo Support)
 ```bash
+# From project root
 cd hibp-service
 heroku create your-app-name
-git push heroku main
-heroku open
+# Heroku will detect pom.xml in current directory
+git subtree push --prefix hibp-service heroku main
+# OR use Heroku CLI with subdirectory:
+heroku git:remote -a your-app-name
+git push heroku `git subtree split --prefix hibp-service main`:main --force
 ```
 
-#### Option C: Fly.io
+**Alternative**: Use Heroku's monorepo buildpack or deploy via GitHub integration with root directory set to `hibp-service`.
+
+#### Option C: Fly.io (Monorepo Support)
 ```bash
 cd hibp-service
 fly launch
+# When prompted, Fly.io will detect the Spring Boot app
+# Edit fly.toml if needed to set correct paths
 fly deploy
 fly open
 ```
 
-#### Option D: Docker (Any Platform)
+**Note**: Fly.io will create a `fly.toml` in the `hibp-service/` directory. This is fine - it's scoped to that service.
+
+#### Option D: Docker (Any Platform - Works from Same Repo)
 ```bash
+# From project root
 cd hibp-service
 docker build -t hibp-service .
 docker run -p 8080:8080 hibp-service
 ```
+
+#### Option E: Separate Repository (Optional)
+If you prefer a separate repo:
+1. Create a new GitHub repository
+2. Copy only the `hibp-service/` directory contents
+3. Push to the new repo
+4. Deploy from that repo
+
+**Pros of separate repo:**
+- Cleaner separation
+- Independent versioning
+- Easier to set different access controls
+
+**Pros of same repo (monorepo):**
+- Everything in one place
+- Easier to keep in sync
+- Single source of truth
+- Less overhead for small projects
+
+**Recommendation**: For this project size, keep it in the same repo (monorepo approach).
 
 ### 2. Configure Android App
 

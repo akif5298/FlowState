@@ -1,0 +1,12 @@
+# Railway Nixpacks configuration for Spring Boot
+# This helps Railway auto-detect and build the service correctly
+
+[phases.setup]
+nixPkgs = ["maven", "jdk17"]
+
+[phases.install]
+cmds = ["mvn clean package -DskipTests"]
+
+[start]
+cmd = "java -jar target/hibp-service-1.0.0.jar"
+
