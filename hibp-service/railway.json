@@ -5,7 +5,7 @@
     "buildCommand": "mvn clean package -DskipTests"
   },
   "deploy": {
-    "startCommand": "JAR=$(find . -name 'hibp-service-*.jar' ! -name '*-original.jar' | head -1) && echo \"Found JAR: $JAR\" && java -jar \"$JAR\"",
+    "startCommand": "sh -c 'JAR=$(find . -name \"hibp-service-*.jar\" ! -name \"*-original.jar\" | head -1) && echo \"Found JAR: $JAR\" && java -jar \"$JAR\"'",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }
