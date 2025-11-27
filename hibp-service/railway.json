@@ -5,7 +5,7 @@
     "buildCommand": "mvn clean package -DskipTests"
   },
   "deploy": {
-    "startCommand": "echo 'Current directory:' && pwd && echo 'Listing target directory:' && ls -la target/ 2>/dev/null || echo 'target/ not found' && echo 'Looking for JAR files:' && find . -name '*.jar' 2>/dev/null && echo 'Trying to start JAR...' && cd target && java -jar hibp-service-1.0.0.jar",
+    "startCommand": "if [ ! -f target/hibp-service-1.0.0.jar ]; then echo 'JAR not found! Listing target:'; ls -la target/; exit 1; fi && echo 'Found JAR, starting...' && java -jar target/hibp-service-1.0.0.jar",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }
