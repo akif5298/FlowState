@@ -128,10 +128,7 @@ public class SignUpActivity extends AppCompatActivity {
                     // Password has been compromised
                     btnSignUp.setEnabled(true);
                     btnSignUp.setText("Sign Up");
-                    String message = String.format(
-                        "This password has been found in %d data breaches. Please choose a different password.",
-                        count
-                    );
+                    String message = "This is a commonly compromised password, please use a different one";
                     etPassword.setError(message);
                     Snackbar.make(rootView, message, Snackbar.LENGTH_LONG).show();
                 } else {
