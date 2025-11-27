@@ -1,8 +1,8 @@
 package com.flowstate.app.supabase;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import com.flowstate.app.BuildConfig;
+import com.flowstate.core.Config;
+import com.flowstate.core.SecureStore;
 import com.flowstate.app.supabase.api.SupabaseAuthApi;
 import com.flowstate.app.supabase.api.SupabasePostgrestApi;
 import com.google.gson.Gson;
@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Supabase client for Java using Retrofit
  * 
- * Supabase credentials are loaded from BuildConfig, which reads from local.properties
+ * Supabase credentials are loaded from Config class, which reads from BuildConfig
  * Add your credentials to local.properties:
  *   SUPABASE_URL=https://your-project.supabase.co
  *   SUPABASE_ANON_KEY=your-anon-key
@@ -26,23 +26,24 @@ import java.util.concurrent.TimeUnit;
  */
 public class SupabaseClient {
     
-    // Credentials are loaded from BuildConfig (generated from local.properties)
-    private static final String SUPABASE_URL = BuildConfig.SUPABASE_URL;
-    private static final String SUPABASE_ANON_KEY = BuildConfig.SUPABASE_ANON_KEY;
+    // Credentials are loaded from Config (which reads from BuildConfig)
+    private static final String SUPABASE_URL = Config.SUPABASE_URL;
+    private static final String SUPABASE_ANON_KEY = Config.SUPABASE_ANON_KEY;
     
-    private static final String PREFS_NAME = "flowstate_supabase";
-    private static final String KEY_ACCESS_TOKEN = "access_token";
-    private static final String KEY_REFRESH_TOKEN = "refresh_token";
     private static final String KEY_USER_ID = "user_id";
+    private static final String PREFS_NAME = "flowstate_supabase";
     
     private static SupabaseClient instance;
     private Retrofit retrofit;
     private SupabaseAuthApi authApi;
     private SupabasePostgrestApi postgrestApi;
-    private SharedPreferences prefs;
+    private SecureStore secureStore;
+    private android.content.SharedPreferences prefs; // For non-sensitive data like user_id
     private Gson gson;
     
     private SupabaseClient(Context context) {
+        // Use SecureStore for sensitive tokens, regular SharedPreferences for non-sensitive data
+        this.secureStore = SecureStore.getInstance(context);
         this.prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         this.gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
         
@@ -102,19 +103,30 @@ public class SupabaseClient {
     }
     
     public String getAccessToken() {
-        return prefs.getString(KEY_ACCESS_TOKEN, null);
+        return secureStore.getAccessToken();
     }
     
     public void setAccessToken(String accessToken) {
-        prefs.edit().putString(KEY_ACCESS_TOKEN, accessToken).commit(); // Use commit() to ensure it's saved synchronously
+        // Store access token securely
+        String refreshToken = secureStore.getRefreshToken();
+        secureStore.putToken(accessToken, refreshToken != null ? refreshToken : "");
     }
     
     public String getRefreshToken() {
-        return prefs.getString(KEY_REFRESH_TOKEN, null);
+        return secureStore.getRefreshToken();
     }
     
     public void setRefreshToken(String refreshToken) {
-        prefs.edit().putString(KEY_REFRESH_TOKEN, refreshToken).apply();
+        // Store refresh token securely
+        String accessToken = secureStore.getAccessToken();
+        secureStore.putToken(accessToken != null ? accessToken : "", refreshToken);
+    }
+    
+    /**
+     * Store both tokens together (more efficient)
+     */
+    public void setTokens(String accessToken, String refreshToken) {
+        secureStore.putToken(accessToken, refreshToken);
     }
     
     public String getUserId() {
@@ -126,15 +138,16 @@ public class SupabaseClient {
     }
     
     public void clearAuth() {
+        // Clear secure tokens
+        secureStore.clear();
+        // Clear non-sensitive data
         prefs.edit()
-                .remove(KEY_ACCESS_TOKEN)
-                .remove(KEY_REFRESH_TOKEN)
                 .remove(KEY_USER_ID)
                 .apply();
     }
     
     public boolean isAuthenticated() {
-        return getAccessToken() != null && !getAccessToken().isEmpty();
+        return secureStore.hasAccessToken();
     }
     
     public String getSupabaseUrl() {

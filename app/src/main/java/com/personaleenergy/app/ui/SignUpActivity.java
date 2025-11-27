@@ -12,6 +12,8 @@ import com.google.android.material.snackbar.Snackbar;
 import com.flowstate.app.R;
 import com.flowstate.app.supabase.AuthService;
 import com.flowstate.app.supabase.api.SupabaseAuthApi;
+import com.flowstate.core.Config;
+import com.flowstate.services.HibpPasswordChecker;
 import com.personaleenergy.app.ui.EnergyDashboardActivity;
 
 public class SignUpActivity extends AppCompatActivity {
@@ -115,8 +117,42 @@ public class SignUpActivity extends AppCompatActivity {
     
     private void signUpUser(String firstName, String lastName, String username, String email, String password) {
         btnSignUp.setEnabled(false);
-        btnSignUp.setText("Signing up...");
+        btnSignUp.setText("Checking password...");
         
+        // First check password against HIBP
+        HibpPasswordChecker passwordChecker = new HibpPasswordChecker(Config.HIBP_SERVICE_URL);
+        passwordChecker.checkPassword(password, new HibpPasswordChecker.Callback() {
+            @Override
+            public void onResult(boolean pwned, int count) {
+                if (pwned) {
+                    // Password has been compromised
+                    btnSignUp.setEnabled(true);
+                    btnSignUp.setText("Sign Up");
+                    String message = String.format(
+                        "This password has been found in %d data breaches. Please choose a different password.",
+                        count
+                    );
+                    etPassword.setError(message);
+                    Snackbar.make(rootView, message, Snackbar.LENGTH_LONG).show();
+                } else {
+                    // Password is safe, proceed with signup
+                    btnSignUp.setText("Signing up...");
+                    performSignUp(firstName, lastName, username, email, password);
+                }
+            }
+            
+            @Override
+            public void onError(Exception error) {
+                // If HIBP service is unavailable, log but allow signup to proceed
+                // (fail open - don't block users if service is down)
+                android.util.Log.w("SignUpActivity", "HIBP password check failed, proceeding with signup", error);
+                btnSignUp.setText("Signing up...");
+                performSignUp(firstName, lastName, username, email, password);
+            }
+        });
+    }
+    
+    private void performSignUp(String firstName, String lastName, String username, String email, String password) {
         authService.signUp(email, password, username, firstName, lastName, new AuthService.AuthCallback() {
             @Override
             public void onSuccess(SupabaseAuthApi.UserResponse user) {

@@ -6,6 +6,11 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.BODY_SENSORS" />
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" 
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" 
+        android:maxSdkVersion="32" />
 
     <application
         android:name=".EnergyPredictorApplication"
@@ -49,11 +54,22 @@
             android:screenOrientation="portrait" />
 
         <activity
-            android:name="com.personaleenergy.app.ui.energy.EnergyPredictionActivity"
-            android:exported="false" />
+            android:name="com.personaleenergy.app.ui.EnergyPredictionActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FlowState" />
 
         <activity
             android:name="com.personaleenergy.app.ui.EnergyDashboardActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FlowState" />
+
+        <activity
+            android:name="com.personaleenergy.app.ui.OnboardingActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FlowState" />
+
+        <activity
+            android:name="com.personaleenergy.app.ui.manual.ManualDataEntryActivity"
             android:exported="false"
             android:theme="@style/Theme.FlowState" />
 

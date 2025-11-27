@@ -3,10 +3,11 @@ package com.personaleenergy.app.llm;
 import com.flowstate.app.data.models.EnergyPrediction;
 import com.flowstate.app.data.models.ProductivitySuggestion;
 import com.flowstate.app.data.models.EnergyLevel;
+import com.flowstate.core.Config;
 import java.util.*;
 
 public class LLMService {
-    private static final String API_KEY = "YOUR_OPENAI_API_KEY"; // Replace with actual API key
+    private static final String API_KEY = Config.OPENAI_API_KEY; // Loaded from BuildConfig
     
     /**
      * Generate personalized schedule based on energy predictions

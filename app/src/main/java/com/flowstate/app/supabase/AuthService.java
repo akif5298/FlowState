@@ -39,12 +39,12 @@ public class AuthService {
                                  Response<SupabaseAuthApi.AuthResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     SupabaseAuthApi.AuthResponse authResponse = response.body();
-                    supabaseClient.setAccessToken(authResponse.access_token);
-                    supabaseClient.setRefreshToken(authResponse.refresh_token);
+                    // Store both tokens together securely
+                    supabaseClient.setTokens(authResponse.access_token, authResponse.refresh_token);
                     if (authResponse.user != null) {
                         supabaseClient.setUserId(authResponse.user.id);
                         // Create profile if username is provided
-                        // Pass the access token directly to avoid timing issues with SharedPreferences
+                        // Pass the access token directly to avoid timing issues
                         if (username != null && authResponse.user.id != null && authResponse.access_token != null) {
                             android.util.Log.d("AuthService", "User created successfully. User ID: " + authResponse.user.id);
                             android.util.Log.d("AuthService", "Token available: " + (authResponse.access_token != null && !authResponse.access_token.isEmpty()));
@@ -82,8 +82,8 @@ public class AuthService {
                                  Response<SupabaseAuthApi.AuthResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     SupabaseAuthApi.AuthResponse authResponse = response.body();
-                    supabaseClient.setAccessToken(authResponse.access_token);
-                    supabaseClient.setRefreshToken(authResponse.refresh_token);
+                    // Store both tokens together securely
+                    supabaseClient.setTokens(authResponse.access_token, authResponse.refresh_token);
                     if (authResponse.user != null) {
                         supabaseClient.setUserId(authResponse.user.id);
                     }

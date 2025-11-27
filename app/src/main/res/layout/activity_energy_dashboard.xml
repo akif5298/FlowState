@@ -201,7 +201,7 @@
                         android:id="@+id/tvGraphTitle"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="Energy Prediction"
+                        android:text="Energy Prediction (Tap to Generate)"
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:textColor="@color/text_primary"

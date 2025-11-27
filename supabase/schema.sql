@@ -385,7 +385,9 @@ CREATE POLICY "Users can manage own daily summaries" ON public.daily_summaries
 
 -- Function to automatically update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+SET search_path = public
+AS $$
 BEGIN
     NEW.updated_at = NOW();
     RETURN NEW;
@@ -403,7 +405,9 @@ CREATE TRIGGER update_user_settings_updated_at
 
 -- Function to calculate sleep duration if not provided
 CREATE OR REPLACE FUNCTION calculate_sleep_duration()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+SET search_path = public
+AS $$
 BEGIN
     IF NEW.sleep_end IS NOT NULL AND NEW.duration_minutes IS NULL THEN
         NEW.duration_minutes := EXTRACT(EPOCH FROM (NEW.sleep_end - NEW.sleep_start)) / 60;
@@ -418,7 +422,9 @@ CREATE TRIGGER calculate_sleep_duration_trigger
 
 -- Function to create default user settings on profile creation
 CREATE OR REPLACE FUNCTION create_default_user_settings()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+SET search_path = public
+AS $$
 BEGIN
     INSERT INTO public.user_settings (user_id)
     VALUES (NEW.id)
