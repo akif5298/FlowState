@@ -293,46 +293,47 @@ ALTER TABLE public.daily_summaries ENABLE ROW LEVEL SECURITY;
 -- ============================================================================
 
 -- Profiles policies
+-- Using (select auth.uid()) to cache the result and improve performance
 CREATE POLICY "Users can view own profile" ON public.profiles
-    FOR SELECT USING (auth.uid() = id);
+    FOR SELECT USING ((select auth.uid()) = id);
 
 CREATE POLICY "Users can update own profile" ON public.profiles
-    FOR UPDATE USING (auth.uid() = id);
+    FOR UPDATE USING ((select auth.uid()) = id);
 
 CREATE POLICY "Users can insert own profile" ON public.profiles
-    FOR INSERT WITH CHECK (auth.uid() = id);
+    FOR INSERT WITH CHECK ((select auth.uid()) = id);
 
 -- User settings policies
 CREATE POLICY "Users can manage own settings" ON public.user_settings
-    FOR ALL USING (auth.uid() = user_id);
+    FOR ALL USING ((select auth.uid()) = user_id);
 
 -- Heart rate policies
 CREATE POLICY "Users can manage own heart rate data" ON public.heart_rate_readings
-    FOR ALL USING (auth.uid() = user_id);
+    FOR ALL USING ((select auth.uid()) = user_id);
 
 -- Sleep sessions policies
 CREATE POLICY "Users can manage own sleep data" ON public.sleep_sessions
-    FOR ALL USING (auth.uid() = user_id);
+    FOR ALL USING ((select auth.uid()) = user_id);
 
 -- Temperature policies
 CREATE POLICY "Users can manage own temperature data" ON public.temperature_readings
-    FOR ALL USING (auth.uid() = user_id);
+    FOR ALL USING ((select auth.uid()) = user_id);
 
 -- Typing speed policies
 CREATE POLICY "Users can manage own typing tests" ON public.typing_speed_tests
-    FOR ALL USING (auth.uid() = user_id);
+    FOR ALL USING ((select auth.uid()) = user_id);
 
 -- Reaction time policies
 CREATE POLICY "Users can manage own reaction time tests" ON public.reaction_time_tests
-    FOR ALL USING (auth.uid() = user_id);
+    FOR ALL USING ((select auth.uid()) = user_id);
 
 -- Cognitive test sessions policies
 CREATE POLICY "Users can manage own cognitive sessions" ON public.cognitive_test_sessions
-    FOR ALL USING (auth.uid() = user_id);
+    FOR ALL USING ((select auth.uid()) = user_id);
 
 -- Energy predictions policies
 CREATE POLICY "Users can manage own energy predictions" ON public.energy_predictions
-    FOR ALL USING (auth.uid() = user_id);
+    FOR ALL USING ((select auth.uid()) = user_id);
 
 -- Energy prediction factors policies
 CREATE POLICY "Users can view own prediction factors" ON public.energy_prediction_factors
@@ -340,7 +341,7 @@ CREATE POLICY "Users can view own prediction factors" ON public.energy_predictio
         EXISTS (
             SELECT 1 FROM public.energy_predictions
             WHERE energy_predictions.id = energy_prediction_factors.prediction_id
-            AND energy_predictions.user_id = auth.uid()
+            AND energy_predictions.user_id = (select auth.uid())
         )
     );
 
@@ -349,17 +350,17 @@ CREATE POLICY "Users can insert own prediction factors" ON public.energy_predict
         EXISTS (
             SELECT 1 FROM public.energy_predictions
             WHERE energy_predictions.id = energy_prediction_factors.prediction_id
-            AND energy_predictions.user_id = auth.uid()
+            AND energy_predictions.user_id = (select auth.uid())
         )
     );
 
 -- Productivity suggestions policies
 CREATE POLICY "Users can manage own suggestions" ON public.productivity_suggestions
-    FOR ALL USING (auth.uid() = user_id);
+    FOR ALL USING ((select auth.uid()) = user_id);
 
 -- AI schedules policies
 CREATE POLICY "Users can manage own schedules" ON public.ai_schedules
-    FOR ALL USING (auth.uid() = user_id);
+    FOR ALL USING ((select auth.uid()) = user_id);
 
 -- Scheduled tasks policies
 CREATE POLICY "Users can manage own scheduled tasks" ON public.scheduled_tasks
@@ -367,17 +368,17 @@ CREATE POLICY "Users can manage own scheduled tasks" ON public.scheduled_tasks
         EXISTS (
             SELECT 1 FROM public.ai_schedules
             WHERE ai_schedules.id = scheduled_tasks.schedule_id
-            AND ai_schedules.user_id = auth.uid()
+            AND ai_schedules.user_id = (select auth.uid())
         )
     );
 
 -- Weekly insights policies
 CREATE POLICY "Users can manage own weekly insights" ON public.weekly_insights
-    FOR ALL USING (auth.uid() = user_id);
+    FOR ALL USING ((select auth.uid()) = user_id);
 
 -- Daily summaries policies
 CREATE POLICY "Users can manage own daily summaries" ON public.daily_summaries
-    FOR ALL USING (auth.uid() = user_id);
+    FOR ALL USING ((select auth.uid()) = user_id);
 
 -- ============================================================================
 -- FUNCTIONS & TRIGGERS
