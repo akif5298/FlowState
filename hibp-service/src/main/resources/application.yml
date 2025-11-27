@@ -1,5 +1,6 @@
 server:
-  port: 8080
+  # Use PORT environment variable if set (Railway), otherwise default to 8080
+  port: ${PORT:8080}
   address: 0.0.0.0
 
 spring:
