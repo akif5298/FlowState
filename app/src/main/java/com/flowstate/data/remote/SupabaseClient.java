@@ -1,8 +1,8 @@
-package com.flowstate.data.remote;
+package com.personaleenergy.data.remote;
 
 import android.content.Context;
-import com.flowstate.core.Config;
-import com.flowstate.core.SecureStore;
+import com.personaleenergy.core.Config;
+import com.personaleenergy.core.SecureStore;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import okhttp3.OkHttpClient;
@@ -134,4 +134,3 @@ public class SupabaseClient {
         secureStore.clear();
     }
 }
-

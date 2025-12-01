@@ -1,11 +1,11 @@
-package com.flowstate.data.local.dao;
+package com.personaleenergy.data.local.dao;
 
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Update;
 
-import com.flowstate.data.local.entities.PredictionLocal;
+import com.personaleenergy.data.local.entities.PredictionLocal;
 
 import java.util.List;
 
@@ -45,4 +45,3 @@ public interface PredictionDao {
     @Update
     void update(PredictionLocal predictionLocal);
 }
-

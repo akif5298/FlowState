@@ -1,11 +1,11 @@
-package com.flowstate.data.local.repo;
+package com.personaleenergy.data.local.repo;
 
 import android.content.Context;
 import android.util.Log;
 
-import com.flowstate.data.local.AppDb;
-import com.flowstate.data.local.dao.PredictionDao;
-import com.flowstate.data.local.entities.PredictionLocal;
+import com.personaleenergy.data.local.AppDb;
+import com.personaleenergy.data.local.dao.PredictionDao;
+import com.personaleenergy.data.local.entities.PredictionLocal;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -114,4 +114,3 @@ public class EnergyPredictionRepository {
         void onError(Exception e);
     }
 }
-

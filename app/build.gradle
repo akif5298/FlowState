@@ -12,11 +12,11 @@ if (localPropertiesFile.exists()) {
 }
 
 android {
-    namespace 'com.flowstate.app'
+    namespace 'com.personaleenergy.app'
     compileSdk 34
 
     defaultConfig {
-        applicationId 'com.flowstate.app'
+        applicationId 'com.personaleenergy.app'
         minSdk 28
         targetSdk 34
         versionCode 1
@@ -72,6 +72,9 @@ dependencies {
     // Google Fit
     implementation 'com.google.android.gms:play-services-fitness:21.1.0'
     implementation 'com.google.android.gms:play-services-auth:20.7.0'
+
+    // Health Connect
+    implementation 'androidx.health.connect:connect-client:1.1.0-alpha02'
 
     // TensorFlow Lite
     implementation 'org.tensorflow:tensorflow-lite:2.14.0'

@@ -1,6 +1,6 @@
 package com.personaleenergy.app.data.collection;
 
-import com.flowstate.app.data.models.ReactionTimeData;
+import com.personaleenergy.app.data.models.ReactionTimeData;
 import java.util.Date;
 import java.util.Random;
 
@@ -39,4 +39,3 @@ public class ReactionTimeCollector {
         void onColorChange();
     }
 }
-

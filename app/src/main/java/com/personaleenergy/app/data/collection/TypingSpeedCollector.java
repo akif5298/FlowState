@@ -1,6 +1,6 @@
 package com.personaleenergy.app.data.collection;
 
-import com.flowstate.app.data.models.TypingSpeedData;
+import com.personaleenergy.app.data.models.TypingSpeedData;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -73,4 +73,3 @@ public class TypingSpeedCollector {
         return typedText.trim().length() >= currentSampleText.trim().length() * 0.8;
     }
 }
-

@@ -12,6 +12,12 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" 
         android:maxSdkVersion="32" />
 
+    <!-- Health Connect permissions -->
+    <uses-permission android:name="android.permission.health.READ_HEART_RATE"/>
+    <uses-permission android:name="android.permission.health.READ_SLEEP"/>
+    <uses-permission android:name="android.permission.health.READ_STEPS"/>
+    <uses-permission android:name="android.permission.health.READ_TOTAL_CALORIES_BURNED"/>
+
     <application
         android:name=".EnergyPredictorApplication"
         android:allowBackup="true"
@@ -23,6 +29,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FlowState"
         tools:targetApi="31">
+
+        <!-- Required for Health Connect SDK -->
+        <meta-data
+            android:name="health_connect_sdk_version"
+            android:value="1.1.0-alpha02" />
+
         <activity
             android:name=".ui.LoginActivity"
             android:exported="true"
@@ -92,6 +104,15 @@
             android:name="com.personaleenergy.app.ui.insights.WeeklyInsightsActivity"
             android:exported="false"
             android:theme="@style/Theme.FlowState" />
+
+        <!-- Activity to show the rationale for Health Connect permissions -->
+        <activity android:name="com.personaleenergy.app.ui.health.HealthConnectRationaleActivity"
+            android:exported="true"
+            android:theme="@style/Theme.FlowState">
+            <intent-filter>
+                <action android:name="androidx.health.connect.client.action.REQUEST_PERMISSIONS" />
+            </intent-filter>
+        </activity>
 
     </application>
 

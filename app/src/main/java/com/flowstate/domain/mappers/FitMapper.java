@@ -1,12 +1,12 @@
-package com.flowstate.domain.mappers;
+package com.personaleenergy.domain.mappers;
 
 import android.util.Log;
 import com.google.android.gms.fitness.data.DataPoint;
 import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.Field;
 import com.google.android.gms.fitness.result.DataReadResponse;
-import com.flowstate.data.local.entities.HrLocal;
-import com.flowstate.data.local.entities.SleepLocal;
+import com.personaleenergy.data.local.entities.HrLocal;
+import com.personaleenergy.data.local.entities.SleepLocal;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -132,4 +132,3 @@ public class FitMapper {
         return sleepList;
     }
 }
-

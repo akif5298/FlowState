@@ -1,4 +1,4 @@
-package com.flowstate.workers;
+package com.personaleenergy.workers;
 
 import android.content.Context;
 import android.util.Log;
@@ -8,9 +8,9 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
-import com.flowstate.data.local.repo.BiometricDataRepository;
-import com.flowstate.domain.mappers.FitMapper;
-import com.flowstate.services.GoogleFitManager;
+import com.personaleenergy.data.local.repo.BiometricDataRepository;
+import com.personaleenergy.domain.mappers.FitMapper;
+import com.personaleenergy.services.GoogleFitManager;
 import com.google.android.gms.fitness.result.DataReadResponse;
 import com.google.android.gms.tasks.Tasks;
 
@@ -48,7 +48,7 @@ public class SleepSyncWorker extends Worker {
             );
             
             // Map to Room entities
-            List<com.flowstate.data.local.entities.SleepLocal> sleepList = FitMapper.mapSleep(response);
+            List<com.personaleenergy.data.local.entities.SleepLocal> sleepList = FitMapper.mapSleep(response);
             
             // Save to Room database
             repo.saveSleep(sleepList);
@@ -94,4 +94,3 @@ public class SleepSyncWorker extends Worker {
      */
     public static final String PERIODIC_WORK_NAME = "hourly_sleep_sync";
 }
-

@@ -1,4 +1,4 @@
-package com.flowstate.app.data.models;
+package com.personaleenergy.app.data.models;
 
 import java.util.Date;
 
@@ -27,4 +27,3 @@ public class ReactionTimeData {
         this.reactionTimeMs = reactionTimeMs;
     }
 }
-

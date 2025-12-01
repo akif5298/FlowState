@@ -10,13 +10,12 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import com.flowstate.app.R;
-import com.flowstate.data.local.entities.PredictionLocal;
-import com.flowstate.data.local.repo.EnergyPredictionRepository;
-import com.flowstate.domain.features.FeatureRow;
-import com.flowstate.domain.features.FeatureService;
-import com.flowstate.domain.ml.EnergyPredictor;
-import com.flowstate.services.DataChecker;
+import com.personaleenergy.app.R;
+import com.personaleenergy.data.local.entities.PredictionLocal;
+import com.personaleenergy.data.local.repo.EnergyPredictionRepository;
+import com.personaleenergy.domain.features.FeatureRow;
+import com.personaleenergy.domain.features.FeatureService;
+import com.personaleenergy.domain.ml.EnergyPredictor;
 import com.personaleenergy.app.ui.OnboardingActivity;
 
 import java.text.SimpleDateFormat;
@@ -42,7 +41,6 @@ public class EnergyPredictionActivity extends AppCompatActivity {
     private FeatureService featureService;
     private EnergyPredictor energyPredictor;
     private EnergyPredictionRepository predictionRepository;
-    private DataChecker dataChecker;
     private ExecutorService executor;
     private Handler mainHandler;
     
@@ -57,7 +55,6 @@ public class EnergyPredictionActivity extends AppCompatActivity {
         featureService = new FeatureService(this);
         energyPredictor = new EnergyPredictor();
         predictionRepository = new EnergyPredictionRepository(this);
-        dataChecker = new DataChecker(this);
         executor = Executors.newSingleThreadExecutor();
         mainHandler = new Handler(Looper.getMainLooper());
         
@@ -89,63 +86,6 @@ public class EnergyPredictionActivity extends AppCompatActivity {
         if (btnGenerateToday != null) {
             btnGenerateToday.setEnabled(false);
         }
-        updateStatus("Checking your data...");
-        
-        // First check if user has data
-        dataChecker.hasMinimumDataForPredictions(new DataChecker.DataCheckCallback() {
-            @Override
-            public void onResult(DataChecker.DataCheckResult result) {
-                mainHandler.post(() -> {
-                    if (!result.hasAnyData) {
-                        // No data found, show onboarding message
-                        showNoDataMessage();
-                        if (btnGenerateToday != null) {
-                            btnGenerateToday.setEnabled(true);
-                        }
-                        return;
-                    }
-                    
-                    // Has data, proceed with prediction generation
-                    proceedWithGeneration();
-                });
-            }
-            
-            @Override
-            public void onError(Exception e) {
-                Log.e(TAG, "Error checking data", e);
-                mainHandler.post(() -> {
-                    // On error, assume no data and show onboarding message
-                    showNoDataMessage();
-                    if (btnGenerateToday != null) {
-                        btnGenerateToday.setEnabled(true);
-                    }
-                });
-            }
-        });
-    }
-    
-    /**
-     * Show message when no data is found
-     */
-    private void showNoDataMessage() {
-        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
-        builder.setTitle("No Data Found")
-                .setMessage("Oh! Looks like we have no data for you. Get started with our onboarding to begin tracking your energy levels!")
-                .setPositiveButton("Go to Onboarding", (dialog, which) -> {
-                    Intent intent = new Intent(EnergyPredictionActivity.this, OnboardingActivity.class);
-                    startActivity(intent);
-                })
-                .setNegativeButton("Cancel", (dialog, which) -> {
-                    dialog.dismiss();
-                })
-                .setCancelable(true)
-                .show();
-    }
-    
-    /**
-     * Proceed with prediction generation after data check passes
-     */
-    private void proceedWithGeneration() {
         updateStatus("Generating predictions for today...");
         
         executor.execute(() -> {
@@ -202,6 +142,24 @@ public class EnergyPredictionActivity extends AppCompatActivity {
         });
     }
     
+    /**
+     * Show message when no data is found
+     */
+    private void showNoDataMessage() {
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+        builder.setTitle("No Data Found")
+                .setMessage("Oh! Looks like we have no data for you. Get started with our onboarding to begin tracking your energy levels!")
+                .setPositiveButton("Go to Onboarding", (dialog, which) -> {
+                    Intent intent = new Intent(EnergyPredictionActivity.this, OnboardingActivity.class);
+                    startActivity(intent);
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> {
+                    dialog.dismiss();
+                })
+                .setCancelable(true)
+                .show();
+    }
+
     /**
      * Load existing predictions for today
      */
@@ -294,4 +252,3 @@ public class EnergyPredictionActivity extends AppCompatActivity {
         }
     }
 }
-

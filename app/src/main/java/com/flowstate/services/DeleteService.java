@@ -1,11 +1,11 @@
-package com.flowstate.services;
+package com.personaleenergy.services;
 
 import android.content.Context;
 import android.util.Log;
-import com.flowstate.data.local.AppDb;
-import com.flowstate.data.remote.PostgrestApi;
-import com.flowstate.data.remote.RpcApi;
-import com.flowstate.data.remote.SupabaseClient;
+import com.personaleenergy.data.local.AppDb;
+import com.personaleenergy.data.remote.PostgrestApi;
+import com.personaleenergy.data.remote.RpcApi;
+import com.personaleenergy.data.remote.SupabaseClient;
 import com.google.gson.JsonObject;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -216,13 +216,13 @@ public class DeleteService {
     private String getUserId() {
         try {
             // Try to get from the old SupabaseClient (compatibility)
-            com.flowstate.app.supabase.SupabaseClient oldClient = 
-                com.flowstate.app.supabase.SupabaseClient.getInstance(context);
+            com.personaleenergy.app.supabase.SupabaseClient oldClient = 
+                com.personaleenergy.app.supabase.SupabaseClient.getInstance(context);
             return oldClient.getUserId();
         } catch (Exception e) {
             // Fallback: try to get from SharedPreferences
             android.content.SharedPreferences prefs = context.getSharedPreferences(
-                "flowstate_supabase", Context.MODE_PRIVATE);
+                "personaleenergy_supabase", Context.MODE_PRIVATE);
             return prefs.getString("user_id", null);
         }
     }
@@ -235,4 +235,3 @@ public class DeleteService {
         void onError(Exception error);
     }
 }
-

@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.flowstate.app.R;
+import com.personaleenergy.app.R;
 import com.personaleenergy.app.ui.EnergyDashboardActivity;
 import com.personaleenergy.app.ui.data.DataLogsActivity;
 import com.personaleenergy.app.ui.settings.SettingsActivity;
@@ -52,4 +52,3 @@ public class WeeklyInsightsActivity extends AppCompatActivity {
         bottomNav.setSelectedItemId(R.id.nav_insights);
     }
 }
-

@@ -1,4 +1,4 @@
-package com.flowstate.app.data.models;
+package com.personaleenergy.app.data.models;
 
 import java.util.Date;
 
@@ -51,4 +51,3 @@ public class TypingSpeedData {
         this.sampleText = sampleText;
     }
 }
-

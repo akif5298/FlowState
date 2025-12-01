@@ -1,10 +1,10 @@
-package com.flowstate.data.local.repo;
+package com.personaleenergy.data.local.repo;
 
 import android.content.Context;
 import android.util.Log;
-import com.flowstate.data.local.AppDb;
-import com.flowstate.data.local.entities.HrLocal;
-import com.flowstate.data.local.entities.SleepLocal;
+import com.personaleenergy.data.local.AppDb;
+import com.personaleenergy.data.local.entities.HrLocal;
+import com.personaleenergy.data.local.entities.SleepLocal;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -144,4 +144,3 @@ public class BiometricDataRepository {
         void onError(Exception error);
     }
 }
-

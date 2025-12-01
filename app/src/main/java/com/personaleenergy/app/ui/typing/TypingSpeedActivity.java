@@ -14,10 +14,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.work.WorkManager;
-import com.flowstate.app.R;
-import com.flowstate.data.local.entities.TypingLocal;
-import com.flowstate.data.local.repo.TypingSpeedRepository;
-import com.flowstate.workers.SupabaseSyncWorker;
+import com.personaleenergy.app.R;
+import com.personaleenergy.data.local.entities.TypingLocal;
+import com.personaleenergy.data.local.repo.TypingSpeedRepository;
 import com.personaleenergy.app.data.collection.TypingSpeedCollector;
 
 public class TypingSpeedActivity extends AppCompatActivity {
@@ -235,10 +234,6 @@ public class TypingSpeedActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     // Show success message
                     Toast.makeText(TypingSpeedActivity.this, "Test saved to database! (WPM: " + finalWpm + ", Accuracy: " + String.format("%.1f%%", finalAccuracy) + ")", Toast.LENGTH_LONG).show();
-                    
-                    // Trigger Supabase sync
-                    WorkManager.getInstance(TypingSpeedActivity.this)
-                            .enqueue(SupabaseSyncWorker.createWorkRequest());
                 });
             }
             

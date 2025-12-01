@@ -1,16 +1,16 @@
-package com.flowstate.services;
+package com.personaleenergy.services;
 
 import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
-import com.flowstate.data.local.AppDb;
-import com.flowstate.data.local.entities.HrLocal;
-import com.flowstate.data.local.entities.SleepLocal;
-import com.flowstate.data.local.entities.TypingLocal;
-import com.flowstate.data.local.entities.ReactionLocal;
-import com.flowstate.data.local.entities.PredictionLocal;
-import com.flowstate.data.remote.PostgrestApi;
-import com.flowstate.data.remote.SupabaseClient;
+import com.personaleenergy.data.local.AppDb;
+import com.personaleenergy.data.local.entities.HrLocal;
+import com.personaleenergy.data.local.entities.SleepLocal;
+import com.personaleenergy.data.local.entities.TypingLocal;
+import com.personaleenergy.data.local.entities.ReactionLocal;
+import com.personaleenergy.data.local.entities.PredictionLocal;
+import com.personaleenergy.data.remote.PostgrestApi;
+import com.personaleenergy.data.remote.SupabaseClient;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import retrofit2.Call;
@@ -32,7 +32,7 @@ import java.util.concurrent.Executors;
 public class ExportService {
     
     private static final String TAG = "ExportService";
-    private static final String EXPORT_FILENAME_PREFIX = "flowstate_export_";
+    private static final String EXPORT_FILENAME_PREFIX = "personaleenergy_export_";
     private static final String EXPORT_FILENAME_SUFFIX = ".json";
     
     private Context context;
@@ -298,13 +298,13 @@ public class ExportService {
         // In the new architecture, we might need to get it from SecureStore or another source
         try {
             // Try to get from the old SupabaseClient
-            com.flowstate.app.supabase.SupabaseClient oldClient = 
-                com.flowstate.app.supabase.SupabaseClient.getInstance(context);
+            com.personaleenergy.app.supabase.SupabaseClient oldClient = 
+                com.personaleenergy.app.supabase.SupabaseClient.getInstance(context);
             return oldClient.getUserId();
         } catch (Exception e) {
             // Fallback: try to get from SharedPreferences
             android.content.SharedPreferences prefs = context.getSharedPreferences(
-                "flowstate_supabase", Context.MODE_PRIVATE);
+                "personaleenergy_supabase", Context.MODE_PRIVATE);
             return prefs.getString("user_id", null);
         }
     }
@@ -333,4 +333,3 @@ public class ExportService {
         void onError(Exception error);
     }
 }
-

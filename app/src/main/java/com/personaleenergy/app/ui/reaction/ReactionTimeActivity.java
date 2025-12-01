@@ -9,10 +9,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.work.WorkManager;
-import com.flowstate.app.R;
-import com.flowstate.data.local.entities.ReactionLocal;
-import com.flowstate.data.local.repo.ReactionTimeRepository;
-import com.flowstate.workers.SupabaseSyncWorker;
+import com.personaleenergy.app.R;
+import com.personaleenergy.data.local.entities.ReactionLocal;
+import com.personaleenergy.data.local.repo.ReactionTimeRepository;
 import com.personaleenergy.app.data.collection.ReactionTimeCollector;
 
 import java.util.ArrayList;
@@ -199,10 +198,6 @@ public class ReactionTimeActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     // Show success message
                     Toast.makeText(ReactionTimeActivity.this, "Test saved to database! (Median: " + finalMedianMs + " ms)", Toast.LENGTH_LONG).show();
-                    
-                    // Trigger Supabase sync
-                    WorkManager.getInstance(ReactionTimeActivity.this)
-                            .enqueue(SupabaseSyncWorker.createWorkRequest());
                 });
             }
             

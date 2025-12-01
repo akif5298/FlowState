@@ -1,20 +1,20 @@
-package com.flowstate.data.local;
+package com.personaleenergy.data.local;
 
 import android.content.Context;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
-import com.flowstate.data.local.dao.HrDao;
-import com.flowstate.data.local.dao.SleepDao;
-import com.flowstate.data.local.dao.TypingDao;
-import com.flowstate.data.local.dao.ReactionDao;
-import com.flowstate.data.local.dao.PredictionDao;
-import com.flowstate.data.local.entities.HrLocal;
-import com.flowstate.data.local.entities.SleepLocal;
-import com.flowstate.data.local.entities.TypingLocal;
-import com.flowstate.data.local.entities.ReactionLocal;
-import com.flowstate.data.local.entities.PredictionLocal;
+import com.personaleenergy.data.local.dao.HrDao;
+import com.personaleenergy.data.local.dao.SleepDao;
+import com.personaleenergy.data.local.dao.TypingDao;
+import com.personaleenergy.data.local.dao.ReactionDao;
+import com.personaleenergy.data.local.dao.PredictionDao;
+import com.personaleenergy.data.local.entities.HrLocal;
+import com.personaleenergy.data.local.entities.SleepLocal;
+import com.personaleenergy.data.local.entities.TypingLocal;
+import com.personaleenergy.data.local.entities.ReactionLocal;
+import com.personaleenergy.data.local.entities.PredictionLocal;
 
 /**
  * Room database for local storage
@@ -34,7 +34,7 @@ import com.flowstate.data.local.entities.PredictionLocal;
 )
 public abstract class AppDb extends RoomDatabase {
     
-    private static final String DATABASE_NAME = "flowstate_db";
+    private static final String DATABASE_NAME = "personaleenergy_db";
     private static AppDb instance;
     
     public abstract HrDao hrDao();
@@ -59,4 +59,3 @@ public abstract class AppDb extends RoomDatabase {
         return instance;
     }
 }
-

@@ -1,8 +1,8 @@
-package com.flowstate.data.remote;
+package com.personaleenergy.data.remote;
 
 import android.content.Context;
 import android.util.Log;
-import com.flowstate.core.SecureStore;
+import com.personaleenergy.core.SecureStore;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -149,4 +149,3 @@ public class PostgrestTest {
         void onError(String error);
     }
 }
-

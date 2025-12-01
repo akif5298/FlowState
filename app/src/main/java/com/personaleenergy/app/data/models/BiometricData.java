@@ -1,4 +1,4 @@
-package com.flowstate.app.data.models;
+package com.personaleenergy.app.data.models;
 
 import java.util.Date;
 
@@ -66,4 +66,3 @@ public class BiometricData {
         this.skinTemperature = skinTemperature;
     }
 }
-

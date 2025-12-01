@@ -13,25 +13,26 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import com.flowstate.app.R;
-import com.flowstate.services.DataChecker;
-import com.flowstate.services.GoogleFitManager;
+import com.personaleenergy.app.R;
+import com.personaleenergy.app.services.GoogleFitManager;
 import com.personaleenergy.app.ui.manual.ManualDataEntryActivity;
+import com.personaleenergy.app.workers.HeartRateSyncWorker;
+import com.personaleenergy.app.workers.SleepSyncWorker;
+import com.personaleenergy.app.workers.SyncScheduler;
 
 /**
  * Onboarding activity for new users
  * 
- * Checks if user has data, requests Google Fit permissions,
+ * Requests Google Fit permissions,
  * and offers manual data entry if declined
  */
 public class OnboardingActivity extends AppCompatActivity {
     
     private static final String TAG = "OnboardingActivity";
-    private static final String PREFS_NAME = "flowstate_prefs";
+    private static final String PREFS_NAME = "personaleenergy_prefs";
     private static final String KEY_ONBOARDING_COMPLETE = "onboarding_complete";
     private static final int GOOGLE_FIT_PERMISSION_REQUEST = 2001;
     
-    private DataChecker dataChecker;
     private GoogleFitManager fitManager;
     private TextView tvTitle, tvDescription, tvStatus;
     private Button btnConnectWearable, btnManualEntry;
@@ -44,11 +45,10 @@ public class OnboardingActivity extends AppCompatActivity {
         setContentView(R.layout.activity_onboarding);
         
         mainHandler = new Handler(Looper.getMainLooper());
-        dataChecker = new DataChecker(this);
         fitManager = new GoogleFitManager(this);
         
         initializeViews();
-        checkUserData();
+        showOnboardingFlow();
     }
     
     private void initializeViews() {
@@ -80,44 +80,13 @@ public class OnboardingActivity extends AppCompatActivity {
             });
         }
     }
-    
+
     /**
-     * Check if user has any data
-     */
-    private void checkUserData() {
-        updateStatus("Checking your data...");
-        
-        dataChecker.hasMinimumDataForPredictions(new DataChecker.DataCheckCallback() {
-            @Override
-            public void onResult(DataChecker.DataCheckResult result) {
-                mainHandler.post(() -> {
-                    if (result.hasAnyData) {
-                        // User has some data, show current status
-                        showDataStatus(result);
-                    } else {
-                        // No data, show onboarding
-                        showOnboardingFlow();
-                    }
-                });
-            }
-            
-            @Override
-            public void onError(Exception e) {
-                Log.e(TAG, "Error checking data", e);
-                mainHandler.post(() -> {
-                    // On error, assume no data and show onboarding
-                    showOnboardingFlow();
-                });
-            }
-        });
-    }
-    
-    /**
-     * Show onboarding flow for users with no data
+     * Show onboarding flow for new users
      */
     private void showOnboardingFlow() {
         if (tvTitle != null) {
-            tvTitle.setText("Welcome to FlowState!");
+            tvTitle.setText("Welcome to Personal Energy Cycle Predictor!");
         }
         if (tvDescription != null) {
             tvDescription.setText("To generate accurate energy predictions, we need some data about you. " +
@@ -135,52 +104,6 @@ public class OnboardingActivity extends AppCompatActivity {
         if (btnSkip != null) {
             btnSkip.setVisibility(View.VISIBLE);
         }
-    }
-    
-    /**
-     * Show current data status
-     */
-    private void showDataStatus(DataChecker.DataCheckResult result) {
-        StringBuilder status = new StringBuilder("Your data status:\n\n");
-        
-        if (result.hasHrData) {
-            status.append("✓ Heart rate data\n");
-        } else {
-            status.append("✗ No heart rate data\n");
-        }
-        
-        if (result.hasSleepData) {
-            status.append("✓ Sleep data\n");
-        } else {
-            status.append("✗ No sleep data\n");
-        }
-        
-        if (result.hasTypingData) {
-            status.append("✓ Typing speed tests\n");
-        } else {
-            status.append("✗ No typing tests\n");
-        }
-        
-        if (result.hasReactionData) {
-            status.append("✓ Reaction time tests\n");
-        } else {
-            status.append("✗ No reaction tests\n");
-        }
-        
-        if (result.hasAnyData) {
-            status.append("\nYou have enough data to generate predictions!");
-            if (btnConnectWearable != null) {
-                btnConnectWearable.setVisibility(View.GONE);
-            }
-            if (btnManualEntry != null) {
-                btnManualEntry.setText("Add More Data");
-            }
-        } else {
-            status.append("\nYou need more data for predictions.");
-            showOnboardingFlow();
-        }
-        
-        updateStatus(status.toString());
     }
     
     /**
@@ -227,22 +150,20 @@ public class OnboardingActivity extends AppCompatActivity {
         updateStatus("Permissions granted! Setting up data sync...");
         
         // Schedule hourly sync
-        com.flowstate.workers.SyncScheduler.scheduleHourlySync(this);
+        SyncScheduler.scheduleHourlySync(this);
         
         // Trigger immediate sync
         androidx.work.WorkManager workManager = androidx.work.WorkManager.getInstance(this);
-        workManager.enqueue(com.flowstate.workers.HeartRateSyncWorker.createWorkRequest());
-        workManager.enqueue(com.flowstate.workers.SleepSyncWorker.createWorkRequest());
-        // Also trigger Supabase sync to upload any pending local data
-        workManager.enqueue(com.flowstate.workers.SupabaseSyncWorker.createWorkRequest());
+        workManager.enqueue(HeartRateSyncWorker.createWorkRequest());
+        workManager.enqueue(SleepSyncWorker.createWorkRequest());
         
         Toast.makeText(this, "Connected! Data will sync automatically.", Toast.LENGTH_LONG).show();
         
         // Wait a moment then check data again
         mainHandler.postDelayed(() -> {
-            checkUserData();
             // Mark onboarding as complete after successful connection
             markOnboardingComplete();
+            navigateToMain();
         }, 2000);
     }
     
@@ -329,4 +250,3 @@ public class OnboardingActivity extends AppCompatActivity {
         return prefs.getBoolean(KEY_ONBOARDING_COMPLETE, false);
     }
 }
-

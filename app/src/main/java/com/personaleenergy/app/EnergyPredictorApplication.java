@@ -1,14 +1,20 @@
-package com.flowstate.app;
+package com.personaleenergy.app;
 
 import android.app.Application;
-import com.flowstate.app.supabase.SupabaseClient;
+import android.util.Log;
+import androidx.work.Configuration;
 
-public class EnergyPredictorApplication extends Application {
+public class EnergyPredictorApplication extends Application implements Configuration.Provider {
+
     @Override
     public void onCreate() {
         super.onCreate();
-        // Initialize Supabase client
-        SupabaseClient.getInstance(this);
+    }
+
+    @Override
+    public Configuration getWorkManagerConfiguration() {
+        return new Configuration.Builder()
+                .setMinimumLoggingLevel(Log.INFO)
+                .build();
     }
 }
-

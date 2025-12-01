@@ -10,17 +10,16 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import com.flowstate.app.R;
-import com.flowstate.data.local.AppDb;
+import com.personaleenergy.app.R;
+import com.personaleenergy.data.local.AppDb;
 import android.content.Intent;
-import com.flowstate.data.local.entities.HrLocal;
-import com.flowstate.data.local.entities.SleepLocal;
-import com.flowstate.data.local.entities.TypingLocal;
-import com.flowstate.data.local.entities.ReactionLocal;
+import com.personaleenergy.data.local.entities.HrLocal;
+import com.personaleenergy.data.local.entities.SleepLocal;
+import com.personaleenergy.data.local.entities.TypingLocal;
+import com.personaleenergy.data.local.entities.ReactionLocal;
 import com.personaleenergy.app.ui.typing.TypingSpeedActivity;
 import com.personaleenergy.app.ui.reaction.ReactionTimeActivity;
 import androidx.work.WorkManager;
-import com.flowstate.workers.SupabaseSyncWorker;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -156,11 +155,8 @@ public class ManualDataEntryActivity extends AppCompatActivity {
                 try {
                     long id = db.hrDao().insert(hrLocal);
                     Log.d(TAG, "Saved heart rate to database with id: " + id);
-                    // Trigger Supabase sync
-                    WorkManager.getInstance(ManualDataEntryActivity.this)
-                            .enqueue(SupabaseSyncWorker.createWorkRequest());
                     mainHandler.post(() -> {
-                        Toast.makeText(this, "Heart rate saved! Syncing to cloud...", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "Heart rate saved!", Toast.LENGTH_LONG).show();
                         etHeartRate.setText("");
                     });
                 } catch (Exception e) {
@@ -200,11 +196,8 @@ public class ManualDataEntryActivity extends AppCompatActivity {
                 try {
                     long id = db.sleepDao().insert(sleepLocal);
                     Log.d(TAG, "Saved sleep to database with id: " + id);
-                    // Trigger Supabase sync
-                    WorkManager.getInstance(ManualDataEntryActivity.this)
-                            .enqueue(SupabaseSyncWorker.createWorkRequest());
                     mainHandler.post(() -> {
-                        Toast.makeText(this, "Sleep data saved! Syncing to cloud...", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "Sleep data saved!", Toast.LENGTH_LONG).show();
                         etSleepHours.setText("");
                     });
                 } catch (Exception e) {
@@ -257,11 +250,8 @@ public class ManualDataEntryActivity extends AppCompatActivity {
                 try {
                     long id = db.typingDao().insert(typingLocal);
                     Log.d(TAG, "Saved typing test to database with id: " + id);
-                    // Trigger Supabase sync
-                    WorkManager.getInstance(ManualDataEntryActivity.this)
-                            .enqueue(SupabaseSyncWorker.createWorkRequest());
                     mainHandler.post(() -> {
-                        Toast.makeText(this, "Typing test saved! Syncing to cloud...", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "Typing test saved!", Toast.LENGTH_LONG).show();
                         etTypingWpm.setText("");
                         etTypingAccuracy.setText("");
                     });
@@ -299,11 +289,8 @@ public class ManualDataEntryActivity extends AppCompatActivity {
                 try {
                     long id = db.reactionDao().insert(reactionLocal);
                     Log.d(TAG, "Saved reaction test to database with id: " + id);
-                    // Trigger Supabase sync
-                    WorkManager.getInstance(ManualDataEntryActivity.this)
-                            .enqueue(SupabaseSyncWorker.createWorkRequest());
                     mainHandler.post(() -> {
-                        Toast.makeText(this, "Reaction test saved! Syncing to cloud...", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "Reaction test saved!", Toast.LENGTH_LONG).show();
                         etReactionMs.setText("");
                     });
                 } catch (Exception e) {
@@ -362,4 +349,3 @@ public class ManualDataEntryActivity extends AppCompatActivity {
         }
     }
 }
-

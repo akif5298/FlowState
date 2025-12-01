@@ -1,8 +1,8 @@
-package com.flowstate.domain.ml;
+package com.personaleenergy.domain.ml;
 
 import android.util.Log;
-import com.flowstate.data.local.entities.PredictionLocal;
-import com.flowstate.domain.features.FeatureRow;
+import com.personaleenergy.data.local.entities.PredictionLocal;
+import com.personaleenergy.domain.features.FeatureRow;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -201,4 +201,3 @@ public class EnergyPredictor {
         return Math.sqrt(variance);
     }
 }
-

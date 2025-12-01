@@ -1,12 +1,12 @@
-package com.flowstate.domain.features;
+package com.personaleenergy.domain.features;
 
 import android.content.Context;
 import android.util.Log;
-import com.flowstate.data.local.AppDb;
-import com.flowstate.data.local.entities.HrLocal;
-import com.flowstate.data.local.entities.SleepLocal;
-import com.flowstate.data.local.entities.TypingLocal;
-import com.flowstate.data.local.entities.ReactionLocal;
+import com.personaleenergy.data.local.AppDb;
+import com.personaleenergy.data.local.entities.HrLocal;
+import com.personaleenergy.data.local.entities.SleepLocal;
+import com.personaleenergy.data.local.entities.TypingLocal;
+import com.personaleenergy.data.local.entities.ReactionLocal;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -360,4 +360,3 @@ public class FeatureService {
         return binSizeMinutes;
     }
 }
-
