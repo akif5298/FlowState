@@ -25,7 +25,7 @@ import java.util.Map;
 public class SettingsActivity extends AppCompatActivity {
 
     private BottomNavigationView bottomNav;
-    private SwitchMaterial switchGoogleFit, switchHealthConnect, switchDarkMode, switchAdaptiveLearning, switchDailyAdvice;
+    private SwitchMaterial switchHealthConnect, switchDarkMode, switchAdaptiveLearning, switchDailyAdvice;
     private TextView tvHealthData;
     private HealthConnectManager healthConnectManager;
 
@@ -49,7 +49,6 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void initializeViews() {
-        switchGoogleFit = findViewById(R.id.switchGoogleFit);
         switchHealthConnect = findViewById(R.id.switchHealthConnect);
         switchDarkMode = findViewById(R.id.switchDarkMode);
         switchAdaptiveLearning = findViewById(R.id.switchAdaptiveLearning);

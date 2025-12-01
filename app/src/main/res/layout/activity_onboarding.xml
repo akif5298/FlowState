@@ -64,27 +64,6 @@
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Connect Wearable Button -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnConnectWearable"
-            android:layout_width="match_parent"
-            android:layout_height="72dp"
-            android:layout_marginBottom="16dp"
-            android:text="Connect Wearable Device"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@android:color/white"
-            android:backgroundTint="#636363"
-            android:paddingStart="24dp"
-            android:paddingEnd="24dp"
-            app:icon="@android:drawable/ic_dialog_info"
-            app:iconGravity="start"
-            app:iconPadding="16dp"
-            app:cornerRadius="16dp"
-            app:iconTint="@android:color/white"
-            android:visibility="gone"
-            style="@style/Widget.Material3.Button" />
-
         <!-- Manual Entry Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnManualEntry"
@@ -160,4 +139,3 @@
     </LinearLayout>
 
 </ScrollView>
-

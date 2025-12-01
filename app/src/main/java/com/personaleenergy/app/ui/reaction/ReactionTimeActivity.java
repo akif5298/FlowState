@@ -10,8 +10,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.work.WorkManager;
 import com.personaleenergy.app.R;
-import com.personaleenergy.data.local.entities.ReactionLocal;
-import com.personaleenergy.data.local.repo.ReactionTimeRepository;
+import com.personaleenergy.app.data.local.entities.ReactionLocal;
+import com.personaleenergy.app.data.local.repo.ReactionTimeRepository;
 import com.personaleenergy.app.data.collection.ReactionTimeCollector;
 
 import java.util.ArrayList;
@@ -143,7 +143,7 @@ public class ReactionTimeActivity extends AppCompatActivity {
             btnTap.setEnabled(false);
             tvInstructions.setText("Press Start for next trial");
             updateButtonColorHex("#4CAF50");
-        }
+        } 
     }
     
     private void finishAllTrials() {

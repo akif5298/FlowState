@@ -98,38 +98,12 @@
                         app:layout_constraintEnd_toEndOf="parent" />
 
                     <LinearLayout
-                        android:id="@+id/googleFitLayout"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
                         android:paddingVertical="12dp"
                         app:layout_constraintTop_toBottomOf="@+id/tvIntegrationsTitle"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Google Fit"
-                            android:textSize="16sp"
-                            android:textColor="@color/text_primary" />
-
-                        <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/switchGoogleFit"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:paddingVertical="12dp"
-                        app:layout_constraintTop_toBottomOf="@+id/googleFitLayout"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent">
 
@@ -464,7 +438,7 @@
                 android:background="#EEE"
                 android:padding="16dp"
                 android:text="Health Data:"
-                android:textColor="@color/text_primary"
+                android.textColor="@color/text_primary"
                 android:textSize="12sp"
                 android:visibility="gone"
                 app:layout_constraintTop_toBottomOf="@+id/cardAccount"

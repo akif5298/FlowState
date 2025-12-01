@@ -11,11 +11,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.personaleenergy.app.R;
-import com.personaleenergy.data.local.entities.PredictionLocal;
-import com.personaleenergy.data.local.repo.EnergyPredictionRepository;
-import com.personaleenergy.domain.features.FeatureRow;
-import com.personaleenergy.domain.features.FeatureService;
-import com.personaleenergy.domain.ml.EnergyPredictor;
+import com.personaleenergy.app.data.local.entities.PredictionLocal;
+import com.personaleenergy.app.data.local.repo.EnergyPredictionRepository;
+import com.personaleenergy.app.domain.features.FeatureRow;
+import com.personaleenergy.app.domain.features.FeatureService;
+import com.personaleenergy.app.domain.ml.EnergyPredictor;
 import com.personaleenergy.app.ui.OnboardingActivity;
 
 import java.text.SimpleDateFormat;
