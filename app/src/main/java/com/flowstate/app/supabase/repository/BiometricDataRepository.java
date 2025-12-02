@@ -1,6 +1,7 @@
 package com.flowstate.app.supabase.repository;
 
 import android.content.Context;
+
 import com.flowstate.app.data.models.BiometricData;
 import com.flowstate.app.supabase.SupabaseClient;
 import com.flowstate.app.supabase.api.SupabasePostgrestApi;
