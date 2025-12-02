@@ -6,7 +6,7 @@ import com.flowstate.app.data.models.EnergyLevel;
 import java.util.*;
 
 public class LLMService {
-    private static final String API_KEY = "YOUR_OPENAI_API_KEY"; // Replace with actual API key
+    private static final String API_KEY = "https://example.com"; // Replace with actual API key
     
     /**
      * Generate personalized schedule based on energy predictions

@@ -12,7 +12,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.flowstate.app.R;
 import com.flowstate.app.supabase.AuthService;
 import com.flowstate.app.supabase.api.SupabaseAuthApi;
-import com.personaleenergy.app.ui.EnergyDashboardActivity;
+import com.flowstate.app.ui.EnergyDashboardActivity;
 
 public class LoginActivity extends AppCompatActivity {
     
