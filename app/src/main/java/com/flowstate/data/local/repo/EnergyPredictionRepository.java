@@ -117,7 +117,8 @@ public class EnergyPredictionRepository {
     public void getLatestPrediction(DataCallback<PredictionLocal> callback) {
         databaseWriteExecutor.execute(() -> {
             try {
-                PredictionLocal latest = predictionDao.getLatest();
+                // Get latest prediction that is not in the future (for current status display)
+                PredictionLocal latest = predictionDao.getLatestCurrent(System.currentTimeMillis());
                 callback.onSuccess(latest);
             } catch (Exception e) {
                 callback.onError(e);

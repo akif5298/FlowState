@@ -35,9 +35,14 @@ public class PredictionLocal {
     public double predictedLevel;
     
     /**
-     * Explanation for the prediction
+     * Explanation for the prediction (Technical analysis)
      */
     public String explanation;
+    
+    /**
+     * Actionable insight for the user
+     */
+    public String actionableInsight;
     
     /**
      * Confidence score (0.0 to 1.0)
@@ -66,6 +71,7 @@ public class PredictionLocal {
         this.predictionTime = predictionTime;
         this.predictedLevel = predictedLevel;
         this.explanation = explanation;
+        this.actionableInsight = "No insight available"; // Default
         this.confidence = confidence;
         
         // Map level for backward compatibility

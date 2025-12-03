@@ -67,11 +67,19 @@ public class DataChecker {
                 boolean hasReaction = !db.reactionDao().getAll().isEmpty();
                 
                 // Need at least: (HR OR Sleep) AND (Typing OR Reaction)
-                boolean hasBiometric = hasHr || hasSleep;
-                boolean hasCognitive = hasTyping || hasReaction;
-                boolean hasMinimum = hasBiometric && hasCognitive;
+                // Relaxed: Just need ANY 3 data points overall (including time which is implicit)
+                // Actually, let's just count available sources
+                int dataSources = 0;
+                if (hasHr) dataSources++;
+                if (hasSleep) dataSources++;
+                if (hasTyping) dataSources++;
+                if (hasReaction) dataSources++;
                 
-                DataCheckResult result = new DataCheckResult(hasMinimum, hasHr, hasSleep, hasTyping, hasReaction);
+                // Allow if at least 1 source is present (plus time context is always there)
+                // The prompt will just be less rich, but Gemini can still infer from partial data + time
+                boolean hasEnough = dataSources >= 1;
+                
+                DataCheckResult result = new DataCheckResult(hasEnough, hasHr, hasSleep, hasTyping, hasReaction);
                 
                 if (callback != null) {
                     callback.onResult(result);

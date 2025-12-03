@@ -45,6 +45,9 @@ public interface PredictionDao {
     
     @Query("SELECT * FROM prediction_local ORDER BY predictionTime DESC LIMIT 1")
     PredictionLocal getLatest();
+
+    @Query("SELECT * FROM prediction_local WHERE predictionTime <= :currentTime ORDER BY predictionTime DESC LIMIT 1")
+    PredictionLocal getLatestCurrent(long currentTime);
     
     @Update
     void update(PredictionLocal predictionLocal);
