@@ -8,6 +8,9 @@ import androidx.work.WorkManager;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.flowstate.workers.HeartRateSyncWorker;
 import com.flowstate.workers.SleepSyncWorker;
+import com.flowstate.workers.StepsSyncWorker;
+import com.flowstate.workers.HrvSyncWorker;
+import com.flowstate.workers.WorkoutSyncWorker;
 
 import java.util.List;
 
@@ -19,7 +22,7 @@ public class SyncScheduler {
     private static final String TAG = "SyncScheduler";
     
     /**
-     * Schedule hourly sync for both heart rate and sleep data
+     * Schedule hourly sync for all health data
      * (Room DB → Supabase sync has been removed)
      * 
      * @param context Application context
@@ -27,21 +30,42 @@ public class SyncScheduler {
     public static void scheduleHourlySync(Context context) {
         WorkManager workManager = WorkManager.getInstance(context.getApplicationContext());
         
-        // Schedule heart rate sync (Google Fit → Room DB)
+        // Schedule heart rate sync
         workManager.enqueueUniquePeriodicWork(
             HeartRateSyncWorker.PERIODIC_WORK_NAME,
-            ExistingPeriodicWorkPolicy.KEEP, // Keep existing if already scheduled
+            ExistingPeriodicWorkPolicy.KEEP,
             HeartRateSyncWorker.createPeriodicWorkRequest()
         );
         
-        // Schedule sleep sync (Google Fit → Room DB)
+        // Schedule sleep sync
         workManager.enqueueUniquePeriodicWork(
             SleepSyncWorker.PERIODIC_WORK_NAME,
-            ExistingPeriodicWorkPolicy.KEEP, // Keep existing if already scheduled
+            ExistingPeriodicWorkPolicy.KEEP,
             SleepSyncWorker.createPeriodicWorkRequest()
         );
         
-        Log.d(TAG, "Hourly sync scheduled for HR and Sleep");
+        // Schedule steps sync
+        workManager.enqueueUniquePeriodicWork(
+            StepsSyncWorker.PERIODIC_WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            StepsSyncWorker.createPeriodicWorkRequest()
+        );
+        
+        // Schedule HRV sync
+        workManager.enqueueUniquePeriodicWork(
+            HrvSyncWorker.PERIODIC_WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            HrvSyncWorker.createPeriodicWorkRequest()
+        );
+        
+        // Schedule workout sync
+        workManager.enqueueUniquePeriodicWork(
+            WorkoutSyncWorker.PERIODIC_WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            WorkoutSyncWorker.createPeriodicWorkRequest()
+        );
+        
+        Log.d(TAG, "Hourly sync scheduled for all health metrics");
     }
     
     /**

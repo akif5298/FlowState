@@ -60,7 +60,7 @@ import com.flowstate.data.local.entities.WeatherLocal;
         DeviceUsageLocal.class,
         WeatherLocal.class
     },
-    version = 6, // Incremented for PredictionLocal actionableInsight
+    version = 8, // Incremented for ManualEnergyInputLocal updates (accuracy rating, caffeine int)
     exportSchema = false
 )
 public abstract class AppDb extends RoomDatabase {
