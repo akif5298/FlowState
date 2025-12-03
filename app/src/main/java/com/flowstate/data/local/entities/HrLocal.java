@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey;
 
 /**
  * Local heart rate reading entity
- * Stored in Room database before syncing to Supabase
+ * Stored in Room database
  */
 @Entity(
     tableName = "hr_local",
@@ -29,7 +29,7 @@ public class HrLocal {
     public int bpm;
     
     /**
-     * Whether this record has been synced to Supabase
+     * Whether this record has been synced to remote storage
      */
     public boolean synced;
     

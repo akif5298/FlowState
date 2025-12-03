@@ -37,6 +37,12 @@ public interface SleepDao {
     SleepLocal getLastCompletedBefore(long beforeMs);
     
     /**
+     * Get records in date range
+     */
+    @Query("SELECT * FROM sleep_local WHERE sleep_start >= :startMs AND sleep_start < :endMs ORDER BY sleep_start ASC")
+    List<SleepLocal> getByDateRange(long startMs, long endMs);
+    
+    /**
      * Mark records as synced by their IDs
      */
     @Query("UPDATE sleep_local SET synced = 1 WHERE id IN (:ids)")

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.work.ListenableWorker;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.Worker;
@@ -13,8 +14,6 @@ import com.flowstate.data.local.AppDb;
 import com.flowstate.data.local.entities.HrLocal;
 import com.flowstate.services.HealthConnectManager;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -41,21 +40,21 @@ public class HeartRateSyncWorker extends Worker {
 
     @NonNull
     @Override
-    public Result doWork() {
+    public ListenableWorker.Result doWork() {
         if (!healthConnectManager.isAvailable()) {
             Log.e(TAG, "Health Connect unavailable, skipping sync");
-            return Result.failure();
+            return ListenableWorker.Result.failure();
         }
 
         try {
             // Sync last 24 hours of data
-            Instant end = Instant.now();
-            Instant start = end.minus(24, ChronoUnit.HOURS);
+            long endTime = System.currentTimeMillis();
+            long startTime = endTime - (24 * 60 * 60 * 1000L); // 24 hours ago
 
             Log.d(TAG, "Syncing Heart Rate data from Health Connect...");
             
-            // Get data from Kotlin manager (returns CompletableFuture)
-            List<HrLocal> hrList = healthConnectManager.readHeartRate(start, end).get(30, TimeUnit.SECONDS);
+            // Get data from manager (returns CompletableFuture)
+            List<HrLocal> hrList = healthConnectManager.readHeartRate(startTime, endTime).get(30, TimeUnit.SECONDS);
             
             if (hrList != null && !hrList.isEmpty()) {
                 Log.d(TAG, "Found " + hrList.size() + " heart rate records. Saving to DB...");
@@ -64,11 +63,11 @@ public class HeartRateSyncWorker extends Worker {
                 Log.d(TAG, "No heart rate records found.");
             }
             
-            return Result.success();
+            return ListenableWorker.Result.success();
             
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             Log.e(TAG, "Error syncing heart rate data", e);
-            return Result.retry();
+            return ListenableWorker.Result.retry();
         }
     }
     

@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey;
 
 /**
  * Local reaction time test entity
- * Stored in Room database before syncing to Supabase
+ * Stored in Room database
  */
 @Entity(
     tableName = "reaction_local",
@@ -34,7 +34,7 @@ public class ReactionLocal {
     public int testCount;
     
     /**
-     * Whether this record has been synced to Supabase
+     * Whether this record has been synced to remote storage
      */
     public boolean synced;
     

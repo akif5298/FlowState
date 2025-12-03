@@ -12,88 +12,61 @@
         android:orientation="vertical"
         android:padding="20dp">
 
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="24dp"
-            app:cardElevation="6dp"
-            android:layout_marginBottom="24dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="24dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Energy Predictions"
-                    android:textSize="26sp"
-                    android:textStyle="bold"
-                    android:textColor="@android:color/black"
-                    android:layout_marginBottom="8dp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="View your personalized energy levels for today"
-                    android:textSize="14sp"
-                    android:textColor="#666666" />
-
-            </LinearLayout>
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnLoadData"
-            android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="20dp"
-            android:text="Load Predictions"
-            android:textSize="16sp"
+            android:text="Energy Prediction"
+            android:textSize="28sp"
             android:textStyle="bold"
-            android:textColor="@android:color/white"
-            android:backgroundTint="#636363"
-            android:paddingStart="24dp"
-            android:paddingEnd="24dp"
-            app:cornerRadius="16dp"
-            style="@style/Widget.Material3.Button" />
+            android:textColor="#1F2937"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Get AI-powered energy forecasts"
+            android:textSize="14sp"
+            android:textColor="#6B7280"
+            android:layout_marginBottom="24dp" />
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:strokeWidth="0dp"
-            android:layout_marginBottom="20dp">
+            app:cardElevation="4dp"
+            android:layout_marginBottom="16dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="24dp">
+                android:padding="20dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Energy Levels"
+                    android:text="📊 Legacy Model"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@android:color/black"
+                    android:textColor="#1F2937"
                     android:layout_marginBottom="12dp" />
 
                 <TextView
-                    android:id="@+id/tvPredictions"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Tap 'Load Predictions' to see your energy forecast"
-                    android:padding="12dp"
-                    android:background="#E3F2FD"
-                    android:textColor="@android:color/black"
+                    android:text="Uses historical energy data"
                     android:textSize="14sp"
-                    android:lineSpacingMultiplier="1.5" />
+                    android:textColor="#6B7280"
+                    android:layout_marginBottom="16dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/predict_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:text="Predict Energy"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="12dp" />
 
             </LinearLayout>
 
@@ -103,34 +76,40 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            android:layout_marginBottom="20dp">
+            app:cardElevation="4dp"
+            android:layout_marginBottom="16dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="24dp">
+                android:padding="20dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="💡 Suggestions"
+                    android:text="🧠 Multivariate Model"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@android:color/black"
+                    android:textColor="#1F2937"
                     android:layout_marginBottom="12dp" />
 
                 <TextView
-                    android:id="@+id/tvSuggestions"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text=""
-                    android:padding="12dp"
-                    android:background="#FFF3E0"
-                    android:textColor="@android:color/black"
+                    android:text="Uses heart rate, HRV, and more"
                     android:textSize="14sp"
-                    android:lineSpacingMultiplier="1.5" />
+                    android:textColor="#6B7280"
+                    android:layout_marginBottom="16dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/predict_multi_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:text="Predict (Multivariate)"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="12dp" />
 
             </LinearLayout>
 
@@ -140,35 +119,32 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:strokeWidth="0dp"
-            android:layout_marginBottom="20dp">
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="#F9FAFB">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="24dp">
+                android:padding="20dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Daily Advice"
-                    android:textSize="18sp"
+                    android:text="Results"
+                    android:textSize="16sp"
                     android:textStyle="bold"
-                    android:textColor="@android:color/black"
+                    android:textColor="#1F2937"
                     android:layout_marginBottom="12dp" />
 
                 <TextView
-                    android:id="@+id/tvAdvice"
+                    android:id="@+id/forecast_result"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text=""
-                    android:padding="12dp"
-                    android:background="#E8F5E9"
-                    android:textColor="@android:color/black"
+                    android:text="Tap a button above to get your energy forecast"
                     android:textSize="14sp"
-                    android:lineSpacingMultiplier="1.6" />
+                    android:textColor="#374151"
+                    android:lineSpacingMultiplier="1.4" />
 
             </LinearLayout>
 

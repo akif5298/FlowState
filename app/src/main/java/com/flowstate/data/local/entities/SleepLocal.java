@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey;
 
 /**
  * Local sleep session entity
- * Stored in Room database before syncing to Supabase
+ * Stored in Room database
  */
 @Entity(
     tableName = "sleep_local",
@@ -34,7 +34,7 @@ public class SleepLocal {
     public Integer duration;
     
     /**
-     * Whether this record has been synced to Supabase
+     * Whether this record has been synced to remote storage
      */
     public boolean synced;
     

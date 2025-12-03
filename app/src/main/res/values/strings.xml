@@ -40,5 +40,8 @@
     <!-- Errors -->
     <string name="error_loading_data">Error loading data. Please try again.</string>
     <string name="error_fit_not_connected">Please connect to Google Fit first</string>
+
+    <!-- Health Connect rationale shown when requesting permissions -->
+    <string name="health_connect_rationale">FlowState uses Health Connect to read your health data (heart rate, sleep, steps) to provide energy predictions and insights. Data is read-only and stays on your device.</string>
 </resources>
 

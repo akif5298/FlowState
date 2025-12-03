@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey;
 
 /**
  * Local energy prediction entity
- * Stored in Room database before syncing to Supabase
+ * Stored in Room database
  */
 @Entity(
     tableName = "prediction_local",
@@ -34,7 +34,7 @@ public class PredictionLocal {
     public double confidence;
     
     /**
-     * Whether this record has been synced to Supabase
+     * Whether this record has been synced to remote storage
      */
     public boolean synced;
     

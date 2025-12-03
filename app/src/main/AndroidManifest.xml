@@ -32,31 +32,10 @@
     <uses-permission android:name="android.permission.health.READ_BLOOD_GLUCOSE" />
     <uses-permission android:name="android.permission.health.READ_VO2_MAX" />
 
-    <!-- Device/watch feature (not required) -->
-    <uses-feature
-        android:name="android.hardware.type.watch"
-        android:required="false" />
-    
-    <!-- Explicitly declare Health Connect support so legacy APK (Android 12/13) can discover FlowState -->
-    <uses-feature
-        android:name="androidx.health.connect.feature.HEALTH_CONNECT"
-        android:required="false" />
-        
-    <!-- Health Connect Feature Support -->
-    <!-- This tag helps older devices (Android 13/12) identify the app uses Health Connect -->
+    <!-- Optional: Health Connect rationale (if you add Health Connect later) -->
     <meta-data
         android:name="health_permissions_rationale"
         android:resource="@string/health_connect_rationale" />
-    
-    <!-- Required for legacy Health Connect (Android 13 and below) - Read-Only -->
-    <!-- This tells the system the app wants to use the Health Connect APK -->
-    <uses-permission android:name="androidx.health.connect.permission.HEALTH_DATA" />
-    <uses-permission android:name="androidx.health.connect.permission.READ_HEART_RATE" />
-    <uses-permission android:name="androidx.health.connect.permission.READ_SLEEP" />
-    <uses-permission android:name="androidx.health.connect.permission.READ_STEPS" />
-    <uses-permission android:name="androidx.health.connect.permission.READ_EXERCISE" />
-    <uses-permission android:name="androidx.health.connect.permission.READ_HEART_RATE_VARIABILITY" />
-    <uses-permission android:name="androidx.health.connect.permission.READ_BODY_TEMPERATURE" />
 
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -67,7 +46,6 @@
     </queries>
 
     <application
-        android:name=".EnergyPredictorApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -77,43 +55,17 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FlowState"
         tools:targetApi="31">
-        
-        <!-- Required for Health Connect on Android 14+ -->
+
+        <!-- Health Connect alias (optional, now backed by actual MainActivity) -->
         <activity-alias
             android:name="ViewPermissionUsageActivity"
             android:exported="true"
-            android:targetActivity=".ui.MainActivity">
+            android:targetActivity="com.flowstate.app.ui.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
                 <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
             </intent-filter>
         </activity-alias>
-
-        <!-- Required for Health Connect on Android 13 and below to show the app in the "Apps" list -->
-        <activity-alias
-            android:name=".ui.ManageHealthPermissions"
-            android:exported="true"
-            android:targetActivity=".ui.MainActivity">
-            <intent-filter>
-                <action android:name="androidx.health.connect.action.MANAGE_HEALTH_PERMISSIONS"/>
-            </intent-filter>
-        </activity-alias>
-
-        <!-- This activity-alias is for the Health Connect APK on Android 13 and below to request permissions -->
-        <activity-alias
-            android:name=".ui.HealthConnectPermissionRequest"
-            android:exported="true"
-            android:targetActivity=".ui.MainActivity">
-            <intent-filter>
-                <action android:name="androidx.health.connect.action.REQUEST_PERMISSIONS" />
-            </intent-filter>
-        </activity-alias>
-        
-        <!-- Health Connect Verification -->
-        <activity android:name=".ui.HealthConnectDebugActivity"
-            android:exported="true"
-            android:label="Health Connect Debug">
-        </activity>
 
         <activity
             android:name="com.flowstate.app.ui.MainActivity"
@@ -126,6 +78,12 @@
         </activity>
 
         <activity
+            android:name="com.flowstate.app.ui.EnergyPredictionActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FlowState" />
+
+        <!-- Stub activities to satisfy existing navigation references -->
+        <activity
             android:name="com.flowstate.app.ui.typing.TypingSpeedActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
@@ -134,11 +92,6 @@
             android:name="com.flowstate.app.ui.reaction.ReactionTimeActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
-
-        <activity
-            android:name="com.flowstate.app.ui.EnergyPredictionActivity"
-            android:exported="false"
-            android:theme="@style/Theme.FlowState" />
 
         <activity
             android:name="com.flowstate.app.ui.EnergyDashboardActivity"

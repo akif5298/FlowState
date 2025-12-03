@@ -8,23 +8,10 @@ import com.flowstate.app.BuildConfig;
  * All API credentials are loaded from BuildConfig, which reads from local.properties
  * 
  * To add your credentials, add them to local.properties:
- *   SUPABASE_URL=https://your-project.supabase.co
- *   SUPABASE_ANON_KEY=your-anon-key
  *   OPENAI_API_KEY=your-openai-key (optional)
+ *   GEMINI_API_KEY=your-gemini-api-key (optional)
  */
 public final class Config {
-    
-    /**
-     * Supabase project URL
-     * Get this from your Supabase project: Settings -> API -> Project URL
-     */
-    public static final String SUPABASE_URL = BuildConfig.SUPABASE_URL;
-    
-    /**
-     * Supabase anonymous/public API key
-     * Get this from your Supabase project: Settings -> API -> Project API keys -> anon/public
-     */
-    public static final String SUPABASE_ANON_KEY = BuildConfig.SUPABASE_ANON_KEY;
     
     /**
      * OpenAI API key (may be null if not configured)

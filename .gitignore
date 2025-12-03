@@ -84,3 +84,7 @@ Thumbs.db
 # API Keys
 app/src/main/res/values/api_keys.xml
 
+
+*.zip
+
+flowstate-backend/my_model_cache/

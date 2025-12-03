@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey;
 
 /**
  * Local typing speed test entity
- * Stored in Room database before syncing to Supabase
+ * Stored in Room database
  */
 @Entity(
     tableName = "typing_local",
@@ -54,7 +54,7 @@ public class TypingLocal {
     public String sampleText;
     
     /**
-     * Whether this record has been synced to Supabase
+     * Whether this record has been synced to remote storage
      */
     public boolean synced;
     

@@ -11,7 +11,6 @@
         android:layout_height="wrap_content"
         android:theme="@style/ThemeOverlay.Material3.Dark">
 
-        <!-- Gradient Header -->
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
             android:layout_height="280dp"
@@ -27,7 +26,6 @@
                 android:background="@drawable/gradient_background"
                 android:padding="24dp">
 
-                <!-- App Icon -->
                 <ImageView
                     android:id="@+id/logoIcons"
                     android:layout_width="64dp"
@@ -40,7 +38,6 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent" />
 
-                <!-- Title -->
                 <TextView
                     android:id="@+id/tvTitle"
                     android:layout_width="0dp"
@@ -55,7 +52,6 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent" />
 
-                <!-- Status -->
                 <TextView
                     android:id="@+id/tvStatus"
                     android:layout_width="0dp"
@@ -75,7 +71,6 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- Content ScrollView -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -87,7 +82,6 @@
             android:layout_height="wrap_content"
             android:padding="20dp">
 
-            <!-- Connect Google Fit - Featured Card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardConnectFit"
                 android:layout_width="0dp"
@@ -115,12 +109,10 @@
                     app:icon="@android:drawable/ic_menu_manage"
                     app:iconGravity="start"
                     app:iconPadding="16dp"
-                    app:iconTint="@android:color/white"
-                    style="@style/ModernButton" />
+                    app:iconTint="@android:color/white" />
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Section: Cognitive Tests -->
             <TextView
                 android:id="@+id/sectionCognitive"
                 android:layout_width="0dp"
@@ -136,7 +128,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
 
-            <!-- Typing Speed Card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardTyping"
                 android:layout_width="0dp"
@@ -165,12 +156,10 @@
                     app:iconGravity="start"
                     app:iconPadding="16dp"
                     app:cornerRadius="20dp"
-                    app:iconTint="@android:color/white"
-                    style="@style/Widget.Material3.Button" />
+                    app:iconTint="@android:color/white" />
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Reaction Time Card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardReaction"
                 android:layout_width="0dp"
@@ -199,12 +188,10 @@
                     app:iconGravity="start"
                     app:iconPadding="16dp"
                     app:cornerRadius="20dp"
-                    app:iconTint="@android:color/white"
-                    style="@style/Widget.Material3.Button" />
+                    app:iconTint="@android:color/white" />
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Section: Energy Analysis -->
             <TextView
                 android:id="@+id/sectionEnergy"
                 android:layout_width="0dp"
@@ -220,7 +207,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
 
-            <!-- Energy Prediction Card - Featured -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardEnergy"
                 android:layout_width="0dp"
@@ -236,7 +222,7 @@
                 app:layout_constraintEnd_toEndOf="parent">
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnEnergyPrediction"
+                    android:id="@+id/open_predict_button"
                     android:layout_width="match_parent"
                     android:layout_height="88dp"
                     android:text="View Energy Prediction"
@@ -251,12 +237,10 @@
                     app:iconGravity="start"
                     app:iconPadding="20dp"
                     app:cornerRadius="24dp"
-                    app:iconTint="@android:color/white"
-                    style="@style/Widget.Material3.Button" />
+                    app:iconTint="@android:color/white" />
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Info Card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardInfo"
                 android:layout_width="0dp"

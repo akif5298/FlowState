@@ -8,57 +8,77 @@ import androidx.work.WorkManager;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.flowstate.workers.HeartRateSyncWorker;
 import com.flowstate.workers.SleepSyncWorker;
+import com.flowstate.workers.StepsSyncWorker;
+import com.flowstate.workers.RemoteSyncWorker;
 
 import java.util.List;
 
 /**
- * Utility class to manage hourly sync scheduling
+ * Utility class to manage sync scheduling
+ * Handles both local (Health Connect → Room) and remote (Room → Backend) syncing
  */
 public class SyncScheduler {
     
     private static final String TAG = "SyncScheduler";
     
     /**
-     * Schedule hourly sync for both heart rate and sleep data
-     * (Room DB → Supabase sync has been removed)
+     * Schedule hourly sync for biometric data from Health Connect to Room DB
+     * Also schedules remote sync to backend every 2 hours
      * 
      * @param context Application context
      */
     public static void scheduleHourlySync(Context context) {
         WorkManager workManager = WorkManager.getInstance(context.getApplicationContext());
         
-        // Schedule heart rate sync (Google Fit → Room DB)
+        // Schedule heart rate sync (Health Connect → Room DB)
         workManager.enqueueUniquePeriodicWork(
             HeartRateSyncWorker.PERIODIC_WORK_NAME,
             ExistingPeriodicWorkPolicy.KEEP, // Keep existing if already scheduled
             HeartRateSyncWorker.createPeriodicWorkRequest()
         );
         
-        // Schedule sleep sync (Google Fit → Room DB)
+        // Schedule sleep sync (Health Connect → Room DB)
         workManager.enqueueUniquePeriodicWork(
             SleepSyncWorker.PERIODIC_WORK_NAME,
             ExistingPeriodicWorkPolicy.KEEP, // Keep existing if already scheduled
             SleepSyncWorker.createPeriodicWorkRequest()
         );
         
-        Log.d(TAG, "Hourly sync scheduled for HR and Sleep");
+        // Schedule steps sync (Health Connect → Room DB)
+        workManager.enqueueUniquePeriodicWork(
+            StepsSyncWorker.PERIODIC_WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            StepsSyncWorker.createPeriodicWorkRequest()
+        );
+        
+        // Schedule remote sync (Room DB → Backend API)
+        workManager.enqueueUniquePeriodicWork(
+            RemoteSyncWorker.PERIODIC_WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            RemoteSyncWorker.createPeriodicWorkRequest()
+        );
+        
+        Log.d(TAG, "Hourly sync scheduled for HR, Sleep, and Steps (Health Connect → Room DB)");
+        Log.d(TAG, "2-hour sync scheduled for remote backend (Room DB → Backend API)");
     }
     
     /**
-     * Cancel hourly sync for both heart rate and sleep data
+     * Cancel all sync operations (both local and remote)
      * 
      * @param context Application context
      */
     public static void cancelHourlySync(Context context) {
         WorkManager workManager = WorkManager.getInstance(context.getApplicationContext());
         
-        // Cancel heart rate sync
+        // Cancel local syncs (Health Connect → Room DB)
         workManager.cancelUniqueWork(HeartRateSyncWorker.PERIODIC_WORK_NAME);
-        
-        // Cancel sleep sync
         workManager.cancelUniqueWork(SleepSyncWorker.PERIODIC_WORK_NAME);
+        workManager.cancelUniqueWork(StepsSyncWorker.PERIODIC_WORK_NAME);
         
-        Log.d(TAG, "Hourly sync cancelled for HR and Sleep");
+        // Cancel remote sync (Room DB → Backend API)
+        workManager.cancelUniqueWork(RemoteSyncWorker.PERIODIC_WORK_NAME);
+        
+        Log.d(TAG, "All sync operations cancelled (local and remote)");
     }
     
     /**

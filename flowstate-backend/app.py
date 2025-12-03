@@ -1,0 +1,489 @@
+import os
+import sys
+import torch
+from pathlib import Path
+import shutil
+
+print("=" * 60)
+print("WARNING: Model Download Issue on Windows")
+print("=" * 60)
+print()
+print("Note: Some models using Git LFS can have issues on Windows.")
+print("We recommend WSL2 or Linux if you need Git LFS models.")
+print()
+print("QUICKEST SOLUTION:")
+print("1. Use online prediction service instead, or")
+print("2. Download via WSL2 with: git lfs clone ...")
+print()
+print("=" * 60)
+print()
+
+# WINDOWS CONFIGURATION
+if sys.platform == 'win32':
+    os.environ["HF_HUB_DISABLE_SYMLINKS"] = "1"
+    os.environ["HF_HUB_ENABLE_XET_SYMLINK"] = "0"
+    os.environ["HF_HUB_DOWNLOAD_TIMEOUT"] = "3600"
+
+# Monkey-patch torch.load
+_original_torch_load = torch.load
+def patched_torch_load(f, *args, **kwargs):
+    kwargs['weights_only'] = False
+    return _original_torch_load(f, *args, **kwargs)
+torch.load = patched_torch_load
+
+print("=" * 60)
+print("Amazon Chronos Configuration")
+print("=" * 60)
+print()
+
+# IMPORTS
+import os
+import time
+from flask import Flask, request, jsonify
+import torch
+import numpy as np
+import requests
+from dotenv import load_dotenv
+from chronos import ChronosPipeline
+
+# Load .env file
+load_dotenv()
+
+app = Flask(__name__)
+
+# --- MODEL SETTINGS ---
+CONTEXT_LEN = 48 
+HORIZON_LEN = 12
+
+# Remote inference configuration (optional)
+REMOTE_PRED_URL = os.environ.get("REMOTE_PRED_URL")
+REMOTE_API_KEY = os.environ.get("REMOTE_API_KEY")
+USE_REMOTE = bool(REMOTE_PRED_URL)
+
+if USE_REMOTE:
+    print(f"[REMOTE MODE] Forwarding requests to: {REMOTE_PRED_URL}")
+    if REMOTE_API_KEY:
+        print("[AUTH] Using provided REMOTE_API_KEY for authorization")
+    print("Note: ensure the remote endpoint accepts the same JSON body as this server (/predict).\n")
+
+# --- INITIALIZE LOCAL MODEL (skipped when remote inference is enabled) ---
+chronos_pipeline = None
+if not USE_REMOTE:
+    print("[LOCAL MODE] Loading Amazon Chronos (chronos-tiny) locally...\n")
+    try:
+        chronos_pipeline = ChronosPipeline.from_pretrained(
+            "amazon/chronos-t5-tiny",
+            device_map="cpu",
+            torch_dtype=torch.float32,
+        )
+        print("✅ Chronos model loaded successfully. Server ready for predictions.\n")
+
+    except Exception as e:
+        print(f"[ERROR] Failed to load Chronos model: {type(e).__name__}: {e}\n")
+        print("Falling back to sample prediction mode.\n")
+else:
+    # When remote is enabled we don't attempt to load local model
+    print("[REMOTE MODE] Skipping local model load because REMOTE_PRED_URL is set.\n")
+
+# ============================================================
+# STARTUP USAGE GUIDE
+# ============================================================
+print("=" * 60)
+print("SERVER READY FOR PREDICTIONS")
+print("=" * 60)
+print()
+print("USAGE:")
+print()
+if USE_REMOTE:
+    print("  Mode: REMOTE INFERENCE")
+    print(f"  Endpoint: {REMOTE_PRED_URL}")
+    print()
+    print("  Example (PowerShell - multivariate):")
+    print('    $body = @{')
+    print('      past_values = @{')
+    print('        heart_rate = @(72,76,80,74,78,82,88,75,79,84,81,77)')
+    print('        hrv = @(55,53,52,60,58,56,54,62,59,57,55,60)')
+    print('        steps = @(6000,8500,4000,12000,7000,9000,11000,5500,8000,10000,7500,6800)')
+    print('      }')
+    print('      forecast_horizon = 12')
+    print('    } | ConvertTo-Json')
+    print('    Invoke-RestMethod -Uri http://127.0.0.1:5000/predict -Method POST -Body $body -ContentType "application/json"')
+    print()
+    print("  Example (legacy format):")
+    print('    $body = @{ history = @(1,2,3,4,5) } | ConvertTo-Json')
+    print('    Invoke-RestMethod -Uri http://127.0.0.1:5000/predict -Method POST -Body $body -ContentType "application/json"')
+else:
+    print("  Mode: LOCAL INFERENCE")
+    print("  Model: amazon/chronos-t5-tiny (local)")
+    print("  Context Length: {} | Forecast Horizon: {}".format(CONTEXT_LEN, HORIZON_LEN))
+    print()
+    print("  Example (PowerShell - multivariate):")
+    print('    $body = @{')
+    print('      past_values = @{')
+    print('        heart_rate = @(72,76,80,74,78,82,88,75,79,84,81,77)')
+    print('        hrv = @(55,53,52,60,58,56,54,62,59,57,55,60)')
+    print('      }')
+    print('      forecast_horizon = 12')
+    print('    } | ConvertTo-Json')
+    print('    Invoke-RestMethod -Uri http://127.0.0.1:5000/predict -Method POST -Body $body -ContentType "application/json"')
+    print()
+    print("  Example (legacy format):")
+    print('    $body = @{ history = @(1,2,3,4,5) } | ConvertTo-Json')
+    print('    Invoke-RestMethod -Uri http://127.0.0.1:5000/predict -Method POST -Body $body -ContentType "application/json"')
+print()
+print("  To use REMOTE INFERENCE instead, set environment variables:")
+print('    set REMOTE_PRED_URL=https://your-hosted-chronos-endpoint')
+print('    set REMOTE_API_KEY=hf_YOUR_TOKEN_HERE')
+print("    python app.py")
+print()
+print("=" * 60)
+print()
+
+def generate_sample_forecast(history_values, horizon, multivariate_data=None):
+    """
+    Generate realistic energy level forecasts accounting for multiple biometric factors.
+    
+    Features considered:
+    - Biometrics: Heart Rate, HRV, Sleep Duration, Sleep Quality, Resting HR
+    - Activity: Step Count, Activity Level / Calories
+    - Cognitive: Typing Speed, Reaction Time
+    - Contextual: Time of Day, Mood Score
+    
+    Args:
+        history_values: Array of energy level readings (0-100 scale)
+        horizon: Number of future time periods to predict
+        multivariate_data: Optional dict with features {feature_name: [values...]}
+    
+    Returns:
+        List of predicted energy levels (0-100 scale)
+    """
+    import numpy as np
+    
+    history_array = np.array(history_values, dtype=float)
+    
+    # Calculate base trend and statistics
+    if len(history_array) >= 2:
+        recent_trend = (history_array[-1] - history_array[-5:].mean()) / 5 if len(history_array) >= 5 else 0
+    else:
+        recent_trend = 0
+    
+    mean_val = float(history_array.mean())
+    std_val = float(history_array.std())
+    
+    # Initialize multivariate factors (0-1 scale, 0.5 = neutral)
+    factors = {
+        'heart_rate': 0.5,           # Normal resting HR ~60-100 BPM
+        'hrv': 0.5,                  # Good recovery (HRV 50-100ms)
+        'sleep_hours': 0.5,          # Good sleep (7-8 hours)
+        'sleep_quality': 0.5,        # Normal quality
+        'resting_hr': 0.5,           # Normal resting HR
+        'steps': 0.5,                # Moderate activity
+        'activity_level': 0.5,       # Moderate exertion
+        'typing_speed': 0.5,         # Normal cognitive performance
+        'reaction_time_ms': 0.5,     # Normal reaction time
+        'time_of_day': 0.5,          # Neutral (9am = peak, 3pm = dip, 11pm = low)
+        'mood_score': 0.5             # Neutral mood
+    }
+    
+    # Process multivariate data if provided
+    if multivariate_data:
+        last_values = {}
+        for feature, values in multivariate_data.items():
+            if isinstance(values, list) and len(values) > 0:
+                last_values[feature] = values[-1]
+        
+        # Map features to energy impact (normalized to 0-1, where 0.5 = neutral)
+        # Higher HR during rest = fatigue/stress (lower energy)
+        if 'heart_rate' in last_values:
+            hr = float(last_values['heart_rate'])
+            # 60 BPM = good (0.7), 100 BPM = stressed (0.3), 40 BPM = too low (0.2)
+            factors['heart_rate'] = max(0.1, min(0.9, 1.0 - (hr - 60) / 80))
+        
+        # Higher HRV = better recovery (higher energy)
+        if 'hrv' in last_values:
+            hrv = float(last_values['hrv'])
+            # HRV 20ms = stressed (0.2), 60ms = good (0.7), 100ms = excellent (0.9)
+            factors['hrv'] = min(0.9, hrv / 120)
+        
+        # Sleep duration impact
+        if 'sleep_hours' in last_values:
+            sleep = float(last_values['sleep_hours'])
+            # 5 hrs = 0.3, 7 hrs = 0.7, 9 hrs = 0.8
+            factors['sleep_hours'] = min(0.9, max(0.2, (sleep - 4) / 6))
+        
+        # Typing speed (cognitive performance)
+        if 'typing_speed' in last_values:
+            typing = float(last_values['typing_speed'])
+            # 40 WPM = 0.3, 70 WPM = 0.7, 100 WPM = 0.9
+            factors['typing_speed'] = min(0.95, max(0.1, typing / 120))
+        
+        # Reaction time (lower is better)
+        if 'reaction_time_ms' in last_values:
+            reaction = float(last_values['reaction_time_ms'])
+            # 300ms = 0.3, 200ms = 0.6, 150ms = 0.8
+            factors['reaction_time_ms'] = max(0.1, 1.0 - (reaction / 400))
+        
+        # Step count (activity drives alertness)
+        if 'steps' in last_values:
+            steps = float(last_values['steps'])
+            # 3000 steps = 0.4, 10000 steps = 0.8, 15000 = 0.9
+            factors['steps'] = min(0.95, max(0.2, (steps / 12000)))
+    
+    # Generate forecast incorporating all factors
+    # Use current data as seed for variation (not fixed seed)
+    np.random.seed(int(time.time() * 1000) % (2**32))  # Time-based seed for variation
+    forecast = []
+    last_val = float(history_array[-1])
+    
+    # Calculate composite factor (weighted average of all biometric factors)
+    composite_factor = np.mean([v for v in factors.values()])  # 0-1 scale
+    
+    # Get current hour for circadian rhythm
+    from datetime import datetime
+    current_hour = datetime.now().hour
+    
+    for i in range(horizon):
+        # Trend component (decays over time)
+        trend_component = recent_trend * (1 - i / (horizon * 2))
+        
+        # Circadian rhythm component based on actual time of day
+        predicted_hour = (current_hour + i) % 24
+        # Morning peak (6-10am), afternoon dip (2-4pm), evening decline (8pm+)
+        if 6 <= predicted_hour <= 10:
+            circadian_adjustment = 5  # Morning peak
+        elif 14 <= predicted_hour <= 16:
+            circadian_adjustment = -8  # Afternoon dip
+        elif predicted_hour >= 22 or predicted_hour <= 5:
+            circadian_adjustment = -10  # Night/early morning
+        else:
+            circadian_adjustment = 0
+        
+        # Factor-based adjustment (pushes forecast up if factors are good, down if poor)
+        factor_adjustment = (composite_factor - 0.5) * 15  # Scale to ±7.5 points
+        
+        # Random noise component (varies with actual input data variance)
+        noise = np.random.normal(0, max(std_val * 0.3, 2))
+        
+        # Mean reversion component
+        mean_reversion = (mean_val - last_val) * 0.08
+        
+        # Combine all components
+        next_val = (last_val + trend_component + circadian_adjustment + 
+                   factor_adjustment + noise + mean_reversion)
+        
+        # Clamp to energy scale (0-100)
+        next_val = np.clip(next_val, 10, 100)
+        
+        forecast.append(float(next_val))
+        last_val = next_val
+    
+    return forecast
+
+@app.route('/sample', methods=['GET'])
+def sample_prediction():
+    """
+    Return a sample prediction without requiring input data.
+    Useful for testing and demonstrations.
+    """
+    sample_history = [72, 76, 80, 74, 78, 82, 88, 75, 79, 84, 81, 77]
+    forecast = generate_sample_forecast(sample_history, 12)
+    
+    # Print to terminal
+    print("\n" + "="*60)
+    print("[SAMPLE PREDICTION]")
+    print("="*60)
+    print(f"Input history: {sample_history}")
+    print(f"Forecast (12 values): {forecast}")
+    print("="*60 + "\n")
+    
+    return jsonify({
+        "status": "success",
+        "mode": "sample",
+        "input": {
+            "history": sample_history,
+            "forecast_horizon": 12
+        },
+        "output": {
+            "forecast": forecast
+        }
+    })
+
+@app.route('/predict', methods=['POST'])
+def predict_energy():
+    """
+    Handle prediction requests for energy level forecasting.
+    
+    Accepts either:
+    1. Legacy format: {"history": [val1, val2, ...]}
+    2. New format: {"past_values": {feature: [...], ...}, "timestamps": [...], "forecast_horizon": N}
+    """
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"error": "No JSON data provided"}), 400
+
+        # Detect input format
+        multivariate_data = None
+        if 'past_values' in data:
+            # New multivariate format
+            past_values = data.get('past_values', {})
+            timestamps = data.get('timestamps', [])
+            forecast_horizon = data.get('forecast_horizon', 12)
+            
+            if not past_values or len(past_values) == 0:
+                return jsonify({"error": "No past_values provided"}), 400
+            
+            # Extract the main time series (e.g., energy levels or heart rate as proxy)
+            # For now, use the first available feature
+            feature_name = list(past_values.keys())[0]
+            history_values = past_values[feature_name]
+            multivariate_data = past_values  # Pass all features for biometric analysis
+            
+            if len(history_values) == 0:
+                return jsonify({"error": "Empty history in past_values"}), 400
+                
+            print(f"[PREDICT] Received multivariate data: features={list(past_values.keys())}, " 
+                  f"history_len={len(history_values)}, forecast_horizon={forecast_horizon}", flush=True)
+            
+        elif 'history' in data:
+            # Legacy single time series format
+            history_values = data['history']
+            if len(history_values) == 0:
+                return jsonify({"error": "Empty history list"}), 400
+            forecast_horizon = data.get('forecast_horizon', 12)
+            print(f"[PREDICT] Received legacy format: history_len={len(history_values)}", flush=True)
+        else:
+            return jsonify({"error": "Must provide either 'history' or 'past_values'"}), 400
+
+        # Check if remote inference is enabled
+        remote_url = os.environ.get("REMOTE_PRED_URL")
+        remote_api_key = os.environ.get("REMOTE_API_KEY")
+        use_sample = os.environ.get("USE_SAMPLE_PREDICTION", "false").lower() == "true"
+        
+        if use_sample:
+            # Return a sample prediction based on the input
+            print(f"[SAMPLE] Generating sample prediction with horizon={forecast_horizon}", flush=True)
+            sample_forecast = generate_sample_forecast(history_values, forecast_horizon, multivariate_data=multivariate_data)
+            print(f"[SAMPLE] Input history: {history_values}", flush=True)
+            if multivariate_data:
+                print(f"[SAMPLE] Biometric factors considered: {list(multivariate_data.keys())}", flush=True)
+            print(f"[SAMPLE] Generated forecast: {sample_forecast}", flush=True)
+            print("="*60)
+            return jsonify({
+                "status": "success",
+                "mode": "sample",
+                "message": "Sample prediction (not from actual model)",
+                "forecast": sample_forecast,
+                "forecast_horizon": forecast_horizon
+            })
+        
+        if remote_url:
+            # Forward request to remote endpoint
+            payload = {"history": history_values}
+            headers = {"Content-Type": "application/json"}
+            if remote_api_key:
+                headers["Authorization"] = f"Bearer {remote_api_key}"
+            
+            try:
+                resp = requests.post(remote_url, json=payload, headers=headers, timeout=120)
+                print(f"[REMOTE] Forwarded request to {remote_url}, got status {resp.status_code}", flush=True)
+                
+                if resp.status_code == 200:
+                    # Try to parse the remote response
+                    try:
+                        remote_json = resp.json()
+                    except Exception:
+                        return jsonify({"status": "success", "remote_response": resp.text})
+
+                    # Prefer a 'forecast' field if present, otherwise return the whole response
+                    if isinstance(remote_json, dict) and 'forecast' in remote_json:
+                        return jsonify({"status": "success", "forecast": remote_json['forecast']})
+                    return jsonify({"status": "success", "forecast": remote_json})
+                else:
+                    # Remote failed, fall back to sample generation
+                    print(f"[REMOTE] Status {resp.status_code}, falling back to sample generation", flush=True)
+                    
+            except requests.RequestException as re:
+                print(f"[REMOTE ERROR] Request to {remote_url} failed: {re}, falling back to sample", flush=True)
+            
+            # Fall back to sample prediction if remote failed
+            print(f"[FALLBACK] Generating sample prediction with horizon={forecast_horizon}", flush=True)
+            sample_forecast = generate_sample_forecast(history_values, forecast_horizon, multivariate_data=multivariate_data)
+            print(f"[FALLBACK] Input history: {history_values}", flush=True)
+            if multivariate_data:
+                print(f"[FALLBACK] Biometric factors considered: {list(multivariate_data.keys())}", flush=True)
+            print(f"[FALLBACK] Generated forecast: {sample_forecast}", flush=True)
+            print("="*60)
+            return jsonify({
+                "status": "success",
+                "mode": "sample",
+                "message": "Remote inference unavailable - using sample prediction",
+                "forecast": sample_forecast,
+                "forecast_horizon": forecast_horizon
+            })
+
+        # Local inference path
+        if chronos_pipeline is None:
+            print("[LOCAL] Model not loaded, returning sample prediction", flush=True)
+            sample_forecast = generate_sample_forecast(history_values, forecast_horizon, multivariate_data=multivariate_data)
+            print(f"[LOCAL] Input history: {history_values}", flush=True)
+            if multivariate_data:
+                print(f"[LOCAL] Biometric factors considered: {list(multivariate_data.keys())}", flush=True)
+            print(f"[LOCAL] Generated forecast: {sample_forecast}", flush=True)
+            print("="*60)
+            return jsonify({
+                "status": "success",
+                "mode": "sample",
+                "message": "Model not available - returning sample prediction",
+                "forecast": sample_forecast,
+                "forecast_horizon": forecast_horizon
+            })
+
+        # Use Chronos for prediction with robust error reporting
+        import numpy as np
+        try:
+            # For installed Chronos version, first arg must be a torch.Tensor named 'context'
+            # Build torch Tensor explicitly
+            context_tensor = torch.from_numpy(np.array([history_values], dtype=np.float32))
+            # Call predict using positional args to match installed signature
+            forecast_result = chronos_pipeline.predict(context_tensor, forecast_horizon, 1)
+            prediction_list = forecast_result[0].mean(axis=0).tolist()
+            print(f"[LOCAL] Input history: {history_values}", flush=True)
+            print(f"[LOCAL] Generated forecast (Chronos): {prediction_list}", flush=True)
+            print("="*60)
+            return jsonify({"status": "success", "mode": "local", "forecast": prediction_list})
+        except Exception as e:
+            import traceback
+            tb = traceback.format_exc()
+            print(f"[LOCAL ERROR] Chronos predict failed: {type(e).__name__}: {e}", flush=True)
+            print(tb, flush=True)
+            return jsonify({
+                "status": "error",
+                "error_type": type(e).__name__,
+                "error_message": str(e),
+                "where": "chronos_predict"
+            }), 500
+
+    except Exception as e:
+        import traceback
+        tb = traceback.format_exc()
+        print(f"[HANDLER ERROR] {type(e).__name__}: {e}", flush=True)
+        print(tb, flush=True)
+        return jsonify({
+            "status": "error",
+            "error_type": type(e).__name__,
+            "error_message": str(e)
+        }), 500
+
+if __name__ == '__main__':
+    print("[MAIN] Starting Flask app...", flush=True)
+    sys.stdout.flush()
+    try:
+        print("[MAIN] About to call app.run()", flush=True)
+        sys.stdout.flush()
+        app.run(host='127.0.0.1', port=5000, use_reloader=False, threaded=True, debug=False)
+    except Exception as e:
+        print(f"[MAIN] ERROR: {e}", flush=True)
+        import traceback
+        traceback.print_exc()
+        sys.stdout.flush()

@@ -1,0 +1,12 @@
+# Backend dependencies for FlowState (Railway deploy)
+flask
+flask-cors
+requests
+python-dotenv
+numpy
+# Chronos forecasting library (Amazon Chronos)
+chronos-forecasting
+# PyTorch CPU build (no CUDA). Railway will install a compatible wheel.
+torch
+# Production WSGI server
+gunicorn
