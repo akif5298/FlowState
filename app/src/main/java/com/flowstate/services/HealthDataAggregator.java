@@ -112,22 +112,54 @@ public class HealthDataAggregator {
                 Log.d(TAG, "Collected " + stepsList.size() + " hourly step counts");
             }
             
-            // Collect sleep data (calculate sleep hours per day)
+            // Collect sleep data (hours slept per day for the last 7 days)
+            // Aggregated by day so the bar chart shows one bar per day
             List<SleepLocal> sleepRecords = database.sleepDao().getAll();
+            Log.d(TAG, "Total sleep records in DB: " + sleepRecords.size());
+            
+            // Use Calendar for proper local timezone day boundaries
+            Calendar cal = Calendar.getInstance();
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+            long todayMidnight = cal.getTimeInMillis();
+            long oneDayMs = 24 * 60 * 60 * 1000L;
+            
+            // Create array for 7 days of sleep data (index 0 = 6 days ago, index 6 = today)
+            double[] dailySleep = new double[7];
+            
+            // Calculate the start of 7 days ago
+            long sevenDaysAgoMidnight = todayMidnight - (6 * oneDayMs);
+            
+            // Aggregate sleep sessions into their respective days
             if (!sleepRecords.isEmpty()) {
-                // Filter to date range and calculate sleep hours
-                List<Double> sleepHours = new ArrayList<>();
                 for (SleepLocal sleep : sleepRecords) {
-                    if (sleep.sleep_start >= startMs && sleep.sleep_start < endMs) {
-                        double hoursSlept = sleep.duration / 60.0; // Convert minutes to hours
-                        sleepHours.add(hoursSlept);
+                    if (sleep.duration != null && sleep.duration > 0) {
+                        // Use sleep_end to determine which day this sleep belongs to
+                        long sleepEndMs = sleep.sleep_end != null ? sleep.sleep_end : sleep.sleep_start + (sleep.duration * 60 * 1000L);
+                        
+                        // Calculate which day index this belongs to (0-6)
+                        int dayIndex = (int) ((sleepEndMs - sevenDaysAgoMidnight) / oneDayMs);
+                        
+                        Log.d(TAG, "Sleep record: duration=" + sleep.duration + "min, sleepEnd=" + sleepEndMs + ", dayIndex=" + dayIndex);
+                        
+                        if (dayIndex >= 0 && dayIndex < 7) {
+                            double hoursSlept = sleep.duration / 60.0;
+                            dailySleep[dayIndex] += hoursSlept;
+                            Log.d(TAG, "Added " + hoursSlept + " hours to day " + dayIndex);
+                        }
                     }
                 }
-                if (!sleepHours.isEmpty()) {
-                    data.put("sleep_hours", sleepHours);
-                    Log.d(TAG, "Collected " + sleepHours.size() + " sleep sessions");
-                }
             }
+            
+            // Convert to list for chart
+            List<Double> sleepHours = new ArrayList<>();
+            for (int i = 0; i < 7; i++) {
+                sleepHours.add(dailySleep[i]);
+            }
+            data.put("sleep_hours", sleepHours);
+            Log.d(TAG, "Sleep hours for last 7 days: " + sleepHours);
             
             // Collect Typing Speed data
             List<TypingLocal> typingRecords = database.typingDao().getByDateRange(startMs, endMs);

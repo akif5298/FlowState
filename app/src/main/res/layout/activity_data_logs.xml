@@ -443,7 +443,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Sleep Quality Score"
+                            android:text="Last Night"
                             android:textSize="14sp"
                             android:textColor="#777777"/>
 
@@ -451,16 +451,36 @@
                             android:id="@+id/tvSleepScore"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="--"
+                            android:text="-- hrs"
                             android:textSize="16sp"
                             android:textStyle="bold"
                             android:textColor="@color/text_primary"/>
                     </LinearLayout>
 
-                    <com.github.mikephil.charting.charts.BarChart
-                        android:id="@+id/chartSleep"
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="120dp" />
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingTop="8dp">
+
+                        <TextView
+                            android:id="@+id/tvLastLongSleep"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Last Long Sleep: --"
+                            android:textSize="14sp"
+                            android:textColor="@color/text_primary"
+                            android:layout_marginBottom="8dp"/>
+
+                        <TextView
+                            android:id="@+id/tvHoursAwake"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Awake for: --"
+                            android:textSize="14sp"
+                            android:textColor="@color/text_primary"/>
+                            
+                    </LinearLayout>
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

@@ -122,8 +122,15 @@ public class GeminiEnergyPredictor {
                         future.completeExceptionally(new Exception("Could not parse energy predictions from response"));
                     }
                 } catch (ExecutionException | InterruptedException e) {
-                    Log.e(TAG, "Error getting Gemini response", e);
-                    future.completeExceptionally(e);
+                    Throwable cause = e.getCause();
+                    // Handle specific 503 Server Overloaded error from Gemini
+                    if (cause != null && (cause.toString().contains("503") || cause.toString().contains("overloaded"))) {
+                        Log.w(TAG, "Gemini server overloaded (503)");
+                        future.completeExceptionally(new java.io.IOException("Gemini Server Overloaded (503). Please try again later."));
+                    } else {
+                        Log.e(TAG, "Error getting Gemini response", e);
+                        future.completeExceptionally(e);
+                    }
                 }
             }, java.util.concurrent.Executors.newSingleThreadExecutor());
             

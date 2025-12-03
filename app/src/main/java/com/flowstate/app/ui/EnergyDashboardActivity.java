@@ -21,7 +21,6 @@ import com.flowstate.workers.WorkoutSyncWorker;
 import com.flowstate.workers.SyncScheduler;
 import com.flowstate.app.ui.settings.SettingsActivity;
 import com.flowstate.app.ui.data.DataLogsActivity;
-import com.flowstate.app.ui.schedule.AIScheduleActivity;
 import com.flowstate.app.ui.insights.WeeklyInsightsActivity;
 import com.flowstate.app.ui.typing.TypingSpeedActivity;
 import com.flowstate.app.ui.reaction.ReactionTimeActivity;
@@ -247,10 +246,6 @@ public class EnergyDashboardActivity extends AppCompatActivity {
             
             if (itemId == R.id.nav_dashboard) {
                 // Already here, no action needed
-                return true;
-            } else if (itemId == R.id.nav_schedule) {
-                startActivity(new Intent(this, AIScheduleActivity.class));
-                overridePendingTransition(0, 0);
                 return true;
             } else if (itemId == R.id.nav_data) {
                 startActivity(new Intent(this, DataLogsActivity.class));

@@ -18,7 +18,6 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.flowstate.app.R;
 import com.flowstate.app.ui.EnergyDashboardActivity;
 import com.flowstate.app.ui.data.DataLogsActivity;
-import com.flowstate.app.ui.schedule.AIScheduleActivity;
 import com.flowstate.app.ui.insights.WeeklyInsightsActivity;
 import com.flowstate.services.HealthConnectManager;
 import com.flowstate.core.Config;
@@ -29,11 +28,9 @@ import java.util.Set;
 public class SettingsActivity extends AppCompatActivity {
     
     private static final String PREFS_NAME = "flowstate_settings";
-    private static final String KEY_DARK_MODE = "dark_mode";
     private static final String KEY_GEMINI_API_KEY = "gemini_api_key";
     
     private BottomNavigationView bottomNav;
-    private SwitchMaterial switchDarkMode;
     private MaterialButton btnHealthConnectPermissions;
     private MaterialButton btnDebugHealthConnect;
     private TextInputEditText etGeminiApiKey;
@@ -69,18 +66,11 @@ public class SettingsActivity extends AppCompatActivity {
     }
     
     private void initializeViews() {
-        switchDarkMode = findViewById(R.id.switchDarkMode);
         btnHealthConnectPermissions = findViewById(R.id.btnHealthConnectPermissions);
         btnDebugHealthConnect = findViewById(R.id.btnDebugHealthConnect);
         etGeminiApiKey = findViewById(R.id.etGeminiApiKey);
         btnSaveGeminiApiKey = findViewById(R.id.btnSaveGeminiApiKey);
         btnDeleteData = findViewById(R.id.btnDeleteData);
-        
-        // Dark mode toggle
-        switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            saveDarkMode(isChecked);
-            applyDarkMode(isChecked);
-        });
         
         // Health Connect permissions
         btnHealthConnectPermissions.setOnClickListener(v -> {
@@ -130,11 +120,6 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void loadSettings() {
-        // Load dark mode
-        boolean darkMode = prefs.getBoolean(KEY_DARK_MODE, false);
-        switchDarkMode.setChecked(darkMode);
-        applyDarkMode(darkMode);
-        
         // Load Gemini API key (masked)
         String apiKey = prefs.getString(KEY_GEMINI_API_KEY, null);
         if (apiKey != null && !apiKey.isEmpty()) {
@@ -146,18 +131,6 @@ public class SettingsActivity extends AppCompatActivity {
             if (Config.GEMINI_API_KEY != null && !Config.GEMINI_API_KEY.isEmpty()) {
                 etGeminiApiKey.setHint("API key set in local.properties");
             }
-        }
-    }
-    
-    private void saveDarkMode(boolean enabled) {
-        prefs.edit().putBoolean(KEY_DARK_MODE, enabled).apply();
-    }
-    
-    private void applyDarkMode(boolean enabled) {
-        if (enabled) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         }
     }
     
@@ -208,11 +181,6 @@ public class SettingsActivity extends AppCompatActivity {
                 return true;
             } else if (itemId == R.id.nav_dashboard) {
                 startActivity(new Intent(this, EnergyDashboardActivity.class));
-                overridePendingTransition(0, 0);
-                finish();
-                return true;
-            } else if (itemId == R.id.nav_schedule) {
-                startActivity(new Intent(this, AIScheduleActivity.class));
                 overridePendingTransition(0, 0);
                 finish();
                 return true;

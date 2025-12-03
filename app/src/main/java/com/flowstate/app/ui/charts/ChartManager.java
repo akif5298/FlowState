@@ -144,15 +144,28 @@ public class ChartManager {
         BarDataSet dataSet = new BarDataSet(entries, label);
         dataSet.setColor(COLOR_SECONDARY);
         dataSet.setValueTextColor(COLOR_TEXT);
-        dataSet.setDrawValues(false);
+        dataSet.setDrawValues(true); // Show values on bars
+        dataSet.setValueTextSize(10f);
 
         BarData barData = new BarData(dataSet);
+        barData.setBarWidth(0.7f); // Make bars slightly narrower for better spacing
         chart.setData(barData);
 
+        // Configure X-axis to show all labels
+        XAxis xAxis = chart.getXAxis();
         if (labels != null && !labels.isEmpty()) {
-            chart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
+            xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
+            xAxis.setLabelCount(labels.size()); // Show all labels
         }
-
+        xAxis.setAxisMinimum(-0.5f);
+        xAxis.setAxisMaximum(values.size() - 0.5f);
+        
+        // Configure Y-axis
+        YAxis leftAxis = chart.getAxisLeft();
+        leftAxis.setAxisMinimum(0f); // Start from 0
+        leftAxis.setAxisMaximum(12f); // Max 12 hours for sleep
+        
+        chart.setFitBars(true);
         chart.invalidate();
     }
     

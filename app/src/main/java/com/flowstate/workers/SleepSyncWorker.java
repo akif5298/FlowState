@@ -48,20 +48,30 @@ public class SleepSyncWorker extends Worker {
         }
 
         try {
-            // Sync last 24 hours of data
+            // Sync last 7 days of sleep data (for weekly chart)
             Instant end = Instant.now();
-            Instant start = end.minus(24, ChronoUnit.HOURS);
+            Instant start = end.minus(7, ChronoUnit.DAYS);
 
-            Log.d(TAG, "Syncing Sleep data from Health Connect...");
+            Log.d(TAG, "Syncing Sleep data from Health Connect (last 7 days)...");
             
             // Get data from Kotlin manager (returns CompletableFuture)
             List<SleepLocal> sleepList = healthConnectManager.readSleep(start, end).get(30, TimeUnit.SECONDS);
             
             if (sleepList != null && !sleepList.isEmpty()) {
                 Log.d(TAG, "Found " + sleepList.size() + " sleep records. Saving to DB...");
-                db.sleepDao().insertAll(sleepList);
+                int inserted = 0;
+                for (SleepLocal sleep : sleepList) {
+                    try {
+                        db.sleepDao().insert(sleep);
+                        inserted++;
+                    } catch (Exception e) {
+                        // Duplicate entry (unique constraint on sleep_start), skip
+                        Log.d(TAG, "Sleep record already exists for " + sleep.sleep_start);
+                    }
+                }
+                Log.d(TAG, "Inserted " + inserted + " new sleep records");
             } else {
-                Log.d(TAG, "No sleep records found.");
+                Log.d(TAG, "No sleep records found in Health Connect.");
             }
             
             return Result.success();
