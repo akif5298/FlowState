@@ -8,8 +8,8 @@ print("=" * 60)
 print("WARNING: Model Download Issue on Windows")
 print("=" * 60)
 print()
-print("The TimesFM model uses Git LFS which has known issues on Windows.")
-print("We recommend using WSL2 or Linux to download the model initially.")
+print("Note: Some models using Git LFS can have issues on Windows.")
+print("We recommend WSL2 or Linux if you need Git LFS models.")
 print()
 print("QUICKEST SOLUTION:")
 print("1. Use online prediction service instead, or")
@@ -32,17 +32,18 @@ def patched_torch_load(f, *args, **kwargs):
 torch.load = patched_torch_load
 
 print("=" * 60)
-print("TimesFM Configuration")
+print("Amazon Chronos Configuration")
 print("=" * 60)
 print()
 
 # IMPORTS
 import os
 from flask import Flask, request, jsonify
-import timesfm
+import torch
 import numpy as np
 import requests
 from dotenv import load_dotenv
+from chronos import ChronosPipeline
 
 # Load .env file
 load_dotenv()
@@ -65,63 +66,20 @@ if USE_REMOTE:
     print("Note: ensure the remote endpoint accepts the same JSON body as this server (/predict).\n")
 
 # --- INITIALIZE LOCAL MODEL (skipped when remote inference is enabled) ---
-tfm = None
+chronos_pipeline = None
 if not USE_REMOTE:
-    print("[LOCAL MODE] Loading TimesFM Model locally (this may take several minutes)...\n")
-    # Attempt to locate an LFS-checkout-style checkpoint under the HF cache and
-    # create a copy named `torch_model.ckpt` at the snapshot root so TimesFM
-    # can find it on Windows (avoids xet/symlink issues).
+    print("[LOCAL MODE] Loading Amazon Chronos (chronos-tiny) locally...\n")
     try:
-        hf_snapshots = Path.home() / ".cache" / "huggingface" / "hub" / "models--google--timesfm-1.0-200m" / "snapshots"
-        if hf_snapshots.exists():
-            found = False
-            for commit_dir in hf_snapshots.iterdir():
-                if not commit_dir.is_dir():
-                    continue
-                # Look for an internal checkpoint file (common layout: checkpoints/*/state/checkpoint)
-                candidates = list(commit_dir.rglob('state/checkpoint'))
-                if not candidates:
-                    continue
-                src_checkpoint = candidates[0]
-                dest_ckpt = commit_dir / 'torch_model.ckpt'
-                if not dest_ckpt.exists():
-                    try:
-                        shutil.copy2(src_checkpoint, dest_ckpt)
-                        print(f"Copied local checkpoint from '{src_checkpoint}' to '{dest_ckpt}' to help TimesFM load on Windows.")
-                    except Exception as copy_exc:
-                        print(f"Warning: failed to copy checkpoint file: {copy_exc}")
-                else:
-                    print(f"Found existing root checkpoint file at: {dest_ckpt}")
-                found = True
-                break
-            if not found:
-                print("No internal checkpoint found under HF snapshots; proceeding to let TimesFM attempt download.")
-        else:
-            print(f"HF snapshots cache not found at expected location: {hf_snapshots}")
-    except Exception as e:
-        print(f"Warning while scanning HF cache for local checkpoints: {e}")
-    try:
-        tfm = timesfm.TimesFm(
-            hparams=timesfm.TimesFmHparams(
-                backend="cpu",
-                per_core_batch_size=32,
-                context_len=CONTEXT_LEN,
-                horizon_len=HORIZON_LEN,
-            ),
-            checkpoint=timesfm.TimesFmCheckpoint(
-                huggingface_repo_id="google/timesfm-1.0-200m"
-            ),
+        chronos_pipeline = ChronosPipeline.from_pretrained(
+            "amazon/chronos-t5-tiny",
+            device_map="cpu",
+            torch_dtype=torch.float32,
         )
-        print("✅ Local model loaded. Server ready for predictions.")
-
-    except FileNotFoundError as e:
-        print("[ERROR] Model files not found!\n")
-        print("This is a known issue with HuggingFace Git LFS on Windows.\n")
-        print("Recommendations: use WSL2 to download the model or use remote inference (set REMOTE_PRED_URL).\n")
-        print(f"Error details: {e}\n")
+        print("✅ Chronos model loaded successfully. Server ready for predictions.\n")
 
     except Exception as e:
-        print(f"[ERROR] Unexpected error while loading model: {type(e).__name__}: {e}\n")
+        print(f"[ERROR] Failed to load Chronos model: {type(e).__name__}: {e}\n")
+        print("Falling back to sample prediction mode.\n")
 else:
     # When remote is enabled we don't attempt to load local model
     print("[REMOTE MODE] Skipping local model load because REMOTE_PRED_URL is set.\n")
@@ -155,7 +113,7 @@ if USE_REMOTE:
     print('    Invoke-RestMethod -Uri http://127.0.0.1:5000/predict -Method POST -Body $body -ContentType "application/json"')
 else:
     print("  Mode: LOCAL INFERENCE")
-    print("  Model: google/timesfm-1.0-200m")
+    print("  Model: amazon/chronos-t5-tiny (local)")
     print("  Context Length: {} | Forecast Horizon: {}".format(CONTEXT_LEN, HORIZON_LEN))
     print()
     print("  Example (PowerShell - multivariate):")
@@ -173,7 +131,7 @@ else:
     print('    Invoke-RestMethod -Uri http://127.0.0.1:5000/predict -Method POST -Body $body -ContentType "application/json"')
 print()
 print("  To use REMOTE INFERENCE instead, set environment variables:")
-print('    set REMOTE_PRED_URL=https://router.huggingface.co/models/google/timesfm-1.0-200m')
+print('    set REMOTE_PRED_URL=https://your-hosted-chronos-endpoint')
 print('    set REMOTE_API_KEY=hf_YOUR_TOKEN_HERE')
 print("    python app.py")
 print()
@@ -451,7 +409,7 @@ def predict_energy():
             })
 
         # Local inference path
-        if tfm is None:
+        if chronos_pipeline is None:
             print("[LOCAL] Model not loaded, returning sample prediction", flush=True)
             sample_forecast = generate_sample_forecast(history_values, forecast_horizon, multivariate_data=multivariate_data)
             print(f"[LOCAL] Input history: {history_values}", flush=True)
@@ -467,20 +425,41 @@ def predict_energy():
                 "forecast_horizon": forecast_horizon
             })
 
-        forecast_result = tfm.forecast(
-            inputs=[history_values],
-            freq=[0]
-        )
-        prediction_list = forecast_result[0][0].tolist()
-        print(f"[LOCAL] Input history: {history_values}", flush=True)
-        print(f"[LOCAL] Generated forecast: {prediction_list}", flush=True)
-        print("="*60)
-
-        return jsonify({"status": "success", "mode": "local", "forecast": prediction_list})
+        # Use Chronos for prediction with robust error reporting
+        import numpy as np
+        try:
+            # For installed Chronos version, first arg must be a torch.Tensor named 'context'
+            # Build torch Tensor explicitly
+            context_tensor = torch.from_numpy(np.array([history_values], dtype=np.float32))
+            # Call predict using positional args to match installed signature
+            forecast_result = chronos_pipeline.predict(context_tensor, forecast_horizon, 1)
+            prediction_list = forecast_result[0].mean(axis=0).tolist()
+            print(f"[LOCAL] Input history: {history_values}", flush=True)
+            print(f"[LOCAL] Generated forecast (Chronos): {prediction_list}", flush=True)
+            print("="*60)
+            return jsonify({"status": "success", "mode": "local", "forecast": prediction_list})
+        except Exception as e:
+            import traceback
+            tb = traceback.format_exc()
+            print(f"[LOCAL ERROR] Chronos predict failed: {type(e).__name__}: {e}", flush=True)
+            print(tb, flush=True)
+            return jsonify({
+                "status": "error",
+                "error_type": type(e).__name__,
+                "error_message": str(e),
+                "where": "chronos_predict"
+            }), 500
 
     except Exception as e:
-        print(f"Error: {e}")
-        return jsonify({"error": str(e)}), 500
+        import traceback
+        tb = traceback.format_exc()
+        print(f"[HANDLER ERROR] {type(e).__name__}: {e}", flush=True)
+        print(tb, flush=True)
+        return jsonify({
+            "status": "error",
+            "error_type": type(e).__name__,
+            "error_message": str(e)
+        }), 500
 
 if __name__ == '__main__':
     print("[MAIN] Starting Flask app...", flush=True)

@@ -1,17 +1,12 @@
 #!/usr/bin/env python
-"""Direct test of Flask app without HTTP networking."""
+"""Integration tests against a running Flask server on localhost."""
 import os
 import sys
-
-# Set remote inference mode
-os.environ['REMOTE_PRED_URL'] = 'https://router.huggingface.co/models/google/timesfm-1.0-200m'
-
-# Import app after setting env vars
-from app import app, generate_sample_forecast
-import numpy as np
+import requests
+from app import generate_sample_forecast
 
 print("=" * 80)
-print("DIRECT APP TEST (No HTTP/networking required)")
+print("HTTP INTEGRATION TESTS (Against running server)")
 print("=" * 80)
 
 # Test 1: Sample forecast generation function
@@ -23,14 +18,16 @@ print(f"Input history (12 values): {history}")
 print(f"Generated forecast (12 values): {list(forecast)}")
 print(f"[OK] Sample forecast function works correctly")
 
-# Test 2: /sample endpoint using Flask test client
+# Base URL for running server
+BASE_URL = os.environ.get("TEST_BASE_URL", "http://127.0.0.1:5000")
+
+# Test 2: /sample endpoint using HTTP
 print("\n[TEST 2] /sample endpoint (Flask test client)")
 print("-" * 80)
-client = app.test_client()
-response = client.get('/sample')
+response = requests.get(f"{BASE_URL}/sample", timeout=30)
 print(f"Status code: {response.status_code}")
-print(f"Response type: {response.content_type}")
-data = response.get_json()
+print(f"Response type: {response.headers.get('Content-Type')}")
+data = response.json()
 if data:
     print(f"Response keys: {list(data.keys())}")
     print(f"Status: {data.get('status')}")
@@ -45,7 +42,7 @@ else:
     print("ERROR: No JSON response")
 
 # Test 3: /predict endpoint with multivariate data
-print("\n[TEST 3] /predict endpoint with multivariate data (Flask test client)")
+print("\n[TEST 3] /predict endpoint with multivariate data (HTTP)")
 print("-" * 80)
 multivariate_input = {
     "past_values": {
@@ -59,12 +56,10 @@ multivariate_input = {
     "forecast_horizon": 12
 }
 
-response = client.post('/predict', 
-                       json=multivariate_input,
-                       content_type='application/json')
+response = requests.post(f"{BASE_URL}/predict", json=multivariate_input, timeout=60)
 print(f"Status code: {response.status_code}")
-print(f"Response type: {response.content_type}")
-data = response.get_json()
+print(f"Response type: {response.headers.get('Content-Type')}")
+data = response.json()
 if data:
     print(f"Response keys: {list(data.keys())}")
     print(f"Status: {data.get('status')}")
@@ -80,18 +75,16 @@ else:
     print("ERROR: No JSON response")
 
 # Test 4: /predict endpoint with legacy format
-print("\n[TEST 4] /predict endpoint with legacy format (Flask test client)")
+print("\n[TEST 4] /predict endpoint with legacy format (HTTP)")
 print("-" * 80)
 legacy_input = {
     "history": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 }
 
-response = client.post('/predict',
-                       json=legacy_input,
-                       content_type='application/json')
+response = requests.post(f"{BASE_URL}/predict", json=legacy_input, timeout=60)
 print(f"Status code: {response.status_code}")
-print(f"Response type: {response.content_type}")
-data = response.get_json()
+print(f"Response type: {response.headers.get('Content-Type')}")
+data = response.json()
 if data:
     print(f"Response keys: {list(data.keys())}")
     print(f"Status: {data.get('status')}")
@@ -107,7 +100,7 @@ else:
     print("ERROR: No JSON response")
 
 # Test 5: /predict endpoint with fatigue data (low sleep, high HR, poor metrics)
-print("\n[TEST 5] /predict endpoint with FATIGUE/OVERTRAINING data (Flask test client)")
+print("\n[TEST 5] /predict endpoint with FATIGUE/OVERTRAINING data (HTTP)")
 print("-" * 80)
 fatigue_input = {
     "past_values": {
@@ -131,12 +124,10 @@ fatigue_input = {
     "forecast_horizon": 8
 }
 
-response = client.post('/predict',
-                       json=fatigue_input,
-                       content_type='application/json')
+response = requests.post(f"{BASE_URL}/predict", json=fatigue_input, timeout=60)
 print(f"Status code: {response.status_code}")
-print(f"Response type: {response.content_type}")
-data = response.get_json()
+print(f"Response type: {response.headers.get('Content-Type')}")
+data = response.json()
 if data:
     print(f"Response keys: {list(data.keys())}")
     print(f"Status: {data.get('status')}")
