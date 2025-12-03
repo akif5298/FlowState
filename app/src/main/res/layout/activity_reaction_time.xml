@@ -12,8 +12,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:cardCornerRadius="20dp"
-        app:cardElevation="4dp"
-        android:layout_marginBottom="40dp">
+        app:cardElevation="2dp"
+        android:layout_marginBottom="32dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -24,10 +24,11 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Reaction Time Test"
-                android:textSize="22sp"
+                android:text="⚡ Reaction Time Test"
+                android:textSize="24sp"
                 android:textStyle="bold"
                 android:textColor="?attr/colorOnSurface"
+                android:letterSpacing="-0.01"
                 android:layout_marginBottom="12dp" />
 
             <TextView
@@ -47,7 +48,7 @@
         android:layout_width="280dp"
         android:layout_height="280dp"
         app:cardCornerRadius="140dp"
-        app:cardElevation="12dp"
+        app:cardElevation="4dp"
         android:layout_marginTop="24dp"
         android:layout_marginBottom="32dp"
         android:background="@android:color/transparent"
@@ -59,15 +60,15 @@
             android:layout_height="match_parent"
             android:text=""
             app:cornerRadius="140dp"
-            android:backgroundTint="#636363" />
+            android:backgroundTint="@color/primary" />
 
     </com.google.android.material.card.MaterialCardView>
 
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="4dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="2dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="24dp">
 
@@ -98,21 +99,22 @@
 
     </com.google.android.material.card.MaterialCardView>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnStart"
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:text="Start Test"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:textColor="@android:color/white"
-        android:backgroundTint="#636363"
-        android:paddingStart="24dp"
-        android:paddingEnd="24dp"
-        android:layout_marginTop="16dp"
-        android:insetTop="0dp"
-        android:insetBottom="0dp"
-        app:cornerRadius="16dp"
-        style="@style/Widget.Material3.Button" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnStart"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Start Test"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@color/primary"
+            android:letterSpacing="0.02"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:layout_marginTop="16dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            app:cornerRadius="16dp"
+            style="@style/Widget.Material3.Button" />
 
 </LinearLayout>

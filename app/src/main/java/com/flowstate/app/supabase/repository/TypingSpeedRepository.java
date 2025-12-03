@@ -21,11 +21,61 @@ public class TypingSpeedRepository {
     private SupabasePostgrestApi postgrestApi;
     private SimpleDateFormat dateFormat;
     
+    private SimpleDateFormat dateFormatWithOffset;
+    
     public TypingSpeedRepository(Context context) {
         this.supabaseClient = SupabaseClient.getInstance(context);
         this.postgrestApi = supabaseClient.getPostgrestApi();
         this.dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
         this.dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        // Format for dates with timezone offset like +00:00
+        this.dateFormatWithOffset = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.US);
+        this.dateFormatWithOffset.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
+    
+    /**
+     * Parse date string that can be in multiple formats (Z or +00:00, with or without microseconds)
+     */
+    private Date parseDate(String dateString) throws java.text.ParseException {
+        if (dateString == null || dateString.isEmpty()) {
+            return null;
+        }
+        
+        // Try parsing with Z format first (milliseconds)
+        try {
+            return dateFormat.parse(dateString);
+        } catch (java.text.ParseException e) {
+            // Try parsing with timezone offset format (milliseconds)
+            try {
+                return dateFormatWithOffset.parse(dateString);
+            } catch (java.text.ParseException e2) {
+                // Try with microseconds and Z format
+                try {
+                    SimpleDateFormat microsZFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'", Locale.US);
+                    microsZFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    return microsZFormat.parse(dateString);
+                } catch (java.text.ParseException e3) {
+                    // Try with microseconds and timezone offset
+                    try {
+                        SimpleDateFormat microsOffsetFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX", Locale.US);
+                        microsOffsetFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                        return microsOffsetFormat.parse(dateString);
+                    } catch (java.text.ParseException e4) {
+                        // Try without milliseconds - Z format
+                        try {
+                            SimpleDateFormat noMsFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
+                            noMsFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                            return noMsFormat.parse(dateString);
+                        } catch (java.text.ParseException e5) {
+                            // Try with offset and no milliseconds
+                            SimpleDateFormat noMsOffsetFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.US);
+                            noMsOffsetFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                            return noMsOffsetFormat.parse(dateString);
+                        }
+                    }
+                }
+            }
+        }
     }
     
     /**
@@ -85,12 +135,12 @@ public class TypingSpeedRepository {
         String authorization = "Bearer " + supabaseClient.getAccessToken();
         String apikey = supabaseClient.getSupabaseAnonKey();
         
-        Map<String, String> queryParams = new HashMap<>();
-        queryParams.put("user_id", "eq." + userId);
-        queryParams.put("timestamp", "gte." + dateFormat.format(startDate) + ",lte." + dateFormat.format(endDate));
-        queryParams.put("order", "timestamp.desc");
+        String typingUserId = "eq." + userId;
+        String typingTimestampGte = "gte." + dateFormat.format(startDate);
+        String typingTimestampLte = "lte." + dateFormat.format(endDate);
+        String typingOrder = "timestamp.desc";
         
-        postgrestApi.getTypingSpeedTests(authorization, apikey, queryParams)
+        postgrestApi.getTypingSpeedTests(authorization, apikey, typingUserId, typingTimestampGte, typingTimestampLte, typingOrder)
                 .enqueue(new Callback<List<Map<String, Object>>>() {
                     @Override
                     public void onResponse(Call<List<Map<String, Object>>> call, 
@@ -99,7 +149,7 @@ public class TypingSpeedRepository {
                             List<TypingSpeedData> typingSpeedDataList = new ArrayList<>();
                             for (Map<String, Object> map : response.body()) {
                                 try {
-                                    Date timestamp = dateFormat.parse(map.get("timestamp").toString());
+                                    Date timestamp = parseDate(map.get("timestamp").toString());
                                     Integer totalChars = map.get("total_characters") != null ? 
                                         ((Number) map.get("total_characters")).intValue() : null;
                                     Integer errors = map.get("errors") != null ? 
@@ -139,12 +189,10 @@ public class TypingSpeedRepository {
         String authorization = "Bearer " + supabaseClient.getAccessToken();
         String apikey = supabaseClient.getSupabaseAnonKey();
         
-        Map<String, String> queryParams = new HashMap<>();
-        queryParams.put("user_id", "eq." + userId);
-        queryParams.put("order", "timestamp.desc");
-        queryParams.put("limit", "1");
-        
-        postgrestApi.getTypingSpeedTests(authorization, apikey, queryParams)
+        String typingUserId = "eq." + userId;
+        String typingOrder = "timestamp.desc";
+        // No date range for latest data, so pass null for gte and lte
+        postgrestApi.getTypingSpeedTests(authorization, apikey, typingUserId, null, null, typingOrder)
                 .enqueue(new Callback<List<Map<String, Object>>>() {
                     @Override
                     public void onResponse(Call<List<Map<String, Object>>> call, 
@@ -152,7 +200,7 @@ public class TypingSpeedRepository {
                         if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
                             Map<String, Object> map = response.body().get(0);
                             try {
-                                Date timestamp = dateFormat.parse(map.get("timestamp").toString());
+                                Date timestamp = parseDate(map.get("timestamp").toString());
                                 TypingSpeedData data = new TypingSpeedData(
                                     timestamp,
                                     ((Number) map.get("words_per_minute")).intValue(),

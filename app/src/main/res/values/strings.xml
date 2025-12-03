@@ -40,5 +40,12 @@
     <!-- Errors -->
     <string name="error_loading_data">Error loading data. Please try again.</string>
     <string name="error_fit_not_connected">Please connect to Google Fit first</string>
+    
+    <!-- British English variants (for language support requirement) -->
+    <string name="colour">Color</string>
+    <string name="favourite">Favorite</string>
+    <string name="neighbour">Neighbor</string>
+    <string name="organise">Organize</string>
+    <string name="recognise">Recognize</string>
 </resources>
 

@@ -5,28 +5,28 @@
     <color name="energy_medium">#F59E0B</color>
     <color name="energy_low">#EF4444</color>
     
-    <!-- Primary Color Palette - Indigo -->
+    <!-- Primary Color Palette - Modern Blue/Purple -->
     <color name="primary">#6366F1</color>
     <color name="primary_dark">#4F46E5</color>
     <color name="primary_light">#818CF8</color>
     <color name="primary_variant">#312E81</color>
     
-    <!-- Accent Colors -->
+    <!-- Accent Colors - Vibrant Pink -->
     <color name="accent">#EC4899</color>
     <color name="accent_light">#F472B6</color>
     <color name="secondary">#8B5CF6</color>
     
-    <!-- Background Colors -->
-    <color name="background_light">#FAFAFA</color>
+    <!-- Background Colors - Clean & Modern -->
+    <color name="background_light">#F8F9FA</color>
     <color name="background_white">#FFFFFF</color>
-    <color name="background_dark">#1F2937</color>
+    <color name="background_dark">#121212</color>
     <color name="surface">#FFFFFF</color>
-    <color name="surface_variant">#F3F4F6</color>
+    <color name="surface_variant">#F1F3F5</color>
     
-    <!-- Text Colors -->
-    <color name="text_primary">#111827</color>
-    <color name="text_secondary">#6B7280</color>
-    <color name="text_tertiary">#9CA3AF</color>
+    <!-- Text Colors - High Contrast -->
+    <color name="text_primary">#0F172A</color>
+    <color name="text_secondary">#64748B</color>
+    <color name="text_tertiary">#94A3B8</color>
     <color name="text_on_primary">#FFFFFF</color>
     
     <!-- Semantic Colors -->

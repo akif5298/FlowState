@@ -34,6 +34,13 @@ public final class Config {
     public static final String OPENAI_API_KEY = BuildConfig.OPENAI_API_KEY;
     
     /**
+     * Google Gemini API key
+     * Get this from https://makersuite.google.com/app/apikey
+     * Add to local.properties: GEMINI_API_KEY=your-key
+     */
+    public static final String GEMINI_API_KEY = BuildConfig.GEMINI_API_KEY;
+    
+    /**
      * HIBP Password Checker Service URL
      * URL of your deployed HIBP password checking service
      * Add to local.properties: HIBP_SERVICE_URL=https://your-hibp-service.com

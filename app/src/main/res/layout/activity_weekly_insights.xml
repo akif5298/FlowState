@@ -13,7 +13,7 @@
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
-            android:layout_height="220dp"
+            android:layout_height="120dp"
             app:contentScrim="@drawable/gradient_background"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
@@ -21,18 +21,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/gradient_background"
-                android:padding="24dp">
-
-                <ImageView
-                    android:id="@+id/logoIcons"
-                    android:layout_width="56dp"
-                    android:layout_height="56dp"
-                    android:src="@drawable/app_logo"
-                    android:scaleType="centerInside"
-                    android:contentDescription="FlowState Logo"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent" />
+                android:padding="24dp"
+                android:paddingBottom="16dp">
 
                 <TextView
                     android:id="@+id/tvHeaderTitle"
@@ -42,10 +32,10 @@
                     android:textSize="28sp"
                     android:textStyle="bold"
                     android:textColor="@android:color/white"
-                    android:layout_marginTop="16dp"
-                    app:layout_constraintTop_toBottomOf="@+id/logoIcons"
+                    app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent" />
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -63,7 +53,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="24dp"
+            android:padding="16dp"
             android:paddingBottom="160dp">
 
             <!-- Weekly Summary Card -->
@@ -71,10 +61,10 @@
                 android:id="@+id/cardSummary"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="6dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp"
                 app:strokeWidth="0dp"
-                android:layout_marginBottom="24dp"
+                android:layout_marginBottom="16dp"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
@@ -89,9 +79,10 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:text="📊 Weekly Trend Summary"
-                        android:textSize="20sp"
+                        android:textSize="18sp"
                         android:textStyle="bold"
-                        android:textColor="@color/text_primary"
+                        android:textColor="?attr/colorOnSurface"
+                        android:letterSpacing="-0.01"
                         android:layout_marginBottom="16dp"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -119,10 +110,10 @@
                 android:id="@+id/cardHighlights"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="6dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp"
                 app:strokeWidth="0dp"
-                android:layout_marginBottom="24dp"
+                android:layout_marginBottom="16dp"
                 app:layout_constraintTop_toBottomOf="@+id/cardSummary"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
@@ -137,9 +128,10 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:text="⭐ Highlights"
-                        android:textSize="20sp"
+                        android:textSize="18sp"
                         android:textStyle="bold"
-                        android:textColor="@color/text_primary"
+                        android:textColor="?attr/colorOnSurface"
+                        android:letterSpacing="-0.01"
                         android:layout_marginBottom="16dp"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -185,9 +177,10 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:text="🤖 AI Recommendation"
-                        android:textSize="20sp"
+                        android:textSize="18sp"
                         android:textStyle="bold"
                         android:textColor="@android:color/white"
+                        android:letterSpacing="-0.01"
                         android:layout_marginBottom="16dp"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -215,10 +208,10 @@
                 android:id="@+id/cardMetrics"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="6dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp"
                 app:strokeWidth="0dp"
-                android:layout_marginBottom="24dp"
+                android:layout_marginBottom="16dp"
                 app:layout_constraintTop_toBottomOf="@+id/cardAI"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
@@ -233,18 +226,26 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:text="📈 Weekly Metrics"
-                        android:textSize="20sp"
+                        android:textSize="18sp"
                         android:textStyle="bold"
-                        android:textColor="@color/text_primary"
+                        android:textColor="?attr/colorOnSurface"
+                        android:letterSpacing="-0.01"
                         android:layout_marginBottom="20dp"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent" />
 
-                    <View
+                    <TextView
+                        android:id="@+id/tvMetricsData"
                         android:layout_width="0dp"
-                        android:layout_height="320dp"
+                        android:layout_height="wrap_content"
+                        android:text="Loading weekly metrics..."
+                        android:textSize="14sp"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:lineSpacingMultiplier="1.5"
+                        android:padding="16dp"
                         android:background="?attr/colorSurfaceVariant"
+                        android:minHeight="280dp"
                         app:layout_constraintTop_toBottomOf="@+id/tvMetricsTitle"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"

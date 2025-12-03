@@ -15,23 +15,28 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="24dp"
-            app:cardElevation="6dp"
-            android:layout_marginBottom="24dp">
+            app:cardCornerRadius="20dp"
+            app:cardElevation="2dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="20dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="24dp">
+                android:paddingTop="32dp"
+                android:paddingBottom="24dp"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Energy Predictions"
-                    android:textSize="26sp"
+                    android:text="📊 Energy Predictions"
+                    android:textSize="28sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface"
+                    android:letterSpacing="-0.02"
                     android:layout_marginBottom="8dp" />
 
                 <TextView
@@ -46,28 +51,30 @@
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnLoadData"
+            android:id="@+id/btnGenerateToday"
             android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:layout_marginTop="8dp"
+            android:layout_height="56dp"
+            android:layout_marginTop="4dp"
             android:layout_marginBottom="20dp"
-            android:text="Load Predictions"
+            android:text="Generate Today's Predictions"
             android:textSize="16sp"
             android:textStyle="bold"
             android:textColor="@android:color/white"
-            android:backgroundTint="#636363"
+            android:backgroundTint="@color/primary"
+            android:letterSpacing="0.02"
             android:paddingStart="24dp"
             android:paddingEnd="24dp"
             app:cornerRadius="16dp"
             style="@style/Widget.Material3.Button" />
 
+        <!-- Energy Graph Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="16dp"
+            app:cardCornerRadius="20dp"
             app:cardElevation="2dp"
             app:strokeWidth="0dp"
-            android:layout_marginBottom="20dp">
+            android:layout_marginBottom="16dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -78,33 +85,46 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Energy Levels"
+                    android:text="📈 Energy Levels Throughout the Day"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface"
-                    android:layout_marginBottom="12dp" />
+                    android:layout_marginBottom="16dp" />
 
-                <TextView
-                    android:id="@+id/tvPredictions"
-                    android:layout_width="match_parent"
+                <ProgressBar
+                    android:id="@+id/progressBarPredictions"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Tap 'Load Predictions' to see your energy forecast"
-                    android:padding="12dp"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="16dp"
+                    android:visibility="gone" />
+
+                <ListView
+                    android:id="@+id/listViewPredictions"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
                     android:background="?attr/colorSurfaceVariant"
-                    android:textColor="?attr/colorOnSurface"
-                    android:textSize="14sp"
-                    android:lineSpacingMultiplier="1.5" />
+                    android:padding="8dp"
+                    android:visibility="gone" />
+
+                <com.github.mikephil.charting.charts.LineChart
+                    android:id="@+id/chartEnergy"
+                    android:layout_width="match_parent"
+                    android:layout_height="300dp"
+                    android:background="?attr/colorSurfaceVariant" />
 
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Optimal Times Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="16dp"
+            app:cardCornerRadius="20dp"
             app:cardElevation="2dp"
-            android:layout_marginBottom="20dp">
+            app:strokeWidth="0dp"
+            android:layout_marginBottom="16dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -115,14 +135,38 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="💡 Suggestions"
+                    android:text="⏰ Optimal Times"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface"
-                    android:layout_marginBottom="12dp" />
+                    android:layout_marginBottom="16dp" />
 
                 <TextView
-                    android:id="@+id/tvSuggestions"
+                    android:id="@+id/tvOptimalWorkTime"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:padding="12dp"
+                    android:background="?attr/colorSurfaceVariant"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="14sp"
+                    android:lineSpacingMultiplier="1.5"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:id="@+id/tvOptimalNapTime"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:padding="12dp"
+                    android:background="?attr/colorSurfaceVariant"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="14sp"
+                    android:lineSpacingMultiplier="1.5"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:id="@+id/tvOptimalBedtime"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text=""
@@ -139,10 +183,10 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="16dp"
+            app:cardCornerRadius="20dp"
             app:cardElevation="2dp"
             app:strokeWidth="0dp"
-            android:layout_marginBottom="20dp">
+            android:layout_marginBottom="16dp">
 
             <LinearLayout
                 android:layout_width="match_parent"

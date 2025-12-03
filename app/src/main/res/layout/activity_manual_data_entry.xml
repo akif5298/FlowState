@@ -16,19 +16,20 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Manual Data Entry"
-            android:textSize="28sp"
+            android:text="📝 Manual Data Entry"
+            android:textSize="32sp"
             android:textStyle="bold"
             android:textColor="?attr/colorOnSurface"
+            android:letterSpacing="-0.02"
             android:gravity="center"
-            android:layout_marginBottom="24dp" />
+            android:layout_marginBottom="28dp" />
 
         <!-- Heart Rate Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="4dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="2dp"
             android:layout_marginBottom="16dp">
 
             <LinearLayout
@@ -59,11 +60,12 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnSaveHeartRate"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="56dp"
                     android:text="Save Heart Rate"
                     android:textColor="@android:color/white"
-                    android:backgroundTint="#636363"
-                    app:cornerRadius="12dp" />
+                    android:backgroundTint="@color/primary"
+                    android:letterSpacing="0.02"
+                    app:cornerRadius="16dp" />
 
             </LinearLayout>
 
@@ -108,7 +110,7 @@
                     android:layout_height="wrap_content"
                     android:text="Save Sleep Data"
                     android:textColor="@android:color/white"
-                    android:backgroundTint="#636363"
+                    android:backgroundTint="@color/primary"
                     app:cornerRadius="12dp" />
 
             </LinearLayout>
@@ -174,7 +176,7 @@
                     android:layout_height="wrap_content"
                     android:text="Take Typing Speed Test"
                     android:textColor="@android:color/white"
-                    android:backgroundTint="#4CAF50"
+                    android:backgroundTint="@color/primary"
                     android:layout_marginBottom="8dp"
                     app:cornerRadius="12dp"
                     style="@style/Widget.Material3.Button" />
@@ -185,7 +187,7 @@
                     android:layout_height="wrap_content"
                     android:text="Save Typing Test"
                     android:textColor="@android:color/white"
-                    android:backgroundTint="#636363"
+                    android:backgroundTint="@color/primary"
                     app:cornerRadius="12dp" />
 
             </LinearLayout>
@@ -241,7 +243,7 @@
                     android:layout_height="wrap_content"
                     android:text="Take Reaction Time Test"
                     android:textColor="@android:color/white"
-                    android:backgroundTint="#4CAF50"
+                    android:backgroundTint="@color/primary"
                     android:layout_marginBottom="8dp"
                     app:cornerRadius="12dp"
                     style="@style/Widget.Material3.Button" />
@@ -252,7 +254,7 @@
                     android:layout_height="wrap_content"
                     android:text="Save Reaction Test"
                     android:textColor="@android:color/white"
-                    android:backgroundTint="#636363"
+                    android:backgroundTint="@color/primary"
                     app:cornerRadius="12dp" />
 
             </LinearLayout>

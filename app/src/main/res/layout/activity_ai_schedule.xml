@@ -13,7 +13,7 @@
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
-            android:layout_height="220dp"
+            android:layout_height="120dp"
             app:contentScrim="@drawable/gradient_background"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
@@ -21,18 +21,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/gradient_background"
-                android:padding="24dp">
-
-                <ImageView
-                    android:id="@+id/logoIcons"
-                    android:layout_width="56dp"
-                    android:layout_height="56dp"
-                    android:src="@drawable/app_logo"
-                    android:scaleType="centerInside"
-                    android:contentDescription="FlowState Logo"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent" />
+                android:padding="24dp"
+                android:paddingBottom="16dp">
 
                 <TextView
                     android:id="@+id/tvHeaderTitle"
@@ -42,10 +32,24 @@
                     android:textSize="28sp"
                     android:textStyle="bold"
                     android:textColor="@android:color/white"
-                    android:layout_marginTop="16dp"
-                    app:layout_constraintTop_toBottomOf="@+id/logoIcons"
+                    app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent" />
+                    app:layout_constraintEnd_toStartOf="@+id/fabAddTask"
+                    app:layout_constraintBottom_toBottomOf="parent" />
+
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/fabAddTask"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@android:drawable/ic_input_add"
+                    android:contentDescription="Add task"
+                    app:tint="@android:color/white"
+                    app:backgroundTint="#3A4A5A"
+                    app:elevation="4dp"
+                    app:fabSize="mini"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -63,7 +67,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="24dp"
+            android:padding="16dp"
             android:paddingBottom="160dp">
 
             <!-- Schedule Timeline Card -->
@@ -71,10 +75,10 @@
                 android:id="@+id/cardSchedule"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="6dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp"
                 app:strokeWidth="0dp"
-                android:layout_marginBottom="24dp"
+                android:layout_marginBottom="16dp"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
@@ -88,266 +92,64 @@
                         android:id="@+id/tvScheduleTitle"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="Today's Schedule"
-                        android:textSize="22sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/text_primary"
-                        android:layout_marginBottom="20dp"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent" />
-
-                    <!-- Schedule Item 1 -->
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/scheduleItem1"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        app:cardCornerRadius="16dp"
-                        app:cardElevation="2dp"
-                        android:background="?attr/colorSurfaceVariant"
-                        android:layout_marginBottom="12dp"
-                        app:layout_constraintTop_toBottomOf="@+id/tvScheduleTitle"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent">
-
-                        <androidx.constraintlayout.widget.ConstraintLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:padding="16dp">
-
-                            <TextView
-                                android:id="@+id/tvTime1"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="9:00 - 11:00 AM"
-                                android:textSize="13sp"
-                                android:textColor="@color/text_secondary"
-                                android:textStyle="bold"
-                                app:layout_constraintTop_toTopOf="parent"
-                                app:layout_constraintStart_toStartOf="parent" />
-
-                            <TextView
-                                android:id="@+id/tvTask1"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:text="Deep Work Session"
-                                android:textSize="17sp"
-                                android:textColor="@color/text_primary"
-                                android:textStyle="bold"
-                                android:layout_marginTop="8dp"
-                                android:layout_marginEnd="8dp"
-                                app:layout_constraintTop_toBottomOf="@+id/tvTime1"
-                                app:layout_constraintStart_toStartOf="parent"
-                                app:layout_constraintEnd_toStartOf="@+id/tvEnergy1" />
-
-                            <TextView
-                                android:id="@+id/tvEnergy1"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="HIGH"
-                                android:textSize="12sp"
-                                android:textColor="#10B981"
-                                android:textStyle="bold"
-                                android:background="@drawable/rounded_button"
-                                android:backgroundTint="?attr/colorSurfaceVariant"
-                                android:paddingHorizontal="12dp"
-                                android:paddingVertical="6dp"
-                                app:layout_constraintTop_toTopOf="parent"
-                                app:layout_constraintEnd_toEndOf="parent" />
-
-                        </androidx.constraintlayout.widget.ConstraintLayout>
-
-                    </com.google.android.material.card.MaterialCardView>
-
-                    <!-- Schedule Item 2 -->
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/scheduleItem2"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        app:cardCornerRadius="16dp"
-                        app:cardElevation="2dp"
-                        android:background="?attr/colorSurfaceVariant"
-                        android:layout_marginBottom="12dp"
-                        app:layout_constraintTop_toBottomOf="@+id/scheduleItem1"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent">
-
-                        <androidx.constraintlayout.widget.ConstraintLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:padding="16dp">
-
-                            <TextView
-                                android:id="@+id/tvTime2"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="2:00 - 3:00 PM"
-                                android:textSize="13sp"
-                                android:textColor="@color/text_secondary"
-                                android:textStyle="bold"
-                                app:layout_constraintTop_toTopOf="parent"
-                                app:layout_constraintStart_toStartOf="parent" />
-
-                            <TextView
-                                android:id="@+id/tvTask2"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:text="Light Admin Tasks"
-                                android:textSize="17sp"
-                                android:textColor="@color/text_primary"
-                                android:textStyle="bold"
-                                android:layout_marginTop="8dp"
-                                android:layout_marginEnd="8dp"
-                                app:layout_constraintTop_toBottomOf="@+id/tvTime2"
-                                app:layout_constraintStart_toStartOf="parent"
-                                app:layout_constraintEnd_toStartOf="@+id/tvEnergy2" />
-
-                            <TextView
-                                android:id="@+id/tvEnergy2"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="LOW"
-                                android:textSize="12sp"
-                                android:textColor="#EF4444"
-                                android:textStyle="bold"
-                                android:background="@drawable/rounded_button"
-                                android:backgroundTint="?attr/colorSurfaceVariant"
-                                android:paddingHorizontal="12dp"
-                                android:paddingVertical="6dp"
-                                app:layout_constraintTop_toTopOf="parent"
-                                app:layout_constraintEnd_toEndOf="parent" />
-
-                        </androidx.constraintlayout.widget.ConstraintLayout>
-
-                    </com.google.android.material.card.MaterialCardView>
-
-                    <!-- Schedule Item 3 -->
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/scheduleItem3"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        app:cardCornerRadius="16dp"
-                        app:cardElevation="2dp"
-                        android:background="?attr/colorSurfaceVariant"
-                        app:layout_constraintTop_toBottomOf="@+id/scheduleItem2"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent">
-
-                        <androidx.constraintlayout.widget.ConstraintLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:padding="16dp">
-
-                            <TextView
-                                android:id="@+id/tvTime3"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="6:00 - 8:00 PM"
-                                android:textSize="13sp"
-                                android:textColor="@color/text_secondary"
-                                android:textStyle="bold"
-                                app:layout_constraintTop_toTopOf="parent"
-                                app:layout_constraintStart_toStartOf="parent" />
-
-                            <TextView
-                                android:id="@+id/tvTask3"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:text="Exercise / Creative"
-                                android:textSize="17sp"
-                                android:textColor="@color/text_primary"
-                                android:textStyle="bold"
-                                android:layout_marginTop="8dp"
-                                android:layout_marginEnd="8dp"
-                                app:layout_constraintTop_toBottomOf="@+id/tvTime3"
-                                app:layout_constraintStart_toStartOf="parent"
-                                app:layout_constraintEnd_toStartOf="@+id/tvEnergy3" />
-
-                            <TextView
-                                android:id="@+id/tvEnergy3"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="BALANCED"
-                                android:textSize="12sp"
-                                android:textColor="#F59E0B"
-                                android:textStyle="bold"
-                                android:background="@drawable/rounded_button"
-                                android:backgroundTint="?attr/colorSurfaceVariant"
-                                android:paddingHorizontal="12dp"
-                                android:paddingVertical="6dp"
-                                app:layout_constraintTop_toTopOf="parent"
-                                app:layout_constraintEnd_toEndOf="parent" />
-
-                        </androidx.constraintlayout.widget.ConstraintLayout>
-
-                    </com.google.android.material.card.MaterialCardView>
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Task Input Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardTaskInput"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="6dp"
-                app:strokeWidth="0dp"
-                android:layout_marginBottom="20dp"
-                app:layout_constraintTop_toBottomOf="@+id/cardSchedule"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="24dp">
-
-                    <TextView
-                        android:id="@+id/tvAddTaskTitle"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:text="Add Tasks for Today"
+                        android:text="📅 Today's Schedule"
                         android:textSize="20sp"
                         android:textStyle="bold"
-                        android:textColor="@color/text_primary"
-                        android:layout_marginBottom="20dp"
+                        android:textColor="?attr/colorOnSurface"
+                        android:letterSpacing="-0.01"
+                        android:layout_marginBottom="16dp"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent" />
 
-                    <EditText
-                        android:id="@+id/etTaskInput"
-                        android:layout_width="0dp"
-                        android:layout_height="56dp"
-                        android:hint="Enter task to schedule..."
-                        android:textSize="16sp"
-                        android:textColor="@color/text_primary"
-                        android:textColorHint="@color/text_secondary"
-                        android:paddingStart="20dp"
-                        android:paddingEnd="20dp"
-                        android:background="@drawable/rounded_button"
-                        android:backgroundTint="?attr/colorSurfaceVariant"
-                        android:layout_marginBottom="16dp"
-                        app:layout_constraintTop_toBottomOf="@+id/tvAddTaskTitle"
+                    <ProgressBar
+                        android:id="@+id/progressBarSchedule"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:visibility="gone"
+                        app:layout_constraintTop_toBottomOf="@+id/tvScheduleTitle"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnAddTask"
+                    <ListView
+                        android:id="@+id/listViewSchedule"
                         android:layout_width="0dp"
-                        android:layout_height="56dp"
-                        android:text="Add Task"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="@android:color/white"
-                        android:backgroundTint="#636363"
-                        app:cornerRadius="16dp"
-                        app:layout_constraintTop_toBottomOf="@+id/etTaskInput"
+                        android:layout_height="200dp"
+                        android:background="?attr/colorSurfaceVariant"
+                        android:padding="8dp"
+                        android:visibility="gone"
+                        app:layout_constraintTop_toBottomOf="@+id/progressBarSchedule"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerViewSchedule"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:minHeight="200dp"
+                        android:clipToPadding="false"
+                        android:paddingBottom="8dp"
+                        app:layout_constraintTop_toBottomOf="@+id/tvScheduleTitle"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tvEmptySchedule"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="🤖 Add tasks above and click 'Regenerate Schedule' to generate your AI-optimized schedule!"
+                        android:textSize="15sp"
+                        android:textColor="?attr/colorOnSurface"
+                        android:lineSpacingMultiplier="1.5"
+                        android:padding="16dp"
+                        android:gravity="center"
+                        android:visibility="gone"
+                        app:layout_constraintTop_toBottomOf="@+id/tvScheduleTitle"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -357,19 +159,41 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnRegenerate"
                 android:layout_width="0dp"
-                android:layout_height="64dp"
+                android:layout_height="56dp"
                 android:text="🔄 Regenerate Schedule"
-                android:textSize="17sp"
+                android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/white"
-                android:backgroundTint="#636363"
-                android:layout_marginBottom="24dp"
-                app:cornerRadius="20dp"
+                android:backgroundTint="@color/primary"
+                android:letterSpacing="0.02"
+                android:layout_marginBottom="12dp"
+                app:cornerRadius="16dp"
                 app:icon="@android:drawable/ic_menu_revert"
                 app:iconTint="@android:color/white"
                 app:iconGravity="textStart"
                 app:iconPadding="12dp"
-                app:layout_constraintTop_toBottomOf="@+id/cardTaskInput"
+                app:layout_constraintTop_toBottomOf="@+id/cardSchedule"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- Add to Calendar Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAddToCalendar"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:text="📅 Add to Calendar"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                android:backgroundTint="#10B981"
+                android:letterSpacing="0.02"
+                android:layout_marginBottom="16dp"
+                app:cornerRadius="16dp"
+                app:icon="@android:drawable/ic_menu_agenda"
+                app:iconTint="@android:color/white"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp"
+                app:layout_constraintTop_toBottomOf="@+id/btnRegenerate"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
 

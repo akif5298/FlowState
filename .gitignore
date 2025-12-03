@@ -84,3 +84,7 @@ Thumbs.db
 # API Keys
 app/src/main/res/values/api_keys.xml
 
+# Service Account Keys (sensitive - never commit!)
+flowstate-480112-ace1b1353df7.json
+app/src/main/assets/service_account_key.json
+*service_account*.json

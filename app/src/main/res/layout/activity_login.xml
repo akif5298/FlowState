@@ -36,16 +36,18 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
 
-            <!-- Login Card - Glassmorphism -->
+            <!-- Login Card - Modern Glassmorphism -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardLogin"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
                 android:layout_marginTop="48dp"
-                app:cardCornerRadius="32dp"
-                app:cardElevation="20dp"
+                app:cardCornerRadius="28dp"
+                app:cardElevation="8dp"
                 app:strokeWidth="0dp"
-                app:cardBackgroundColor="#F8FFFFFF"
+                app:cardBackgroundColor="#F5FFFFFF"
                 app:layout_constraintTop_toBottomOf="@+id/appIcon"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
@@ -53,7 +55,7 @@
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="32dp">
+                    android:padding="28dp">
 
                     <!-- Welcome Text -->
                     <TextView
@@ -61,9 +63,10 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:text="Welcome Back"
-                        android:textSize="28sp"
+                        android:textSize="32sp"
                         android:textStyle="bold"
                         android:textColor="@color/text_primary"
+                        android:letterSpacing="-0.02"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent" />
@@ -74,7 +77,8 @@
                         android:text="Sign in to continue your journey"
                         android:textSize="15sp"
                         android:textColor="@color/text_secondary"
-                        android:layout_marginTop="12dp"
+                        android:lineSpacingMultiplier="1.4"
+                        android:layout_marginTop="8dp"
                         app:layout_constraintTop_toBottomOf="@+id/tvWelcome"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent" />
@@ -91,8 +95,8 @@
                         app:boxCornerRadiusTopEnd="16dp"
                         app:boxCornerRadiusBottomStart="16dp"
                         app:boxCornerRadiusBottomEnd="16dp"
-                        app:boxStrokeWidth="2dp"
-                        app:boxStrokeColor="#636363"
+                        app:boxStrokeWidth="1.5dp"
+                        app:boxStrokeColor="@color/primary"
                         app:layout_constraintTop_toBottomOf="@+id/tvWelcome"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent">
@@ -121,8 +125,8 @@
                         app:boxCornerRadiusTopEnd="16dp"
                         app:boxCornerRadiusBottomStart="16dp"
                         app:boxCornerRadiusBottomEnd="16dp"
-                        app:boxStrokeWidth="2dp"
-                        app:boxStrokeColor="#636363"
+                        app:boxStrokeWidth="1.5dp"
+                        app:boxStrokeColor="@color/primary"
                         app:layout_constraintTop_toBottomOf="@+id/inputLayoutUsername"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent">
@@ -142,19 +146,19 @@
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnLogin"
                         android:layout_width="0dp"
-                        android:layout_height="64dp"
+                        android:layout_height="56dp"
                         android:text="Sign In"
-                        android:textSize="18sp"
+                        android:textSize="16sp"
                         android:textStyle="bold"
                         android:textColor="@android:color/white"
-                        android:backgroundTint="#636363"
+                        android:backgroundTint="@color/primary"
+                        android:letterSpacing="0.02"
                         android:paddingStart="24dp"
                         android:paddingEnd="24dp"
-                        app:cornerRadius="20dp"
+                        app:cornerRadius="16dp"
                         app:iconGravity="start"
                         app:iconPadding="12dp"
                         android:layout_marginTop="32dp"
-                        android:elevation="8dp"
                         app:layout_constraintTop_toBottomOf="@+id/inputLayoutPassword"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent" />
@@ -165,14 +169,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Forgot Password?"
-                        android:textColor="#636363"
+                        android:textColor="@color/primary"
                         android:textSize="15sp"
                         android:textStyle="bold"
-                        android:padding="16dp"
+                        android:padding="12dp"
                         android:clickable="true"
                         android:focusable="true"
                         android:foreground="?attr/selectableItemBackground"
-                        android:layout_marginTop="24dp"
+                        android:layout_marginTop="20dp"
                         app:layout_constraintTop_toBottomOf="@+id/btnLogin"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent" />

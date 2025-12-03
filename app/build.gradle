@@ -32,11 +32,15 @@ android {
         def supabaseUrl = localProperties.getProperty('SUPABASE_URL', 'YOUR_SUPABASE_URL')
         def supabaseAnonKey = localProperties.getProperty('SUPABASE_ANON_KEY', 'YOUR_SUPABASE_ANON_KEY')
         def openaiApiKey = localProperties.getProperty('OPENAI_API_KEY', '')
+        def geminiApiKey = localProperties.getProperty('GEMINI_API_KEY', '')
         def hibpServiceUrl = localProperties.getProperty('HIBP_SERVICE_URL', '')
+        def openweatherApiKey = localProperties.getProperty('OPENWEATHER_API_KEY', '')
         buildConfigField 'String', 'SUPABASE_URL', "\"${supabaseUrl}\""
         buildConfigField 'String', 'SUPABASE_ANON_KEY', "\"${supabaseAnonKey}\""
         buildConfigField 'String', 'OPENAI_API_KEY', "\"${openaiApiKey}\""
+        buildConfigField 'String', 'GEMINI_API_KEY', "\"${geminiApiKey}\""
         buildConfigField 'String', 'HIBP_SERVICE_URL', hibpServiceUrl ? "\"${hibpServiceUrl}\"" : 'null'
+        buildConfigField 'String', 'OPENWEATHER_API_KEY', "\"${openweatherApiKey}\""
     }
 
     buildTypes {
@@ -46,6 +50,22 @@ android {
                 getDefaultProguardFile('proguard-android-optimize.txt'),
                 'proguard-rules.pro'
             )
+        }
+    }
+    
+    packaging {
+        resources {
+            excludes += [
+                'META-INF/DEPENDENCIES',
+                'META-INF/LICENSE',
+                'META-INF/LICENSE.txt',
+                'META-INF/license.txt',
+                'META-INF/NOTICE',
+                'META-INF/NOTICE.txt',
+                'META-INF/notice.txt',
+                'META-INF/ASL2.0',
+                'META-INF/*.kotlin_module'
+            ]
         }
     }
     
@@ -72,6 +92,15 @@ dependencies {
     // Google Fit
     implementation 'com.google.android.gms:play-services-fitness:21.1.0'
     implementation 'com.google.android.gms:play-services-auth:20.7.0'
+    implementation 'com.google.android.gms:play-services-location:21.0.1'
+    
+    // Google Calendar API
+    implementation 'com.google.apis:google-api-services-calendar:v3-rev20220715-2.0.0'
+    implementation 'com.google.api-client:google-api-client-android:2.2.0'
+    implementation 'com.google.api-client:google-api-client:2.2.0'
+    implementation 'com.google.http-client:google-http-client-gson:1.43.3'
+    implementation 'com.google.auth:google-auth-library-oauth2-http:1.19.0'
+    implementation 'com.google.http-client:google-http-client-android:1.42.3'
 
     // TensorFlow Lite
     implementation 'org.tensorflow:tensorflow-lite:2.14.0'

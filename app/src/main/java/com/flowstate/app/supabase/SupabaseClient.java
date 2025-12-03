@@ -31,6 +31,7 @@ public class SupabaseClient {
     private static final String SUPABASE_ANON_KEY = Config.SUPABASE_ANON_KEY;
     
     private static final String KEY_USER_ID = "user_id";
+    private static final String KEY_USER_EMAIL = "user_email";
     private static final String PREFS_NAME = "flowstate_supabase";
     
     private static SupabaseClient instance;
@@ -46,6 +47,19 @@ public class SupabaseClient {
         this.secureStore = SecureStore.getInstance(context);
         this.prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         this.gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
+        
+        // Log configuration (without exposing sensitive data)
+        android.util.Log.d("SupabaseClient", "Initializing Supabase client");
+        android.util.Log.d("SupabaseClient", "Supabase URL: " + (SUPABASE_URL != null && !SUPABASE_URL.isEmpty() ? 
+            SUPABASE_URL.substring(0, Math.min(30, SUPABASE_URL.length())) + "..." : "NULL or EMPTY"));
+        android.util.Log.d("SupabaseClient", "API Key configured: " + (SUPABASE_ANON_KEY != null && !SUPABASE_ANON_KEY.isEmpty()));
+        
+        if (SUPABASE_URL == null || SUPABASE_URL.isEmpty() || SUPABASE_URL.equals("YOUR_SUPABASE_URL")) {
+            android.util.Log.e("SupabaseClient", "ERROR: SUPABASE_URL is not configured! Check local.properties");
+        }
+        if (SUPABASE_ANON_KEY == null || SUPABASE_ANON_KEY.isEmpty() || SUPABASE_ANON_KEY.equals("YOUR_SUPABASE_ANON_KEY")) {
+            android.util.Log.e("SupabaseClient", "ERROR: SUPABASE_ANON_KEY is not configured! Check local.properties");
+        }
         
         // Setup OkHttp with logging
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
@@ -70,6 +84,61 @@ public class SupabaseClient {
                     }
                     
                     return chain.proceed(requestBuilder.build());
+                })
+                .addInterceptor(chain -> {
+                    // Intercept 401 responses and try to refresh token
+                    okhttp3.Request original = chain.request();
+                    okhttp3.Response response = chain.proceed(original);
+                    
+                    // If we get a 401 and it's not an auth endpoint, try to refresh token
+                    if (response.code() == 401 && !original.url().toString().contains("/auth/v1/")) {
+                        android.util.Log.d("SupabaseClient", "Received 401, attempting token refresh");
+                        
+                        String refreshToken = getRefreshToken();
+                        if (refreshToken != null && !refreshToken.isEmpty()) {
+                            try {
+                                // Attempt to refresh the token
+                                com.flowstate.app.supabase.api.SupabaseAuthApi.RefreshTokenRequest refreshRequest = 
+                                    new com.flowstate.app.supabase.api.SupabaseAuthApi.RefreshTokenRequest(refreshToken);
+                                
+                                // Synchronously refresh token (we're in an interceptor)
+                                retrofit2.Response<com.flowstate.app.supabase.api.SupabaseAuthApi.AuthResponse> refreshResponse = 
+                                    authApi.refreshToken(refreshRequest).execute();
+                                
+                                if (refreshResponse.isSuccessful() && refreshResponse.body() != null) {
+                                    com.flowstate.app.supabase.api.SupabaseAuthApi.AuthResponse authResponse = refreshResponse.body();
+                                    // Store new tokens
+                                    setTokens(authResponse.access_token, authResponse.refresh_token);
+                                    
+                                    android.util.Log.d("SupabaseClient", "Token refreshed successfully");
+                                    
+                                    // Retry the original request with new token
+                                    okhttp3.Request newRequest = original.newBuilder()
+                                            .header("Authorization", "Bearer " + authResponse.access_token)
+                                            .build();
+                                    
+                                    // Close the old response
+                                    response.close();
+                                    
+                                    // Retry with new token
+                                    return chain.proceed(newRequest);
+                                } else {
+                                    android.util.Log.e("SupabaseClient", "Token refresh failed: " + refreshResponse.code());
+                                    // Clear tokens if refresh failed
+                                    clearAuth();
+                                }
+                            } catch (Exception e) {
+                                android.util.Log.e("SupabaseClient", "Error refreshing token", e);
+                                // Clear tokens on error
+                                clearAuth();
+                            }
+                        } else {
+                            android.util.Log.e("SupabaseClient", "No refresh token available");
+                            clearAuth();
+                        }
+                    }
+                    
+                    return response;
                 })
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
@@ -143,7 +212,16 @@ public class SupabaseClient {
         // Clear non-sensitive data
         prefs.edit()
                 .remove(KEY_USER_ID)
+                .remove(KEY_USER_EMAIL)
                 .apply();
+    }
+    
+    public void storeEmail(String email) {
+        prefs.edit().putString(KEY_USER_EMAIL, email).apply();
+    }
+    
+    public String getStoredEmail() {
+        return prefs.getString(KEY_USER_EMAIL, null);
     }
     
     public boolean isAuthenticated() {

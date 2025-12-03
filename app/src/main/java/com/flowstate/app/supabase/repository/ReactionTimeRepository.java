@@ -21,11 +21,61 @@ public class ReactionTimeRepository {
     private SupabasePostgrestApi postgrestApi;
     private SimpleDateFormat dateFormat;
     
+    private SimpleDateFormat dateFormatWithOffset;
+    
     public ReactionTimeRepository(Context context) {
         this.supabaseClient = SupabaseClient.getInstance(context);
         this.postgrestApi = supabaseClient.getPostgrestApi();
         this.dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
         this.dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        // Format for dates with timezone offset like +00:00
+        this.dateFormatWithOffset = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.US);
+        this.dateFormatWithOffset.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
+    
+    /**
+     * Parse date string that can be in multiple formats (Z or +00:00, with or without microseconds)
+     */
+    private Date parseDate(String dateString) throws java.text.ParseException {
+        if (dateString == null || dateString.isEmpty()) {
+            return null;
+        }
+        
+        // Try parsing with Z format first (milliseconds)
+        try {
+            return dateFormat.parse(dateString);
+        } catch (java.text.ParseException e) {
+            // Try parsing with timezone offset format (milliseconds)
+            try {
+                return dateFormatWithOffset.parse(dateString);
+            } catch (java.text.ParseException e2) {
+                // Try with microseconds and Z format
+                try {
+                    SimpleDateFormat microsZFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'", Locale.US);
+                    microsZFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    return microsZFormat.parse(dateString);
+                } catch (java.text.ParseException e3) {
+                    // Try with microseconds and timezone offset
+                    try {
+                        SimpleDateFormat microsOffsetFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX", Locale.US);
+                        microsOffsetFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                        return microsOffsetFormat.parse(dateString);
+                    } catch (java.text.ParseException e4) {
+                        // Try without milliseconds - Z format
+                        try {
+                            SimpleDateFormat noMsFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
+                            noMsFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                            return noMsFormat.parse(dateString);
+                        } catch (java.text.ParseException e5) {
+                            // Try with offset and no milliseconds
+                            SimpleDateFormat noMsOffsetFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.US);
+                            noMsOffsetFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                            return noMsOffsetFormat.parse(dateString);
+                        }
+                    }
+                }
+            }
+        }
     }
     
     /**
@@ -83,12 +133,12 @@ public class ReactionTimeRepository {
         String authorization = "Bearer " + supabaseClient.getAccessToken();
         String apikey = supabaseClient.getSupabaseAnonKey();
         
-        Map<String, String> queryParams = new HashMap<>();
-        queryParams.put("user_id", "eq." + userId);
-        queryParams.put("timestamp", "gte." + dateFormat.format(startDate) + ",lte." + dateFormat.format(endDate));
-        queryParams.put("order", "timestamp.desc");
+        String reactionUserId = "eq." + userId;
+        String reactionTimestampGte = "gte." + dateFormat.format(startDate);
+        String reactionTimestampLte = "lte." + dateFormat.format(endDate);
+        String reactionOrder = "timestamp.desc";
         
-        postgrestApi.getReactionTimeTests(authorization, apikey, queryParams)
+        postgrestApi.getReactionTimeTests(authorization, apikey, reactionUserId, reactionTimestampGte, reactionTimestampLte, reactionOrder)
                 .enqueue(new Callback<List<Map<String, Object>>>() {
                     @Override
                     public void onResponse(Call<List<Map<String, Object>>> call, 
@@ -97,7 +147,7 @@ public class ReactionTimeRepository {
                             List<ReactionTimeData> reactionTimeDataList = new ArrayList<>();
                             for (Map<String, Object> map : response.body()) {
                                 try {
-                                    Date timestamp = dateFormat.parse(map.get("timestamp").toString());
+                                    Date timestamp = parseDate(map.get("timestamp").toString());
                                     String testType = map.get("test_type") != null ? 
                                         map.get("test_type").toString() : "visual";
                                     Integer attempts = map.get("attempts") != null ? 
@@ -135,12 +185,10 @@ public class ReactionTimeRepository {
         String authorization = "Bearer " + supabaseClient.getAccessToken();
         String apikey = supabaseClient.getSupabaseAnonKey();
         
-        Map<String, String> queryParams = new HashMap<>();
-        queryParams.put("user_id", "eq." + userId);
-        queryParams.put("order", "timestamp.desc");
-        queryParams.put("limit", "1");
-        
-        postgrestApi.getReactionTimeTests(authorization, apikey, queryParams)
+        String reactionUserId = "eq." + userId;
+        String reactionOrder = "timestamp.desc";
+        // No date range for latest data, so pass null for gte and lte
+        postgrestApi.getReactionTimeTests(authorization, apikey, reactionUserId, null, null, reactionOrder)
                 .enqueue(new Callback<List<Map<String, Object>>>() {
                     @Override
                     public void onResponse(Call<List<Map<String, Object>>> call, 
@@ -148,7 +196,7 @@ public class ReactionTimeRepository {
                         if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
                             Map<String, Object> map = response.body().get(0);
                             try {
-                                Date timestamp = dateFormat.parse(map.get("timestamp").toString());
+                                Date timestamp = parseDate(map.get("timestamp").toString());
                                 ReactionTimeData data = new ReactionTimeData(
                                     timestamp,
                                     ((Number) map.get("reaction_time_ms")).intValue()

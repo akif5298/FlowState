@@ -22,15 +22,45 @@ import com.personaleenergy.app.ui.insights.WeeklyInsightsActivity;
 import com.personaleenergy.app.ui.typing.TypingSpeedActivity;
 import com.personaleenergy.app.ui.reaction.ReactionTimeActivity;
 import com.personaleenergy.app.ui.EnergyPredictionActivity;
+import com.flowstate.app.supabase.SupabaseClient;
+import com.flowstate.app.supabase.repository.EnergyPredictionRepository;
+import com.flowstate.app.data.models.EnergyPrediction;
+import com.flowstate.app.data.models.EnergyLevel;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
+
+import android.view.Menu;
+import android.view.MenuItem;
+import com.flowstate.app.utils.HelpDialogHelper;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public class EnergyDashboardActivity extends AppCompatActivity {
     
     private BottomNavigationView bottomNav;
-    private TextView tvCurrentEnergy, tvEnergyLevel, tvAIInsight;
+    private TextView tvAIInsight;
     private MaterialCardView cardGraph, cardCognitive;
     private Button btnSyncNow;
     private GoogleFitManager fitManager;
     private WorkManager workManager;
+    private LineChart energyChart;
+    private EnergyPredictionRepository energyRepo;
+    private SupabaseClient supabaseClient;
+    private SimpleDateFormat timeFormat;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,11 +87,10 @@ public class EnergyDashboardActivity extends AppCompatActivity {
     
     private void initializeViews() {
         bottomNav = findViewById(R.id.bottomNavigation);
-        tvCurrentEnergy = findViewById(R.id.tvCurrentEnergy);
-        tvEnergyLevel = findViewById(R.id.tvEnergyLevel);
         tvAIInsight = findViewById(R.id.tvAIInsight);
         cardGraph = findViewById(R.id.cardGraph);
         cardCognitive = findViewById(R.id.cardCognitive);
+        energyChart = findViewById(R.id.energyChart);
         // btnSyncNow may not exist in layout - check for resource existence first
         int syncNowId = getResources().getIdentifier("btnSyncNow", "id", getPackageName());
         btnSyncNow = syncNowId != 0 ? findViewById(syncNowId) : null;
@@ -69,6 +98,14 @@ public class EnergyDashboardActivity extends AppCompatActivity {
         // Initialize managers
         fitManager = new GoogleFitManager(this);
         workManager = WorkManager.getInstance(this);
+        supabaseClient = SupabaseClient.getInstance(this);
+        energyRepo = new EnergyPredictionRepository(this);
+        timeFormat = new SimpleDateFormat("h:mm a", Locale.getDefault());
+        
+        // Setup chart
+        if (energyChart != null) {
+            setupEnergyChart();
+        }
         
         // Set up sync button if present
         if (btnSyncNow != null) {
@@ -147,6 +184,24 @@ public class EnergyDashboardActivity extends AppCompatActivity {
             });
         }
         
+        // View Energy Details button
+        View btnViewEnergyDetails = findViewById(R.id.btnViewEnergyDetails);
+        if (btnViewEnergyDetails != null) {
+            btnViewEnergyDetails.setOnClickListener(v -> {
+                startActivity(new Intent(this, EnergyPredictionActivity.class));
+            });
+        }
+        
+        // View Cognitive Details button
+        View btnViewCognitiveDetails = findViewById(R.id.btnViewCognitiveDetails);
+        if (btnViewCognitiveDetails != null) {
+            btnViewCognitiveDetails.setOnClickListener(v -> {
+                // Navigate to Data Logs with focus on cognitive section
+                Intent intent = new Intent(this, DataLogsActivity.class);
+                startActivity(intent);
+            });
+        }
+        
         // Manual feedback slider - will be handled in layout
         // Graph click to navigate to Energy Prediction screen
         if (cardGraph != null) {
@@ -170,23 +225,224 @@ public class EnergyDashboardActivity extends AppCompatActivity {
         android.util.Log.d("EnergyDashboard", "Sync workers enqueued");
     }
     
+    private void setupEnergyChart() {
+        energyChart.getDescription().setEnabled(false);
+        energyChart.setTouchEnabled(true);
+        energyChart.setDragEnabled(true);
+        energyChart.setScaleEnabled(true);
+        energyChart.setPinchZoom(true);
+        energyChart.setBackgroundColor(getResources().getColor(R.color.surface_variant, getTheme()));
+        
+        // X Axis
+        XAxis xAxis = energyChart.getXAxis();
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setGranularity(1f);
+        xAxis.setValueFormatter(new TimeValueFormatter());
+        xAxis.setTextColor(getResources().getColor(R.color.text_primary, getTheme()));
+        
+        // Y Axis
+        YAxis leftAxis = energyChart.getAxisLeft();
+        leftAxis.setAxisMinimum(0f);
+        leftAxis.setAxisMaximum(100f);
+        leftAxis.setTextColor(getResources().getColor(R.color.text_primary, getTheme()));
+        
+        YAxis rightAxis = energyChart.getAxisRight();
+        rightAxis.setEnabled(false);
+        
+        energyChart.getLegend().setEnabled(false);
+    }
+    
+    private class TimeValueFormatter extends ValueFormatter {
+        @Override
+        public String getFormattedValue(float value) {
+            int hour = (int) value;
+            String period = hour < 12 ? "AM" : "PM";
+            int displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+            return String.format(Locale.getDefault(), "%d:00 %s", displayHour, period);
+        }
+    }
+    
     private void loadEnergyData() {
-        // TODO: Load actual data from ML model
-        if (tvCurrentEnergy != null) {
-            tvCurrentEnergy.setText("75");
+        String userId = supabaseClient.getUserId();
+        if (userId == null || userId.isEmpty()) {
+            return;
         }
-        if (tvEnergyLevel != null) {
-            tvEnergyLevel.setText("HIGH");
+        
+        // Load today's energy predictions
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        Date todayStart = cal.getTime();
+        
+        cal.add(Calendar.DAY_OF_MONTH, 1);
+        Date todayEnd = cal.getTime();
+        
+        energyRepo.getEnergyPredictions(userId, todayStart, todayEnd, new EnergyPredictionRepository.DataCallback() {
+            @Override
+            public void onSuccess(Object data) {
+                runOnUiThread(() -> {
+                    @SuppressWarnings("unchecked")
+                    List<EnergyPrediction> predictions = (List<EnergyPrediction>) data;
+                    if (predictions != null && !predictions.isEmpty()) {
+                        displayEnergyChart(predictions);
+                        updateAIInsight(predictions);
+                    } else {
+                        // No predictions yet
+                        if (energyChart != null) {
+                            energyChart.clear();
+                        }
+                        if (tvAIInsight != null) {
+                            tvAIInsight.setText("No energy predictions yet. Generate predictions to see your energy forecast.");
+                        }
+                    }
+                });
+            }
+            
+            @Override
+            public void onError(Throwable error) {
+                android.util.Log.e("EnergyDashboard", "Error loading energy predictions", error);
+            }
+        });
+    }
+    
+    private void displayEnergyChart(List<EnergyPrediction> predictions) {
+        if (energyChart == null || predictions == null || predictions.isEmpty()) {
+            return;
         }
-        if (tvAIInsight != null) {
-            tvAIInsight.setText("Energy dip expected in 25 min. Hydrate or take a short walk.");
+        
+        // Use a map to handle duplicate hours (take the latest prediction for each hour)
+        Map<Integer, Entry> hourEntryMap = new HashMap<>();
+        
+        for (EnergyPrediction pred : predictions) {
+            if (pred == null || pred.getTimestamp() == null) {
+                continue;
+            }
+            
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(pred.getTimestamp());
+            int hour = cal.get(Calendar.HOUR_OF_DAY);
+            
+            // Convert energy level to numeric value for graph
+            float energyValue = 0f;
+            switch (pred.getPredictedLevel()) {
+                case HIGH:
+                    energyValue = 80f + (float)(pred.getConfidence() * 20f); // 80-100
+                    break;
+                case MEDIUM:
+                    energyValue = 40f + (float)(pred.getConfidence() * 40f); // 40-80
+                    break;
+                case LOW:
+                    energyValue = (float)(pred.getConfidence() * 40f); // 0-40
+                    break;
+            }
+            
+            // Store entry, overwriting if hour already exists (takes latest)
+            hourEntryMap.put(hour, new Entry(hour, energyValue));
         }
+        
+        if (hourEntryMap.isEmpty()) {
+            return;
+        }
+        
+        // Convert map to sorted list
+        List<Entry> entries = new ArrayList<>(hourEntryMap.values());
+        Collections.sort(entries, (e1, e2) -> Float.compare(e1.getX(), e2.getX()));
+        
+        if (entries.isEmpty()) {
+            return;
+        }
+        
+        LineDataSet dataSet = new LineDataSet(entries, "Energy Level");
+        dataSet.setColor(getResources().getColor(R.color.primary, getTheme()));
+        dataSet.setLineWidth(2f);
+        dataSet.setCircleColor(getResources().getColor(R.color.primary, getTheme()));
+        dataSet.setCircleRadius(4f);
+        dataSet.setDrawCircleHole(false);
+        dataSet.setValueTextColor(getResources().getColor(R.color.text_primary, getTheme()));
+        dataSet.setValueTextSize(10f);
+        dataSet.setFillAlpha(65);
+        dataSet.setFillColor(getResources().getColor(R.color.primary, getTheme()));
+        dataSet.setDrawFilled(true);
+        dataSet.setDrawValues(false); // Disable value labels to prevent rendering issues
+        
+        List<ILineDataSet> dataSets = new ArrayList<>();
+        dataSets.add(dataSet);
+        
+        LineData lineData = new LineData(dataSets);
+        energyChart.setData(lineData);
+        energyChart.invalidate();
+    }
+    
+    private void updateAIInsight(List<EnergyPrediction> predictions) {
+        if (tvAIInsight == null || predictions == null || predictions.isEmpty()) {
+            return;
+        }
+        
+        // Find current time and next few hours
+        Calendar now = Calendar.getInstance();
+        int currentHour = now.get(Calendar.HOUR_OF_DAY);
+        
+        // Find next prediction
+        EnergyPrediction nextPred = null;
+        for (EnergyPrediction pred : predictions) {
+            Calendar predCal = Calendar.getInstance();
+            predCal.setTime(pred.getTimestamp());
+            int predHour = predCal.get(Calendar.HOUR_OF_DAY);
+            if (predHour > currentHour) {
+                nextPred = pred;
+                break;
+            }
+        }
+        
+        if (nextPred != null) {
+            String time = timeFormat.format(nextPred.getTimestamp());
+            String insight = String.format(Locale.getDefault(),
+                "Your energy is predicted to be %s at %s. %s",
+                nextPred.getPredictedLevel().toString(),
+                time,
+                nextPred.getPredictedLevel() == EnergyLevel.LOW ? 
+                    "Consider taking a break or a short nap." :
+                    nextPred.getPredictedLevel() == EnergyLevel.HIGH ?
+                    "Perfect time for demanding tasks!" :
+                    "Good time for moderate activities.");
+            tvAIInsight.setText(insight);
+        } else {
+            tvAIInsight.setText("Your energy predictions for today are loaded. Check the graph above for details.");
+        }
+    }
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Reload energy data when returning to dashboard
+        loadEnergyData();
     }
     
     @Override
     public void onBackPressed() {
         // Prevent going back to login - exit app instead
         moveTaskToBack(true);
+    }
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.help_menu, menu);
+        return true;
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menu_help) {
+            HelpDialogHelper.showHelpDialog(
+                this,
+                "Energy Dashboard",
+                HelpDialogHelper.getDefaultInstructions("Dashboard")
+            );
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
 

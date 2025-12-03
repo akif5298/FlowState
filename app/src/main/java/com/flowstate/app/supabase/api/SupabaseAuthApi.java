@@ -23,7 +23,7 @@ public interface SupabaseAuthApi {
     @GET("/auth/v1/user")
     Call<UserResponse> getCurrentUser(@Header("Authorization") String authorization);
     
-    @POST("/auth/v1/refresh")
+    @POST("/auth/v1/token?grant_type=refresh_token")
     Call<AuthResponse> refreshToken(@Body RefreshTokenRequest request);
     
     // Request/Response models

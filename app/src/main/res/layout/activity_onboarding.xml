@@ -16,9 +16,9 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="24dp"
-            app:cardElevation="6dp"
-            android:layout_marginBottom="24dp">
+            app:cardCornerRadius="20dp"
+            app:cardElevation="2dp"
+            android:layout_marginBottom="20dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -31,9 +31,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Welcome to FlowState!"
-                    android:textSize="28sp"
+                    android:textSize="32sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface"
+                    android:letterSpacing="-0.02"
                     android:gravity="center"
                     android:layout_marginBottom="16dp" />
 
@@ -68,13 +69,14 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnConnectWearable"
             android:layout_width="match_parent"
-            android:layout_height="72dp"
-            android:layout_marginBottom="16dp"
+            android:layout_height="56dp"
+            android:layout_marginBottom="12dp"
             android:text="Connect Wearable Device"
-            android:textSize="18sp"
+            android:textSize="16sp"
             android:textStyle="bold"
             android:textColor="@android:color/white"
-            android:backgroundTint="#636363"
+            android:backgroundTint="@color/primary"
+            android:letterSpacing="0.02"
             android:paddingStart="24dp"
             android:paddingEnd="24dp"
             app:icon="@android:drawable/ic_dialog_info"
@@ -89,13 +91,14 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnManualEntry"
             android:layout_width="match_parent"
-            android:layout_height="72dp"
-            android:layout_marginBottom="16dp"
+            android:layout_height="56dp"
+            android:layout_marginBottom="12dp"
             android:text="Enter Data Manually"
-            android:textSize="18sp"
+            android:textSize="16sp"
             android:textStyle="bold"
             android:textColor="@android:color/white"
-            android:backgroundTint="#4CAF50"
+            android:backgroundTint="@color/primary"
+            android:letterSpacing="0.02"
             android:paddingStart="24dp"
             android:paddingEnd="24dp"
             app:icon="@android:drawable/ic_menu_edit"
@@ -126,9 +129,9 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="16dp"
+            app:cardCornerRadius="20dp"
             app:cardElevation="2dp"
-            android:layout_marginTop="24dp">
+            android:layout_marginTop="20dp">
 
             <LinearLayout
                 android:layout_width="match_parent"

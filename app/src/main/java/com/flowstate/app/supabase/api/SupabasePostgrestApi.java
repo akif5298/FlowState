@@ -48,7 +48,10 @@ public interface SupabasePostgrestApi {
     Call<List<Map<String, Object>>> getHeartRateReadings(
         @Header("Authorization") String authorization,
         @Header("apikey") String apikey,
-        @QueryMap Map<String, String> queryParams
+        @Query("user_id") String userId,
+        @Query("timestamp") String timestampGte,
+        @Query("timestamp") String timestampLte,
+        @Query("order") String order
     );
     
     @POST("/rest/v1/heart_rate_readings")
@@ -74,6 +77,7 @@ public interface SupabasePostgrestApi {
         @Header("apikey") String apikey,
         @Query("user_id") String userId,
         @Query("sleep_start") String sleepStartGte,
+        @Query("sleep_start") String sleepStartLte,
         @Query("order") String order
     );
     
@@ -108,7 +112,10 @@ public interface SupabasePostgrestApi {
     Call<List<Map<String, Object>>> getTypingSpeedTests(
         @Header("Authorization") String authorization,
         @Header("apikey") String apikey,
-        @QueryMap Map<String, String> queryParams
+        @Query("user_id") String userId,
+        @Query("timestamp") String timestampGte,
+        @Query("timestamp") String timestampLte,
+        @Query("order") String order
     );
     
     // Reaction Time Tests
@@ -124,7 +131,10 @@ public interface SupabasePostgrestApi {
     Call<List<Map<String, Object>>> getReactionTimeTests(
         @Header("Authorization") String authorization,
         @Header("apikey") String apikey,
-        @QueryMap Map<String, String> queryParams
+        @Query("user_id") String userId,
+        @Query("timestamp") String timestampGte,
+        @Query("timestamp") String timestampLte,
+        @Query("order") String order
     );
     
     // Energy Predictions
@@ -140,7 +150,10 @@ public interface SupabasePostgrestApi {
     Call<List<Map<String, Object>>> getEnergyPredictions(
         @Header("Authorization") String authorization,
         @Header("apikey") String apikey,
-        @QueryMap Map<String, String> queryParams
+        @Query("user_id") String userId,
+        @Query("prediction_time") String predictionTimeGte,
+        @Query("prediction_time") String predictionTimeLte,
+        @Query("order") String order
     );
     
     // Productivity Suggestions
@@ -225,9 +238,7 @@ public interface SupabasePostgrestApi {
     Call<List<Map<String, Object>>> getWeeklyInsights(
         @Header("Authorization") String authorization,
         @Header("apikey") String apikey,
-        @Query("user_id") String userId,
-        @Query("week_start_date") String weekStartDate,
-        @Query("order") String order
+        @QueryMap Map<String, String> queryParams
     );
     
     // Daily Summaries

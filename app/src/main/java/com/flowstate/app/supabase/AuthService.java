@@ -86,6 +86,10 @@ public class AuthService {
                     supabaseClient.setTokens(authResponse.access_token, authResponse.refresh_token);
                     if (authResponse.user != null) {
                         supabaseClient.setUserId(authResponse.user.id);
+                        // Store email for quick access
+                        if (authResponse.user.email != null) {
+                            supabaseClient.storeEmail(authResponse.user.email);
+                        }
                     }
                     mainHandler.post(() -> callback.onSuccess(authResponse.user));
                 } else {

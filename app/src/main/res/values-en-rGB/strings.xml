@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- British English strings -->
+    <string name="app_name">FlowState</string>
+    
+    <!-- Main Activity -->
+    <string name="welcome_text">FlowState</string>
+    <string name="connect_fit">Connect Google Fit</string>
+    <string name="measure_typing_speed">Measure Typing Speed</string>
+    <string name="measure_reaction_time">Measure Reaction Time</string>
+    <string name="view_energy_prediction">View Energy Prediction</string>
+    <string name="view_statistics">View Statistics</string>
+    
+    <!-- Google Fit -->
+    <string name="fit_not_available">Google Fit is not available on this device</string>
+    <string name="fit_connected">Connected to Google Fit</string>
+    <string name="fit_disconnected">Disconnected from Google Fit</string>
+    
+    <!-- Typing Test -->
+    <string name="typing_instructions">Type the text shown below as quickly and accurately as possible</string>
+    <string name="typing_result">Results</string>
+    <string name="typing_wpm">Words per minute: %1$d</string>
+    <string name="typing_accuracy">Accuracy: %1$d%%</string>
+    
+    <!-- Reaction Time -->
+    <string name="reaction_instructions">Tap the screen when the colour changes</string>
+    <string name="waiting">Wait for the colour to change…</string>
+    <string name="tap_now">TAP NOW!</string>
+    <string name="reaction_result">Your reaction time: %1$d ms</string>
+    
+    <!-- Energy Prediction -->
+    <string name="predicted_energy_high">High Energy</string>
+    <string name="predicted_energy_medium">Medium Energy</string>
+    <string name="predicted_energy_low">Low Energy</string>
+    <string name="recommended_tasks">Recommended Tasks</string>
+    
+    <!-- Charts -->
+    <string name="heart_rate_chart">Heart Rate Trend</string>
+    <string name="sleep_quality_chart">Sleep Quality</string>
+    <string name="energy_prediction_chart">Energy Prediction</string>
+    
+    <!-- Errors -->
+    <string name="error_loading_data">Error loading data. Please try again.</string>
+    <string name="error_fit_not_connected">Please connect to Google Fit first</string>
+    
+    <!-- Colours (British spelling) -->
+    <string name="colour">Colour</string>
+    <string name="favourite">Favourite</string>
+    <string name="neighbour">Neighbour</string>
+    <string name="organise">Organise</string>
+    <string name="recognise">Recognise</string>
+</resources>
+
