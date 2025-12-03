@@ -8,5 +8,7 @@ numpy
 chronos-forecasting
 # PyTorch CPU build (no CUDA). Railway will install a compatible wheel.
 torch
+# HuggingFace Hub for model downloads
+huggingface-hub>=0.20.0
 # Production WSGI server
 gunicorn

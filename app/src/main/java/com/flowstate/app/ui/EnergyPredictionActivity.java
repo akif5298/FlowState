@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.flowstate.core.Config;
+import com.flowstate.data.ai.GeminiClient;
 import com.flowstate.data.remote.RemoteLegacyPredictRequest;
 import com.flowstate.data.remote.RemoteModelClient;
 import com.flowstate.data.remote.RemotePredictResponse;
@@ -54,7 +55,25 @@ public class EnergyPredictionActivity extends AppCompatActivity {
                     if (response.isSuccessful() && response.body() != null) {
                         RemotePredictResponse body = response.body();
                         if (body.forecast != null) {
-                            resultView.setText("Forecast: " + body.forecast.toString());
+                            resultView.setText("Generating AI insight...");
+                            
+                            // Get AI-generated insight from Gemini
+                            GeminiClient gemini = GeminiClient.getInstance(EnergyPredictionActivity.this);
+                            gemini.generateInsight(body.forecast, new GeminiClient.InsightCallback() {
+                                @Override
+                                public void onSuccess(String insight) {
+                                    runOnUiThread(() -> {
+                                        resultView.setText(insight);
+                                    });
+                                }
+
+                                @Override
+                                public void onFailure(Exception e) {
+                                    runOnUiThread(() -> {
+                                        resultView.setText("AI insight unavailable: " + e.getMessage());
+                                    });
+                                }
+                            });
                         } else {
                             resultView.setText("No forecast field in response");
                         }
@@ -95,7 +114,25 @@ public class EnergyPredictionActivity extends AppCompatActivity {
                     if (response.isSuccessful() && response.body() != null) {
                         RemotePredictResponse body = response.body();
                         if (body.forecast != null) {
-                            resultView.setText("Forecast (multi): " + body.forecast.toString());
+                            resultView.setText("Generating AI insight...");
+                            
+                            // Get AI-generated insight from Gemini
+                            GeminiClient gemini = GeminiClient.getInstance(EnergyPredictionActivity.this);
+                            gemini.generateInsight(body.forecast, new GeminiClient.InsightCallback() {
+                                @Override
+                                public void onSuccess(String insight) {
+                                    runOnUiThread(() -> {
+                                        resultView.setText(insight);
+                                    });
+                                }
+
+                                @Override
+                                public void onFailure(Exception e) {
+                                    runOnUiThread(() -> {
+                                        resultView.setText("AI insight unavailable: " + e.getMessage());
+                                    });
+                                }
+                            });
                         } else {
                             resultView.setText("No forecast field in response");
                         }

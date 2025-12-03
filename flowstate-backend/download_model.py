@@ -1,51 +1,42 @@
 #!/usr/bin/env python3
 """
-Standalone model downloader for TimesFM - works around Windows permission issues
+Pre-download Chronos model during Railway build phase
 """
 import os
 import sys
-from pathlib import Path
 
-# Configure before importing huggingface_hub
-current_dir = Path(__file__).parent
-cache_dir = current_dir / "my_model_cache"
-os.environ["HF_HOME"] = str(cache_dir)
+print("=" * 60)
+print("Pre-downloading Chronos model for Railway deployment...")
+print("=" * 60)
+
+# Set environment variables for download
 os.environ["HF_HUB_DISABLE_SYMLINKS"] = "1"
-os.environ["HF_HUB_ENABLE_XET_SYMLINK"] = "0"
-
-print(f"📁 Model cache: {cache_dir}")
-print(f"🔧 Downloading TimesFM model (814MB)...")
-print(f"⏱️  This may take 10-30 minutes depending on your internet connection")
-print()
+os.environ["HF_HUB_DOWNLOAD_TIMEOUT"] = "300"
 
 try:
-    from huggingface_hub import snapshot_download
+    from chronos import ChronosPipeline
+    import torch
     
-    # Ensure cache directory exists
-    cache_dir.mkdir(parents=True, exist_ok=True)
+    print("⬇️  Downloading amazon/chronos-t5-tiny (~200MB)...")
+    print("⏱️  This may take 2-5 minutes...")
+    print()
     
-    # Download the model
-    repo_id = "google/timesfm-1.0-200m"
-    print(f"⬇️  Downloading {repo_id}...")
-    
-    local_dir = snapshot_download(
-        repo_id=repo_id,
-        local_dir=str(cache_dir / "hub" / f"models--{repo_id.replace('/', '--')}"),
-        resume_download=True,
-        force_download=False,
+    # Download and cache the model
+    pipeline = ChronosPipeline.from_pretrained(
+        "amazon/chronos-t5-tiny",
+        device_map="cpu",
+        torch_dtype=torch.float32,
     )
     
     print()
-    print(f"✅ Download complete!")
-    print(f"📦 Model saved to: {local_dir}")
-    print()
-    print("You can now run: python app.py")
+    print("✅ Chronos model downloaded and cached successfully!")
+    print(f"📦 Model cache: {os.environ.get('HF_HOME', '~/.cache/huggingface')}")
+    print("=" * 60)
     
 except Exception as e:
-    print(f"❌ Download failed: {e}")
     print()
-    print("TROUBLESHOOTING:")
-    print("1. Check your internet connection")
-    print("2. Ensure you have at least 2GB free disk space")
-    print("3. Try again - the download can be resumed")
-    sys.exit(1)
+    print(f"⚠️  Model download failed: {e}")
+    print("Server will fall back to sample prediction mode")
+    print("=" * 60)
+    # Don't exit - let the server start anyway with sample mode
+    sys.exit(0)
