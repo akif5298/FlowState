@@ -382,6 +382,15 @@
                         android:textColor="#666666"
                         android:layout_marginBottom="16dp" />
 
+                    <TextView
+                        android:id="@+id/tvLastCheckInSummary"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="No check-ins yet"
+                        android:textColor="#8A8A8A"
+                        android:textStyle="italic"
+                        android:layout_marginBottom="16dp" />
+
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnDailyCheckIn"
                         android:layout_width="match_parent"

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <Button
+        android:id="@+id/btnCheckPermissions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Check Permissions" />
+
+    <Button
+        android:id="@+id/btnRequestPermissions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Request Health Connect Permissions"
+        android:backgroundTint="#4CAF50" />
+
+    <Button
+        android:id="@+id/btnReadHeartRate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Read Heart Rate (Last 24h)" />
+
+    <Button
+        android:id="@+id/btnReadHrv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Read HRV (Last 24h)" />
+
+    <Button
+        android:id="@+id/btnReadSteps"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Read Steps (Last 24h)" />
+
+    <Button
+        android:id="@+id/btnReadWorkouts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Read Workouts (Last 24h)" />
+
+    <Button
+        android:id="@+id/btnReadBodyTemp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Read Body Temp (Last 24h)" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="16dp"
+        android:background="#EEEEEE">
+
+        <TextView
+            android:id="@+id/tvLog"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:fontFamily="monospace"
+            android:text="Logs will appear here..." />
+    </ScrollView>
+
+</LinearLayout>
+

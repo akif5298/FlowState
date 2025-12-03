@@ -1,0 +1,3 @@
+<resources>
+    <string name="health_connect_rationale">FlowState needs access to your health data (heart rate, sleep, steps) to predict your energy levels and optimize your productivity.</string>
+</resources>

@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Daily Check-in"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="24dp" />
+
+        <!-- 1. Energy -->
+        <CheckBox
+            android:id="@+id/cbEnergyInput"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Report Energy Level"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView android:text="1" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            <com.google.android.material.slider.Slider
+                android:id="@+id/sliderEnergyInput"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:valueFrom="1"
+                android:valueTo="10"
+                android:stepSize="1"
+                android:value="5"
+                android:enabled="false"/>
+            <TextView android:text="10" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <!-- 2. Physical Tiredness -->
+        <CheckBox
+            android:id="@+id/cbPhysicalTired"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Report Physical Tiredness"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView android:text="1" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            <com.google.android.material.slider.Slider
+                android:id="@+id/sliderPhysicalTired"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:valueFrom="1"
+                android:valueTo="10"
+                android:stepSize="1"
+                android:value="5"
+                android:enabled="false"/>
+            <TextView android:text="10" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <!-- 3. Mental Tiredness -->
+        <CheckBox
+            android:id="@+id/cbMentalTired"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Report Mental Tiredness"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView android:text="1" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            <com.google.android.material.slider.Slider
+                android:id="@+id/sliderMentalTired"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:valueFrom="1"
+                android:valueTo="10"
+                android:stepSize="1"
+                android:value="5"
+                android:enabled="false"/>
+            <TextView android:text="10" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <!-- 4. Meal Impact -->
+        <CheckBox
+            android:id="@+id/cbMealImpact"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Report Meal Impact"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp" />
+        <RadioGroup
+            android:id="@+id/rgMealImpact"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <RadioButton
+                android:id="@+id/rbSluggish"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sluggish"
+                android:enabled="false"
+                android:layout_weight="1"/>
+            <RadioButton
+                android:id="@+id/rbNeutral"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Neutral"
+                android:checked="true"
+                android:enabled="false"
+                android:layout_weight="1"/>
+            <RadioButton
+                android:id="@+id/rbSharp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sharp"
+                android:enabled="false"
+                android:layout_weight="1"/>
+        </RadioGroup>
+
+        <!-- 5. Prediction Accuracy -->
+        <CheckBox
+            android:id="@+id/cbPredictionAccuracy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Report Prediction Accuracy"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/toggleAccuracy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:singleSelection="true"
+                app:selectionRequired="false">
+                <Button
+                    android:id="@+id/btnInaccuratelyLow"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:enabled="false"
+                    android:text="Too Low" />
+                <Button
+                    android:id="@+id/btnAccurate"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:enabled="false"
+                    android:text="Accurate" />
+                <Button
+                    android:id="@+id/btnInaccuratelyHigh"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:enabled="false"
+                    android:text="Too High" />
+            </com.google.android.material.button.MaterialButtonToggleGroup>
+        </LinearLayout>
+
+        <!-- 6. Recent Task -->
+        <CheckBox
+            android:id="@+id/cbRecentTask"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Report Recent Task"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp" />
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilRecentTask"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Recent task completed"
+            android:layout_marginTop="4dp"
+            android:enabled="false"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etRecentTask"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textMultiLine"
+                android:lines="2" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 7. Caffeine -->
+        <CheckBox
+            android:id="@+id/cbCaffeine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Report Caffeine Intake"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="4dp" />
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            
+            <NumberPicker
+                android:id="@+id/npCaffeine"
+                android:layout_width="wrap_content"
+                android:layout_height="120dp"
+                android:layout_gravity="center_horizontal"
+                android:enabled="false"/>
+                
+        </LinearLayout>
+
+        <!-- 8. Emotion -->
+        <CheckBox
+            android:id="@+id/cbEmotion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Report Emotion"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp" />
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none">
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroupEmotion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:singleLine="true"
+                app:singleSelection="true">
+                <com.google.android.material.chip.Chip
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Happy"
+                    android:enabled="false"
+                    android:clickable="false"/>
+                <com.google.android.material.chip.Chip
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Excited"
+                    android:enabled="false"
+                    android:clickable="false"/>
+                <com.google.android.material.chip.Chip
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Neutral"
+                    android:enabled="false"
+                    android:clickable="false"/>
+                <com.google.android.material.chip.Chip
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tired"
+                    android:enabled="false"
+                    android:clickable="false"/>
+                <com.google.android.material.chip.Chip
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Stressed"
+                    android:enabled="false"
+                    android:clickable="false"/>
+                <com.google.android.material.chip.Chip
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Sad"
+                    android:enabled="false"
+                    android:clickable="false"/>
+                <com.google.android.material.chip.Chip
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Anxious"
+                    android:enabled="false"
+                    android:clickable="false"/>
+            </com.google.android.material.chip.ChipGroup>
+        </HorizontalScrollView>
+
+        <Button
+            android:id="@+id/btnSaveCheckIn"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Save Check-in"
+            android:layout_marginTop="32dp"
+            app:cornerRadius="28dp" />
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>
