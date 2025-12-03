@@ -30,12 +30,22 @@ public class ReactionTimeRepository {
     
     /**
      * Insert reaction time data
+     * Maps to reaction_time_tests table
      */
     public void insertReactionTimeData(String userId, ReactionTimeData reactionTimeData, DataCallback callback) {
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("user_id", userId);
         dataMap.put("timestamp", dateFormat.format(reactionTimeData.getTimestamp()));
         dataMap.put("reaction_time_ms", reactionTimeData.getReactionTimeMs());
+        if (reactionTimeData.getTestType() != null) {
+            dataMap.put("test_type", reactionTimeData.getTestType());
+        }
+        if (reactionTimeData.getAttempts() != null) {
+            dataMap.put("attempts", reactionTimeData.getAttempts());
+        }
+        if (reactionTimeData.getAverageReactionTimeMs() != null) {
+            dataMap.put("average_reaction_time_ms", reactionTimeData.getAverageReactionTimeMs());
+        }
         
         String authorization = "Bearer " + supabaseClient.getAccessToken();
         String apikey = supabaseClient.getSupabaseAnonKey();
@@ -88,9 +98,17 @@ public class ReactionTimeRepository {
                             for (Map<String, Object> map : response.body()) {
                                 try {
                                     Date timestamp = dateFormat.parse(map.get("timestamp").toString());
+                                    String testType = map.get("test_type") != null ? 
+                                        map.get("test_type").toString() : "visual";
+                                    Integer attempts = map.get("attempts") != null ? 
+                                        ((Number) map.get("attempts")).intValue() : 1;
+                                    Double avgReactionTime = map.get("average_reaction_time_ms") != null ? 
+                                        ((Number) map.get("average_reaction_time_ms")).doubleValue() : null;
+                                    
                                     ReactionTimeData data = new ReactionTimeData(
                                         timestamp,
-                                        ((Number) map.get("reaction_time_ms")).intValue()
+                                        ((Number) map.get("reaction_time_ms")).intValue(),
+                                        testType, attempts, avgReactionTime
                                     );
                                     reactionTimeDataList.add(data);
                                 } catch (Exception e) {

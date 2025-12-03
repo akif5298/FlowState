@@ -1,5 +1,6 @@
 package com.personaleenergy.app.ui.energy;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
@@ -26,6 +27,16 @@ public class EnergyPredictionActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        // Check authentication
+        com.flowstate.app.supabase.AuthService authService = new com.flowstate.app.supabase.AuthService(this);
+        if (!authService.isAuthenticated()) {
+            // Not authenticated, go to login
+            startActivity(new Intent(this, com.flowstate.app.ui.LoginActivity.class));
+            finish();
+            return;
+        }
+        
         setContentView(R.layout.activity_energy_prediction);
         
         initializeViews();

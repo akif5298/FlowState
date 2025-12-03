@@ -30,6 +30,7 @@ public class TypingSpeedRepository {
     
     /**
      * Insert typing speed data
+     * Maps to typing_speed_tests table
      */
     public void insertTypingSpeedData(String userId, TypingSpeedData typingSpeedData, DataCallback callback) {
         Map<String, Object> dataMap = new HashMap<>();
@@ -38,6 +39,15 @@ public class TypingSpeedRepository {
         dataMap.put("words_per_minute", typingSpeedData.getWordsPerMinute());
         dataMap.put("accuracy_percentage", typingSpeedData.getAccuracy());
         dataMap.put("sample_text", typingSpeedData.getSampleText());
+        if (typingSpeedData.getTotalCharacters() != null) {
+            dataMap.put("total_characters", typingSpeedData.getTotalCharacters());
+        }
+        if (typingSpeedData.getErrors() != null) {
+            dataMap.put("errors", typingSpeedData.getErrors());
+        }
+        if (typingSpeedData.getDurationSeconds() != null) {
+            dataMap.put("duration_seconds", typingSpeedData.getDurationSeconds());
+        }
         
         String authorization = "Bearer " + supabaseClient.getAccessToken();
         String apikey = supabaseClient.getSupabaseAnonKey();
@@ -90,11 +100,19 @@ public class TypingSpeedRepository {
                             for (Map<String, Object> map : response.body()) {
                                 try {
                                     Date timestamp = dateFormat.parse(map.get("timestamp").toString());
+                                    Integer totalChars = map.get("total_characters") != null ? 
+                                        ((Number) map.get("total_characters")).intValue() : null;
+                                    Integer errors = map.get("errors") != null ? 
+                                        ((Number) map.get("errors")).intValue() : null;
+                                    Integer durationSecs = map.get("duration_seconds") != null ? 
+                                        ((Number) map.get("duration_seconds")).intValue() : null;
+                                    
                                     TypingSpeedData data = new TypingSpeedData(
                                         timestamp,
                                         ((Number) map.get("words_per_minute")).intValue(),
                                         ((Number) map.get("accuracy_percentage")).doubleValue(),
-                                        map.get("sample_text") != null ? map.get("sample_text").toString() : ""
+                                        map.get("sample_text") != null ? map.get("sample_text").toString() : "",
+                                        totalChars, errors, durationSecs
                                     );
                                     typingSpeedDataList.add(data);
                                 } catch (Exception e) {

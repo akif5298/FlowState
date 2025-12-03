@@ -4,6 +4,7 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
+import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.QueryMap;
@@ -99,6 +100,28 @@ public interface PostgrestApi {
     Call<Void> postBatch(
         @Path("table") String table,
         @Body List<Map<String, Object>> data
+    );
+    
+    /**
+     * Generic PATCH to update data in a table
+     * 
+     * @param table Table name
+     * @param queryParams Query parameters to identify which rows to update (e.g., user_id=eq.uuid)
+     * @param data Map of fields to update
+     * @return Void response
+     * 
+     * Example usage:
+     *   Map<String, String> params = new HashMap<>();
+     *   params.put("user_id", "eq." + userId);
+     *   Map<String, Object> updates = new HashMap<>();
+     *   updates.put("google_fit_enabled", true);
+     *   postgrestApi.patch("user_settings", params, updates);
+     */
+    @PATCH("{table}")
+    Call<Void> patch(
+        @Path("table") String table,
+        @QueryMap Map<String, String> queryParams,
+        @Body Map<String, Object> data
     );
 }
 

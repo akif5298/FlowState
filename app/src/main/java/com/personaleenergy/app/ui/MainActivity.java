@@ -35,6 +35,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
+        // Check authentication first
+        com.flowstate.app.supabase.AuthService authService = new com.flowstate.app.supabase.AuthService(this);
+        if (!authService.isAuthenticated()) {
+            // Not authenticated, go to login
+            startActivity(new Intent(this, com.flowstate.app.ui.LoginActivity.class));
+            finish();
+            return;
+        }
+        
         // Check if onboarding is needed
         if (!OnboardingActivity.isOnboardingComplete(this)) {
             // Check if user has minimum data
@@ -48,8 +57,9 @@ public class MainActivity extends AppCompatActivity {
                             startActivity(new Intent(MainActivity.this, OnboardingActivity.class));
                             finish();
                         } else {
-                            // Has data, continue with normal flow
-                            initializeMainActivity();
+                            // Has data, redirect to dashboard
+                            startActivity(new Intent(MainActivity.this, EnergyDashboardActivity.class));
+                            finish();
                         }
                     });
                 }
@@ -63,12 +73,13 @@ public class MainActivity extends AppCompatActivity {
                     });
                 }
             });
-            // Return early - will initialize main activity if data exists
+            // Return early - will navigate based on data check
             return;
         }
         
-        // Onboarding already complete, initialize normally
-        initializeMainActivity();
+        // Onboarding complete and authenticated, redirect to dashboard
+        startActivity(new Intent(this, EnergyDashboardActivity.class));
+        finish();
     }
     
     private void initializeMainActivity() {

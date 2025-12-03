@@ -17,6 +17,7 @@ import com.flowstate.app.R;
 import com.flowstate.services.DataChecker;
 import com.flowstate.services.GoogleFitManager;
 import com.personaleenergy.app.ui.manual.ManualDataEntryActivity;
+import com.personaleenergy.app.ui.EnergyDashboardActivity;
 
 /**
  * Onboarding activity for new users
@@ -213,11 +214,20 @@ public class OnboardingActivity extends AppCompatActivity {
     }
     
     /**
-     * Skip onboarding and go to main activity
+     * Skip onboarding and go to dashboard
      */
     private void skipOnboarding() {
         markOnboardingComplete();
-        navigateToMain();
+        navigateToDashboard();
+    }
+    
+    /**
+     * Navigate to dashboard instead of main activity
+     */
+    private void navigateToDashboard() {
+        Intent intent = new Intent(this, EnergyDashboardActivity.class);
+        startActivity(intent);
+        finish();
     }
     
     /**
@@ -243,6 +253,8 @@ public class OnboardingActivity extends AppCompatActivity {
             checkUserData();
             // Mark onboarding as complete after successful connection
             markOnboardingComplete();
+            // Navigate to dashboard after successful setup
+            navigateToDashboard();
         }, 2000);
     }
     
@@ -279,11 +291,6 @@ public class OnboardingActivity extends AppCompatActivity {
         prefs.edit().putBoolean(KEY_ONBOARDING_COMPLETE, true).apply();
     }
     
-    private void navigateToMain() {
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
-        finish();
-    }
     
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

@@ -38,14 +38,12 @@ public class EnergyPredictionRepository {
         dataMap.put("prediction_time", dateFormat.format(energyPrediction.getTimestamp()));
         dataMap.put("predicted_level", energyPrediction.getPredictedLevel().name());
         dataMap.put("confidence_score", energyPrediction.getConfidence());
+        // Note: ml_model_version has a default in schema, but can be set if needed
         
-        // Convert maps to JSON strings (Gson will handle this)
-        if (energyPrediction.getBiometricFactors() != null) {
-            dataMap.put("biometric_factors", energyPrediction.getBiometricFactors());
-        }
-        if (energyPrediction.getCognitiveFactors() != null) {
-            dataMap.put("cognitive_factors", energyPrediction.getCognitiveFactors());
-        }
+        // Note: The schema uses a separate energy_prediction_factors table for factors
+        // For now, we'll insert the prediction first, then factors can be added separately
+        // if needed. The factors are stored in the EnergyPrediction model but not in the
+        // main predictions table per the schema.
         
         String authorization = "Bearer " + supabaseClient.getAccessToken();
         String apikey = supabaseClient.getSupabaseAnonKey();
@@ -101,37 +99,11 @@ public class EnergyPredictionRepository {
                                     EnergyLevel level = EnergyLevel.valueOf(map.get("predicted_level").toString());
                                     double confidence = ((Number) map.get("confidence_score")).doubleValue();
                                     
-                                    // Parse JSON maps
+                                    // Note: Factors are stored in energy_prediction_factors table, not here
+                                    // For now, set factors to null - they would need to be fetched separately
+                                    // if needed from the energy_prediction_factors table
                                     Map<String, Double> biometricFactors = null;
                                     Map<String, Double> cognitiveFactors = null;
-                                    
-                                    if (map.get("biometric_factors") != null) {
-                                        Object bioObj = map.get("biometric_factors");
-                                        if (bioObj instanceof Map) {
-                                            biometricFactors = new HashMap<>();
-                                            for (Map.Entry<?, ?> entry : ((Map<?, ?>) bioObj).entrySet()) {
-                                                Object value = entry.getValue();
-                                                if (value instanceof Number) {
-                                                    biometricFactors.put(entry.getKey().toString(), 
-                                                        ((Number) value).doubleValue());
-                                                }
-                                            }
-                                        }
-                                    }
-                                    
-                                    if (map.get("cognitive_factors") != null) {
-                                        Object cogObj = map.get("cognitive_factors");
-                                        if (cogObj instanceof Map) {
-                                            cognitiveFactors = new HashMap<>();
-                                            for (Map.Entry<?, ?> entry : ((Map<?, ?>) cogObj).entrySet()) {
-                                                Object value = entry.getValue();
-                                                if (value instanceof Number) {
-                                                    cognitiveFactors.put(entry.getKey().toString(), 
-                                                        ((Number) value).doubleValue());
-                                                }
-                                            }
-                                        }
-                                    }
                                     
                                     EnergyPrediction prediction = new EnergyPrediction(
                                         timestamp, level, confidence, biometricFactors, cognitiveFactors

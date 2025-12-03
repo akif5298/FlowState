@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F5F7FA"
+    android:background="@color/background_light"
     android:gravity="center"
     android:padding="20dp">
 
@@ -27,7 +27,7 @@
                 android:text="Reaction Time Test"
                 android:textSize="22sp"
                 android:textStyle="bold"
-                android:textColor="@android:color/black"
+                android:textColor="?attr/colorOnSurface"
                 android:layout_marginBottom="12dp" />
 
             <TextView
@@ -36,7 +36,7 @@
                 android:layout_height="wrap_content"
                 android:text="Tap when the button turns green"
                 android:textSize="16sp"
-                android:textColor="#666666"
+                android:textColor="?attr/colorOnSurfaceVariant"
                 android:textAlignment="center" />
 
         </LinearLayout>
@@ -92,7 +92,7 @@
                 android:layout_height="wrap_content"
                 android:text="Your reaction time"
                 android:textSize="14sp"
-                android:textColor="#666666" />
+                android:textColor="?attr/colorOnSurfaceVariant" />
 
         </LinearLayout>
 

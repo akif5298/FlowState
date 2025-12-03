@@ -238,6 +238,92 @@ public class UserSettingsService {
     }
     
     /**
+     * Save user settings to Supabase
+     * Uses upsert (insert or update) based on user_id
+     */
+    public void save(UserSettings settings, SettingsCallback callback) {
+        String userId = getUserId();
+        if (userId == null || userId.isEmpty()) {
+            Log.e(TAG, "No user ID available for saving settings");
+            if (callback != null) {
+                callback.onError(new Exception("No user ID available"));
+            }
+            return;
+        }
+        
+        // Prepare data map
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("user_id", userId);
+        dataMap.put("notification_enabled", settings.notificationEnabled);
+        if (settings.notificationTime != null) {
+            dataMap.put("notification_time", settings.notificationTime);
+        }
+        dataMap.put("google_fit_enabled", settings.googleFitEnabled);
+        if (settings.googleFitAccount != null) {
+            dataMap.put("google_fit_account", settings.googleFitAccount);
+        }
+        if (settings.mlModelPreference != null) {
+            dataMap.put("ml_model_preference", settings.mlModelPreference);
+        }
+        dataMap.put("data_sync_enabled", settings.dataSyncEnabled);
+        
+        // Use POST with upsert (resolution=merge-duplicates) to insert or update
+        // This works because user_id is UNIQUE in the schema
+        Call<Void> call = postgrestApi.post("user_settings", dataMap);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    // Cache settings locally
+                    cacheSettings(settings);
+                    Log.d(TAG, "Settings saved successfully");
+                    if (callback != null) {
+                        callback.onSuccess(settings);
+                    }
+                } else {
+                    // Try PATCH if POST fails (record might exist)
+                    Map<String, String> queryParams = new HashMap<>();
+                    queryParams.put("user_id", "eq." + userId);
+                    Call<Void> patchCall = postgrestApi.patch("user_settings", queryParams, dataMap);
+                    patchCall.enqueue(new Callback<Void>() {
+                        @Override
+                        public void onResponse(Call<Void> call, Response<Void> response) {
+                            if (response.isSuccessful()) {
+                                cacheSettings(settings);
+                                if (callback != null) {
+                                    callback.onSuccess(settings);
+                                }
+                            } else {
+                                String error = "Failed to save settings: " + response.code();
+                                Log.e(TAG, error);
+                                if (callback != null) {
+                                    callback.onError(new Exception(error));
+                                }
+                            }
+                        }
+                        
+                        @Override
+                        public void onFailure(Call<Void> call, Throwable t) {
+                            Log.e(TAG, "Error saving settings", t);
+                            if (callback != null) {
+                                callback.onError(new Exception(t.getMessage(), t));
+                            }
+                        }
+                    });
+                }
+            }
+            
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Log.e(TAG, "Error saving settings", t);
+                if (callback != null) {
+                    callback.onError(new Exception(t.getMessage(), t));
+                }
+            }
+        });
+    }
+    
+    /**
      * Get user ID from Supabase client
      */
     private String getUserId() {

@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F7FA"
+    android:background="@color/background_light"
     android:fillViewport="true">
 
     <LinearLayout
@@ -31,7 +31,7 @@
                     android:text="Energy Predictions"
                     android:textSize="26sp"
                     android:textStyle="bold"
-                    android:textColor="@android:color/black"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_marginBottom="8dp" />
 
                 <TextView
@@ -39,7 +39,7 @@
                     android:layout_height="wrap_content"
                     android:text="View your personalized energy levels for today"
                     android:textSize="14sp"
-                    android:textColor="#666666" />
+                    android:textColor="?attr/colorOnSurfaceVariant" />
 
             </LinearLayout>
 
@@ -81,7 +81,7 @@
                     android:text="Energy Levels"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@android:color/black"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_marginBottom="12dp" />
 
                 <TextView
@@ -90,8 +90,8 @@
                     android:layout_height="wrap_content"
                     android:text="Tap 'Load Predictions' to see your energy forecast"
                     android:padding="12dp"
-                    android:background="#E3F2FD"
-                    android:textColor="@android:color/black"
+                    android:background="?attr/colorSurfaceVariant"
+                    android:textColor="?attr/colorOnSurface"
                     android:textSize="14sp"
                     android:lineSpacingMultiplier="1.5" />
 
@@ -118,7 +118,7 @@
                     android:text="💡 Suggestions"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@android:color/black"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_marginBottom="12dp" />
 
                 <TextView
@@ -127,8 +127,8 @@
                     android:layout_height="wrap_content"
                     android:text=""
                     android:padding="12dp"
-                    android:background="#FFF3E0"
-                    android:textColor="@android:color/black"
+                    android:background="?attr/colorSurfaceVariant"
+                    android:textColor="?attr/colorOnSurface"
                     android:textSize="14sp"
                     android:lineSpacingMultiplier="1.5" />
 
@@ -156,7 +156,7 @@
                     android:text="Daily Advice"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@android:color/black"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_marginBottom="12dp" />
 
                 <TextView
@@ -165,8 +165,8 @@
                     android:layout_height="wrap_content"
                     android:text=""
                     android:padding="12dp"
-                    android:background="#E8F5E9"
-                    android:textColor="@android:color/black"
+                    android:background="?attr/colorSurfaceVariant"
+                    android:textColor="?attr/colorOnSurface"
                     android:textSize="14sp"
                     android:lineSpacingMultiplier="1.6" />
 

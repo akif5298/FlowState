@@ -25,9 +25,19 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
         
         authService = new AuthService(this);
+        
+        // Check if user is already logged in
+        if (authService.isAuthenticated()) {
+            // User is already authenticated, go to dashboard
+            Intent intent = new Intent(this, EnergyDashboardActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
+        
+        setContentView(R.layout.activity_login);
         initializeViews();
         setupClickListeners();
         
