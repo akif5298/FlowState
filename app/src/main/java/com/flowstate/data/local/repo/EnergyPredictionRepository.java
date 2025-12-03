@@ -20,18 +20,44 @@ public class EnergyPredictionRepository {
     private final PredictionDao predictionDao;
     private final ExecutorService databaseWriteExecutor;
     
-    public EnergyPredictionRepository(Context context) {
+    // In-memory cache for recent predictions
+    private List<PredictionLocal> cachedPredictions;
+    private long lastCacheTime = 0;
+    private static final long CACHE_VALIDITY_MS = 5 * 60 * 1000; // 5 minutes cache
+
+    private static EnergyPredictionRepository instance;
+
+    public static synchronized EnergyPredictionRepository getInstance(Context context) {
+        if (instance == null) {
+            instance = new EnergyPredictionRepository(context.getApplicationContext());
+        }
+        return instance;
+    }
+
+    private EnergyPredictionRepository(Context context) { // Changed to private
         AppDb db = AppDb.getInstance(context);
         predictionDao = db.predictionDao();
         databaseWriteExecutor = Executors.newSingleThreadExecutor();
     }
     
     /**
+     * Clear the in-memory cache
+     */
+    public void clearCache() {
+        cachedPredictions = null;
+        lastCacheTime = 0;
+    }
+
+    /**
      * Saves a list of prediction records to the local database
      *
      * @param items The list of PredictionLocal objects to save
      */
     public void saveAll(List<PredictionLocal> items) {
+        // Update cache immediately with new data
+        cachedPredictions = new java.util.ArrayList<>(items);
+        lastCacheTime = System.currentTimeMillis();
+        
         databaseWriteExecutor.execute(() -> {
             try {
                 List<Long> insertedIds = predictionDao.insertAll(items);
@@ -98,10 +124,41 @@ public class EnergyPredictionRepository {
      * @param callback Callback to receive the list of predictions
      */
     public void getByDateRange(long dateStartMs, long dateEndMs, DataCallback<List<PredictionLocal>> callback) {
+        // Check memory cache first
+        if (cachedPredictions != null && System.currentTimeMillis() - lastCacheTime < CACHE_VALIDITY_MS) {
+            // Filter cache for requested range
+            List<PredictionLocal> filtered = new java.util.ArrayList<>();
+            boolean fullCoverage = false;
+            
+            // Simple check: if cache has data covering the requested start, we might use it
+            // For now, if we have a valid cache, let's just use it if it's "fresh" enough
+            // But strict filtering is safer
+            for (PredictionLocal p : cachedPredictions) {
+                if (p.predictionTime >= dateStartMs && p.predictionTime < dateEndMs) {
+                    filtered.add(p);
+                }
+            }
+            
+            if (!filtered.isEmpty()) {
+                Log.d(TAG, "Returning " + filtered.size() + " predictions from memory cache");
+                callback.onSuccess(filtered);
+                return;
+            }
+        }
+
         databaseWriteExecutor.execute(() -> {
             try {
                 // Use DAO method to get predictions by date range
                 List<PredictionLocal> predictions = predictionDao.getByDateRange(dateStartMs, dateEndMs);
+                
+                // Update cache if we got results and it's a useful set (e.g. covering today)
+                if (!predictions.isEmpty()) {
+                    // Only cache if we think this is the "main" forecast (heuristic)
+                    // Or just always cache the last result
+                    cachedPredictions = new java.util.ArrayList<>(predictions);
+                    lastCacheTime = System.currentTimeMillis();
+                }
+                
                 callback.onSuccess(predictions);
             } catch (Exception e) {
                 callback.onError(e);

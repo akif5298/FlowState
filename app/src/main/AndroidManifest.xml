@@ -151,6 +151,7 @@
         <activity
             android:name="com.flowstate.app.ui.EnergyDashboardActivity"
             android:exported="true"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:theme="@style/Theme.FlowState">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -161,31 +162,37 @@
         <activity
             android:name="com.flowstate.app.ui.OnboardingActivity"
             android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:theme="@style/Theme.FlowState" />
 
         <activity
             android:name="com.flowstate.app.ui.manual.ManualDataEntryActivity"
             android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:theme="@style/Theme.FlowState" />
 
         <activity
             android:name="com.flowstate.app.ui.settings.SettingsActivity"
             android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:theme="@style/Theme.FlowState" />
 
         <activity
             android:name="com.flowstate.app.ui.data.DataLogsActivity"
             android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:theme="@style/Theme.FlowState" />
 
         <activity
             android:name="com.flowstate.app.ui.schedule.AIScheduleActivity"
             android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:theme="@style/Theme.FlowState" />
 
         <activity
             android:name="com.flowstate.app.ui.insights.WeeklyInsightsActivity"
             android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:theme="@style/Theme.FlowState" />
 
     </application>
