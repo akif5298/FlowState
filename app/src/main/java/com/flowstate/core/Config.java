@@ -43,6 +43,30 @@ public final class Config {
             ? BuildConfig.HIBP_SERVICE_URL 
             : "https://your-hibp-service.com";
     
+    /**
+     * Remote Model API URL for energy level predictions
+     * Add to local.properties: REMOTE_MODEL_URL=https://router.huggingface.co/models/google/timesfm-1.0-200m
+     * Defaults to HuggingFace TimesFM model endpoint
+     */
+    public static final String REMOTE_MODEL_URL = BuildConfig.REMOTE_MODEL_URL;
+    
+    /**
+     * Remote Model API Key (optional, for authenticated endpoints)
+     * Add to local.properties: REMOTE_MODEL_API_KEY=your-api-key
+     */
+    public static final String REMOTE_MODEL_API_KEY = BuildConfig.REMOTE_MODEL_API_KEY != null 
+            ? BuildConfig.REMOTE_MODEL_API_KEY 
+            : null;
+    
+    /**
+     * Google Gemini API key for energy level predictions
+     * Get this from https://aistudio.google.com/app/apikey
+     * Add to local.properties: GEMINI_API_KEY=your-gemini-api-key
+     */
+    public static final String GEMINI_API_KEY = BuildConfig.GEMINI_API_KEY != null 
+            ? BuildConfig.GEMINI_API_KEY 
+            : null;
+    
     // Prevent instantiation
     private Config() {
         throw new AssertionError("Cannot instantiate Config class");

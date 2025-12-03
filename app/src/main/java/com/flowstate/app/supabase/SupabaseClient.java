@@ -77,8 +77,18 @@ public class SupabaseClient {
                 .build();
         
         // Create Retrofit instance
+        String supabaseUrl = SUPABASE_URL;
+        if (supabaseUrl == null || supabaseUrl.isEmpty() || !supabaseUrl.startsWith("http")) {
+            // Log warning or handle invalid URL (fallback for development if needed, or crash with clearer message)
+            android.util.Log.e("SupabaseClient", "Invalid SUPABASE_URL: " + supabaseUrl);
+            // Fallback for development/testing if local.properties is missing
+            if (supabaseUrl == null || supabaseUrl.equals("YOUR_SUPABASE_URL")) {
+                 supabaseUrl = "https://example.supabase.co"; // Valid placeholder to prevent crash during init
+            }
+        }
+
         this.retrofit = new Retrofit.Builder()
-                .baseUrl(SUPABASE_URL)
+                .baseUrl(supabaseUrl)
                 .client(okHttpClient)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();

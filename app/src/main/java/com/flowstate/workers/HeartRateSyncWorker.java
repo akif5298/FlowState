@@ -2,96 +2,81 @@ package com.flowstate.workers;
 
 import android.content.Context;
 import android.util.Log;
+
 import androidx.annotation.NonNull;
-import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
-import com.flowstate.data.local.repo.BiometricDataRepository;
-import com.flowstate.domain.mappers.FitMapper;
-import com.flowstate.services.GoogleFitManager;
-import com.google.android.gms.fitness.result.DataReadResponse;
-import com.google.android.gms.tasks.Tasks;
 
+import com.flowstate.data.local.AppDb;
+import com.flowstate.data.local.entities.HrLocal;
+import com.flowstate.services.HealthConnectManager;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
- * Worker to sync heart rate data from Google Fit to Room database
+ * Worker to sync heart rate data from Health Connect to local DB.
  */
 public class HeartRateSyncWorker extends Worker {
+
+    private static final String TAG = "HeartRateSyncWorker";
+    public static final String PERIODIC_WORK_NAME = "heart_rate_sync_periodic";
     
-    private static final String TAG = "HrSyncWorker";
-    
+    private final Context context;
+    private final AppDb db;
+    private final HealthConnectManager healthConnectManager;
+
     public HeartRateSyncWorker(@NonNull Context context, @NonNull WorkerParameters params) {
         super(context, params);
+        this.context = context.getApplicationContext();
+        this.db = AppDb.getInstance(this.context);
+        this.healthConnectManager = new HealthConnectManager(this.context);
     }
-    
+
     @NonNull
     @Override
     public Result doWork() {
+        if (!healthConnectManager.isAvailable()) {
+            Log.e(TAG, "Health Connect unavailable, skipping sync");
+            return Result.failure();
+        }
+
         try {
-            Log.d(TAG, "Starting heart rate sync");
+            // Sync last 24 hours of data
+            Instant end = Instant.now();
+            Instant start = end.minus(24, ChronoUnit.HOURS);
+
+            Log.d(TAG, "Syncing Heart Rate data from Health Connect...");
             
-            GoogleFitManager fitManager = new GoogleFitManager(getApplicationContext());
-            BiometricDataRepository repo = new BiometricDataRepository(getApplicationContext());
+            // Get data from Kotlin manager (returns CompletableFuture)
+            List<HrLocal> hrList = healthConnectManager.readHeartRate(start, end).get(30, TimeUnit.SECONDS);
             
-            // Get time range for sync
-            long[] timeRange = fitManager.getBackfillTimeRange();
-            long startMs = timeRange[0];
-            long endMs = timeRange[1];
-            
-            // Read heart rate data from Google Fit
-            DataReadResponse response = Tasks.await(
-                fitManager.readHeartRate(startMs, endMs)
-            );
-            
-            // Map to Room entities
-            List<com.flowstate.data.local.entities.HrLocal> hrList = FitMapper.mapHr(response);
-            
-            // Save to Room database
-            repo.saveHr(hrList);
-            
-            // Update last sync time
-            fitManager.updateLastSync(endMs);
-            
-            // Mark first connect as complete if needed
-            if (fitManager.isFirstConnect()) {
-                fitManager.markFirstConnectComplete();
+            if (hrList != null && !hrList.isEmpty()) {
+                Log.d(TAG, "Found " + hrList.size() + " heart rate records. Saving to DB...");
+                db.hrDao().insertAll(hrList);
+            } else {
+                Log.d(TAG, "No heart rate records found.");
             }
             
-            Log.d(TAG, "Heart rate sync completed. Saved " + hrList.size() + " readings");
             return Result.success();
             
-        } catch (Exception e) {
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
             Log.e(TAG, "Error syncing heart rate data", e);
             return Result.retry();
         }
     }
     
-    /**
-     * Create a one-time work request for heart rate sync
-     */
     public static OneTimeWorkRequest createWorkRequest() {
-        return new OneTimeWorkRequest.Builder(HeartRateSyncWorker.class)
-                .setInitialDelay(0, TimeUnit.SECONDS)
-                .build();
+        return new OneTimeWorkRequest.Builder(HeartRateSyncWorker.class).build();
     }
-    
-    /**
-     * Create a periodic work request for hourly heart rate sync
-     * Note: Minimum interval is 15 minutes due to WorkManager constraints
-     */
-    public static PeriodicWorkRequest createPeriodicWorkRequest() {
-        return new PeriodicWorkRequest.Builder(HeartRateSyncWorker.class, 1, TimeUnit.HOURS)
-                .setInitialDelay(1, TimeUnit.HOURS) // Start after 1 hour
-                .build();
-    }
-    
-    /**
-     * Unique work name for periodic sync
-     */
-    public static final String PERIODIC_WORK_NAME = "hourly_hr_sync";
-}
 
+    public static PeriodicWorkRequest createPeriodicWorkRequest() {
+        return new PeriodicWorkRequest.Builder(HeartRateSyncWorker.class, 1, TimeUnit.HOURS).build();
+    }
+}

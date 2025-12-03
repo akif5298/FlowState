@@ -4,13 +4,67 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.BODY_SENSORS" />
-    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" 
-        android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" 
-        android:maxSdkVersion="32" />
+    
+    <!-- Health Connect Permissions (Read-Only) -->
+    <!-- New standard Health Connect permissions format for Android 14+ -->
+    <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
+    <uses-permission android:name="android.permission.health.READ_SLEEP" />
+    <uses-permission android:name="android.permission.health.READ_STEPS" />
+    <uses-permission android:name="android.permission.health.READ_EXERCISE" />
+    <uses-permission android:name="android.permission.health.READ_HEART_RATE_VARIABILITY" />
+    <uses-permission android:name="android.permission.health.READ_BODY_TEMPERATURE" />
+    <!-- Additional read permissions for comprehensive data collection -->
+    <uses-permission android:name="android.permission.health.READ_ACTIVE_CALORIES_BURNED" />
+    <uses-permission android:name="android.permission.health.READ_TOTAL_CALORIES_BURNED" />
+    <uses-permission android:name="android.permission.health.READ_DISTANCE" />
+    <uses-permission android:name="android.permission.health.READ_ELEVATION_GAINED" />
+    <uses-permission android:name="android.permission.health.READ_FLOORS_CLIMBED" />
+    <uses-permission android:name="android.permission.health.READ_RESTING_HEART_RATE" />
+    <uses-permission android:name="android.permission.health.READ_BLOOD_PRESSURE" />
+    <uses-permission android:name="android.permission.health.READ_OXYGEN_SATURATION" />
+    <uses-permission android:name="android.permission.health.READ_RESPIRATORY_RATE" />
+    <uses-permission android:name="android.permission.health.READ_WEIGHT" />
+    <uses-permission android:name="android.permission.health.READ_HEIGHT" />
+    <uses-permission android:name="android.permission.health.READ_HYDRATION" />
+    <uses-permission android:name="android.permission.health.READ_NUTRITION" />
+    <uses-permission android:name="android.permission.health.READ_MINDFULNESS" />
+    <uses-permission android:name="android.permission.health.READ_BLOOD_GLUCOSE" />
+    <uses-permission android:name="android.permission.health.READ_VO2_MAX" />
+
+    <!-- Device/watch feature (not required) -->
+    <uses-feature
+        android:name="android.hardware.type.watch"
+        android:required="false" />
+    
+    <!-- Explicitly declare Health Connect support so legacy APK (Android 12/13) can discover FlowState -->
+    <uses-feature
+        android:name="androidx.health.connect.feature.HEALTH_CONNECT"
+        android:required="false" />
+        
+    <!-- Health Connect Feature Support -->
+    <!-- This tag helps older devices (Android 13/12) identify the app uses Health Connect -->
+    <meta-data
+        android:name="health_permissions_rationale"
+        android:resource="@string/health_connect_rationale" />
+    
+    <!-- Required for legacy Health Connect (Android 13 and below) - Read-Only -->
+    <!-- This tells the system the app wants to use the Health Connect APK -->
+    <uses-permission android:name="androidx.health.connect.permission.HEALTH_DATA" />
+    <uses-permission android:name="androidx.health.connect.permission.READ_HEART_RATE" />
+    <uses-permission android:name="androidx.health.connect.permission.READ_SLEEP" />
+    <uses-permission android:name="androidx.health.connect.permission.READ_STEPS" />
+    <uses-permission android:name="androidx.health.connect.permission.READ_EXERCISE" />
+    <uses-permission android:name="androidx.health.connect.permission.READ_HEART_RATE_VARIABILITY" />
+    <uses-permission android:name="androidx.health.connect.permission.READ_BODY_TEMPERATURE" />
+
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <queries>
+        <package android:name="com.google.android.apps.healthdata" />
+    </queries>
 
     <application
         android:name=".EnergyPredictorApplication"
@@ -23,8 +77,46 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FlowState"
         tools:targetApi="31">
+        
+        <!-- Required for Health Connect on Android 14+ -->
+        <activity-alias
+            android:name="ViewPermissionUsageActivity"
+            android:exported="true"
+            android:targetActivity=".ui.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
+                <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Required for Health Connect on Android 13 and below to show the app in the "Apps" list -->
+        <activity-alias
+            android:name=".ui.ManageHealthPermissions"
+            android:exported="true"
+            android:targetActivity=".ui.MainActivity">
+            <intent-filter>
+                <action android:name="androidx.health.connect.action.MANAGE_HEALTH_PERMISSIONS"/>
+            </intent-filter>
+        </activity-alias>
+
+        <!-- This activity-alias is for the Health Connect APK on Android 13 and below to request permissions -->
+        <activity-alias
+            android:name=".ui.HealthConnectPermissionRequest"
+            android:exported="true"
+            android:targetActivity=".ui.MainActivity">
+            <intent-filter>
+                <action android:name="androidx.health.connect.action.REQUEST_PERMISSIONS" />
+            </intent-filter>
+        </activity-alias>
+        
+        <!-- Health Connect Verification -->
+        <activity android:name=".ui.HealthConnectDebugActivity"
+            android:exported="true"
+            android:label="Health Connect Debug">
+        </activity>
+
         <activity
-            android:name=".ui.LoginActivity"
+            android:name="com.flowstate.app.ui.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.FlowState">
             <intent-filter>
@@ -34,66 +126,55 @@
         </activity>
 
         <activity
-            android:name=".ui.SignUpActivity"
-            android:exported="false"
-            android:theme="@style/Theme.FlowState" />
-
-        <activity
-            android:name="com.personaleenergy.app.ui.MainActivity"
-            android:exported="false"
-            android:theme="@style/Theme.FlowState" />
-
-        <activity
-            android:name="com.personaleenergy.app.ui.typing.TypingSpeedActivity"
+            android:name="com.flowstate.app.ui.typing.TypingSpeedActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
 
         <activity
-            android:name="com.personaleenergy.app.ui.reaction.ReactionTimeActivity"
+            android:name="com.flowstate.app.ui.reaction.ReactionTimeActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
 
         <activity
-            android:name="com.personaleenergy.app.ui.EnergyPredictionActivity"
+            android:name="com.flowstate.app.ui.EnergyPredictionActivity"
             android:exported="false"
             android:theme="@style/Theme.FlowState" />
 
         <activity
-            android:name="com.personaleenergy.app.ui.EnergyDashboardActivity"
+            android:name="com.flowstate.app.ui.EnergyDashboardActivity"
             android:exported="false"
             android:theme="@style/Theme.FlowState" />
 
         <activity
-            android:name="com.personaleenergy.app.ui.OnboardingActivity"
+            android:name="com.flowstate.app.ui.OnboardingActivity"
             android:exported="false"
             android:theme="@style/Theme.FlowState" />
 
         <activity
-            android:name="com.personaleenergy.app.ui.manual.ManualDataEntryActivity"
+            android:name="com.flowstate.app.ui.manual.ManualDataEntryActivity"
             android:exported="false"
             android:theme="@style/Theme.FlowState" />
 
         <activity
-            android:name="com.personaleenergy.app.ui.settings.SettingsActivity"
+            android:name="com.flowstate.app.ui.settings.SettingsActivity"
             android:exported="false"
             android:theme="@style/Theme.FlowState" />
 
         <activity
-            android:name="com.personaleenergy.app.ui.data.DataLogsActivity"
+            android:name="com.flowstate.app.ui.data.DataLogsActivity"
             android:exported="false"
             android:theme="@style/Theme.FlowState" />
 
         <activity
-            android:name="com.personaleenergy.app.ui.schedule.AIScheduleActivity"
+            android:name="com.flowstate.app.ui.schedule.AIScheduleActivity"
             android:exported="false"
             android:theme="@style/Theme.FlowState" />
 
         <activity
-            android:name="com.personaleenergy.app.ui.insights.WeeklyInsightsActivity"
+            android:name="com.flowstate.app.ui.insights.WeeklyInsightsActivity"
             android:exported="false"
             android:theme="@style/Theme.FlowState" />
 
     </application>
 
 </manifest>
-

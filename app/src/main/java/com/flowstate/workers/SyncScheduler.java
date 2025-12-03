@@ -8,7 +8,6 @@ import androidx.work.WorkManager;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.flowstate.workers.HeartRateSyncWorker;
 import com.flowstate.workers.SleepSyncWorker;
-import com.flowstate.workers.SupabaseSyncWorker;
 
 import java.util.List;
 
@@ -21,7 +20,7 @@ public class SyncScheduler {
     
     /**
      * Schedule hourly sync for both heart rate and sleep data
-     * Also schedules Supabase sync for uploading pending local data
+     * (Room DB → Supabase sync has been removed)
      * 
      * @param context Application context
      */
@@ -42,19 +41,11 @@ public class SyncScheduler {
             SleepSyncWorker.createPeriodicWorkRequest()
         );
         
-        // Schedule Supabase sync (Room DB → Supabase)
-        workManager.enqueueUniquePeriodicWork(
-            SupabaseSyncWorker.PERIODIC_WORK_NAME,
-            ExistingPeriodicWorkPolicy.KEEP, // Keep existing if already scheduled
-            SupabaseSyncWorker.createPeriodicWorkRequest()
-        );
-        
-        Log.d(TAG, "Hourly sync scheduled for HR, Sleep, and Supabase upload");
+        Log.d(TAG, "Hourly sync scheduled for HR and Sleep");
     }
     
     /**
      * Cancel hourly sync for both heart rate and sleep data
-     * Also cancels Supabase sync
      * 
      * @param context Application context
      */
@@ -67,10 +58,7 @@ public class SyncScheduler {
         // Cancel sleep sync
         workManager.cancelUniqueWork(SleepSyncWorker.PERIODIC_WORK_NAME);
         
-        // Cancel Supabase sync
-        workManager.cancelUniqueWork(SupabaseSyncWorker.PERIODIC_WORK_NAME);
-        
-        Log.d(TAG, "Hourly sync cancelled for HR, Sleep, and Supabase upload");
+        Log.d(TAG, "Hourly sync cancelled for HR and Sleep");
     }
     
     /**

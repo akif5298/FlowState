@@ -51,6 +51,38 @@ public class FeatureRow {
      * Reaction time delta from 7-day baseline (in ms)
      */
     public double reactionDelta;
+
+    // --- New Features ---
+
+    /**
+     * Heart Rate Variability (RMSSD)
+     */
+    public double hrvRmssd;
+
+    /**
+     * Steps count for this bin/day
+     */
+    public int stepsCount;
+
+    /**
+     * Workout duration in minutes
+     */
+    public double workoutMinutes;
+
+    /**
+     * Skin/Body temperature in Celsius
+     */
+    public double bodyTemp;
+
+    /**
+     * Screen time in minutes
+     */
+    public double screenTimeMinutes;
+
+    /**
+     * Ambient weather temperature in Celsius
+     */
+    public double weatherTemp;
     
     public FeatureRow() {
         // Initialize with default values
@@ -62,6 +94,14 @@ public class FeatureRow {
         this.cosTOD = 0.0;
         this.wpmDelta = 0.0;
         this.reactionDelta = 0.0;
+        
+        // New features
+        this.hrvRmssd = 0.0;
+        this.stepsCount = 0;
+        this.workoutMinutes = 0.0;
+        this.bodyTemp = 36.5; // Default body temp
+        this.screenTimeMinutes = 0.0;
+        this.weatherTemp = 20.0; // Default weather temp
     }
     
     public FeatureRow(long slotStart) {

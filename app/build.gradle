@@ -1,5 +1,6 @@
 plugins {
     id 'com.android.application'
+    id 'kotlin-android'
 }
 
 // Load local.properties file
@@ -13,7 +14,7 @@ if (localPropertiesFile.exists()) {
 
 android {
     namespace 'com.flowstate.app'
-    compileSdk 34
+    compileSdk 36
 
     defaultConfig {
         applicationId 'com.flowstate.app'
@@ -33,10 +34,16 @@ android {
         def supabaseAnonKey = localProperties.getProperty('SUPABASE_ANON_KEY', 'YOUR_SUPABASE_ANON_KEY')
         def openaiApiKey = localProperties.getProperty('OPENAI_API_KEY', '')
         def hibpServiceUrl = localProperties.getProperty('HIBP_SERVICE_URL', '')
+        def remoteModelUrl = localProperties.getProperty('REMOTE_MODEL_URL', 'https://router.huggingface.co/models/google/timesfm-1.0-200m')
+        def remoteModelApiKey = localProperties.getProperty('REMOTE_MODEL_API_KEY', '')
+        def geminiApiKey = localProperties.getProperty('GEMINI_API_KEY', '')
         buildConfigField 'String', 'SUPABASE_URL', "\"${supabaseUrl}\""
         buildConfigField 'String', 'SUPABASE_ANON_KEY', "\"${supabaseAnonKey}\""
         buildConfigField 'String', 'OPENAI_API_KEY', "\"${openaiApiKey}\""
         buildConfigField 'String', 'HIBP_SERVICE_URL', hibpServiceUrl ? "\"${hibpServiceUrl}\"" : 'null'
+        buildConfigField 'String', 'REMOTE_MODEL_URL', "\"${remoteModelUrl}\""
+        buildConfigField 'String', 'REMOTE_MODEL_API_KEY', remoteModelApiKey ? "\"${remoteModelApiKey}\"" : 'null'
+        buildConfigField 'String', 'GEMINI_API_KEY', geminiApiKey ? "\"${geminiApiKey}\"" : 'null'
     }
 
     buildTypes {
@@ -54,6 +61,12 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
     
+    kotlinOptions {
+        jvmTarget = "17"
+        // Ensure language version matches
+        languageVersion = "2.1"
+    }
+    
     buildFeatures {
         viewBinding true
         dataBinding true
@@ -69,9 +82,13 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-runtime:2.7.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel:2.7.0'
 
-    // Google Fit
-    implementation 'com.google.android.gms:play-services-fitness:21.1.0'
-    implementation 'com.google.android.gms:play-services-auth:20.7.0'
+    // Health Connect - requires compileSdk 36
+    implementation "androidx.health.connect:connect-client:1.2.0-alpha02"
+    
+    // Kotlin
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:2.1.0"
+    implementation "androidx.core:core-ktx:1.12.0"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-guava:1.7.3"
 
     // TensorFlow Lite
     implementation 'org.tensorflow:tensorflow-lite:2.14.0'
@@ -86,6 +103,9 @@ dependencies {
     
     // Gson for JSON serialization
     implementation 'com.google.code.gson:gson:2.10.1'
+    
+    // Google Gemini API
+    implementation 'com.google.ai.client.generativeai:generativeai:0.9.0'
     
     // Security - EncryptedSharedPreferences
     implementation 'androidx.security:security-crypto:1.1.0-alpha06'

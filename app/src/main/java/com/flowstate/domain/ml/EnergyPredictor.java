@@ -24,6 +24,9 @@ public class EnergyPredictor {
     private static final double W3_HR_TREND = 20.0;
     private static final double W4_WPM_DELTA = 15.0;
     private static final double W5_REACTION_DELTA = 10.0;
+    private static final double W6_HRV = 15.0;
+    private static final double W7_ACTIVITY = 10.0;
+    private static final double W8_SCREEN_FATIGUE = 10.0; // Negative impact
     
     // Classification thresholds
     private static final int HIGH_THRESHOLD = 66;
@@ -110,8 +113,25 @@ public class EnergyPredictor {
         double reactionDeltaNormalized = Math.max(0.0, Math.min(1.0, (100.0 - feat.reactionDelta) / 200.0));
         double reactionComponent = W5_REACTION_DELTA * reactionDeltaNormalized;
         
-        // Sum all components
-        double score = sleepComponent + circadianComponent + hrComponent + wpmComponent + reactionComponent;
+        // w6 * HRV (Higher HRV = better recovery/energy)
+        // Normalize HRV (approx 20-100ms)
+        double hrvNormalized = Math.max(0.0, Math.min(1.0, (feat.hrvRmssd - 20.0) / 80.0));
+        double hrvComponent = W6_HRV * hrvNormalized;
+
+        // w7 * Activity (Steps + Workout)
+        // Normalize steps (0-10000) and workout (0-60 mins)
+        double activityScore = (feat.stepsCount / 10000.0) + (feat.workoutMinutes / 60.0);
+        double activityNormalized = Math.max(0.0, Math.min(1.0, activityScore));
+        double activityComponent = W7_ACTIVITY * activityNormalized;
+
+        // -w8 * Screen Fatigue (Higher screen time = lower energy)
+        // Normalize screen time (0-8 hours/480 mins)
+        double screenNormalized = Math.max(0.0, Math.min(1.0, feat.screenTimeMinutes / 480.0));
+        double screenComponent = W8_SCREEN_FATIGUE * screenNormalized;
+
+        // Sum all components (subtract fatigue)
+        double score = sleepComponent + circadianComponent + hrComponent + wpmComponent + reactionComponent
+                     + hrvComponent + activityComponent - screenComponent;
         
         // Clamp score to [0, 100]
         score = Math.max(0.0, Math.min(100.0, score));
