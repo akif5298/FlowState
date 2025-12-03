@@ -2,6 +2,7 @@ package com.flowstate.data.local.dao;
 
 import androidx.room.Dao;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
@@ -12,10 +13,10 @@ import java.util.List;
 @Dao
 public interface PredictionDao {
     
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     long insert(PredictionLocal predictionLocal);
     
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     List<Long> insertAll(List<PredictionLocal> predictionLocals);
     
     /**
@@ -41,6 +42,9 @@ public interface PredictionDao {
      */
     @Query("DELETE FROM prediction_local")
     void deleteAll();
+    
+    @Query("SELECT * FROM prediction_local ORDER BY predictionTime DESC LIMIT 1")
+    PredictionLocal getLatest();
     
     @Update
     void update(PredictionLocal predictionLocal);

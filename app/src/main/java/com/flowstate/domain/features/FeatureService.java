@@ -99,12 +99,22 @@ public class FeatureService {
             // Compute WPM/reaction deltas
             Double wpmForBin = wpmByBin.get(slotStart);
             if (wpmForBin != null) {
-                row.wpmDelta = wpmForBin - wpmBaseline;
+                // If baseline is 0 (no history), assume current performance is normal (delta 0)
+                if (wpmBaseline > 0) {
+                    row.wpmDelta = wpmForBin - wpmBaseline;
+                } else {
+                    row.wpmDelta = 0.0;
+                }
             }
             
             Double reactionForBin = reactionByBin.get(slotStart);
             if (reactionForBin != null) {
-                row.reactionDelta = reactionForBin - reactionBaseline;
+                // If baseline is 0 (no history), assume current performance is normal (delta 0)
+                if (reactionBaseline > 0) {
+                    row.reactionDelta = reactionForBin - reactionBaseline;
+                } else {
+                    row.reactionDelta = 0.0;
+                }
             }
             
             featureRows.add(row);

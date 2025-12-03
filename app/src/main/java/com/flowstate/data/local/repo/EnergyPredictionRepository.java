@@ -109,6 +109,22 @@ public class EnergyPredictionRepository {
         });
     }
     
+    /**
+     * Get the most recent prediction
+     * 
+     * @param callback Callback to receive the latest prediction
+     */
+    public void getLatestPrediction(DataCallback<PredictionLocal> callback) {
+        databaseWriteExecutor.execute(() -> {
+            try {
+                PredictionLocal latest = predictionDao.getLatest();
+                callback.onSuccess(latest);
+            } catch (Exception e) {
+                callback.onError(e);
+            }
+        });
+    }
+
     public interface DataCallback<T> {
         void onSuccess(T data);
         void onError(Exception e);

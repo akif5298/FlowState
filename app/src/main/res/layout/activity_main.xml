@@ -96,6 +96,7 @@
                 app:cardElevation="8dp"
                 app:strokeWidth="0dp"
                 android:layout_marginBottom="24dp"
+                android:visibility="gone"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
@@ -120,89 +121,9 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Section: Cognitive Tests -->
-            <TextView
-                android:id="@+id/sectionCognitive"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="Cognitive Tests"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:textColor="@color/text_primary"
-                android:letterSpacing="0.05"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="20dp"
-                app:layout_constraintTop_toBottomOf="@+id/cardConnectFit"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
-
-            <!-- Typing Speed Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardTyping"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="4dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="@color/border"
-                android:layout_marginBottom="20dp"
-                app:layout_constraintTop_toBottomOf="@+id/sectionCognitive"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnTypingSpeed"
-                    android:layout_width="match_parent"
-                    android:layout_height="72dp"
-                    android:text="Measure Typing Speed"
-                    android:textSize="17sp"
-                    android:textAlignment="textStart"
-                    android:textColor="@android:color/white"
-                    android:backgroundTint="#636363"
-                    android:paddingStart="24dp"
-                    android:paddingEnd="24dp"
-                    app:icon="@android:drawable/ic_menu_sort_by_size"
-                    app:iconGravity="start"
-                    app:iconPadding="16dp"
-                    app:cornerRadius="20dp"
-                    app:iconTint="@android:color/white"
-                    style="@style/Widget.Material3.Button" />
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Reaction Time Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardReaction"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="4dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="@color/border"
-                android:layout_marginBottom="32dp"
-                app:layout_constraintTop_toBottomOf="@+id/cardTyping"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnReactionTime"
-                    android:layout_width="match_parent"
-                    android:layout_height="72dp"
-                    android:text="Measure Reaction Time"
-                    android:textSize="17sp"
-                    android:textAlignment="textStart"
-                    android:textColor="@android:color/white"
-                    android:backgroundTint="#636363"
-                    android:paddingStart="24dp"
-                    android:paddingEnd="24dp"
-                    app:icon="@android:drawable/ic_menu_revert"
-                    app:iconGravity="start"
-                    app:iconPadding="16dp"
-                    app:cornerRadius="20dp"
-                    app:iconTint="@android:color/white"
-                    style="@style/Widget.Material3.Button" />
-
-            </com.google.android.material.card.MaterialCardView>
+            <!-- Section: Cognitive Tests (Removed from Main) -->
+            <!-- Typing Speed Card (Removed from Main) -->
+            <!-- Reaction Time Card (Removed from Main) -->
 
             <!-- Section: Energy Analysis -->
             <TextView
@@ -216,7 +137,7 @@
                 android:letterSpacing="0.05"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="20dp"
-                app:layout_constraintTop_toBottomOf="@+id/cardReaction"
+                app:layout_constraintTop_toBottomOf="@+id/cardConnectFit"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
 

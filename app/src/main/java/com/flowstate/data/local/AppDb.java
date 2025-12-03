@@ -60,7 +60,7 @@ import com.flowstate.data.local.entities.WeatherLocal;
         DeviceUsageLocal.class,
         WeatherLocal.class
     },
-    version = 4, // Incremented for new manual input entities
+    version = 5, // Incremented for PredictionLocal schema changes
     exportSchema = false
 )
 public abstract class AppDb extends RoomDatabase {
