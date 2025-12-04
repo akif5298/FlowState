@@ -26,6 +26,9 @@ import android.graphics.Color;
 import android.view.inputmethod.InputMethodManager;
 import android.content.Context;
 
+import androidx.appcompat.widget.Toolbar;
+import android.view.MenuItem;
+
 public class TypingSpeedActivity extends AppCompatActivity {
     
     private static final int TEST_DURATION_SECONDS = 30;
@@ -47,6 +50,16 @@ public class TypingSpeedActivity extends AppCompatActivity {
         setContentView(R.layout.activity_typing_speed);
         
         initializeViews();
+        
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                getSupportActionBar().setTitle(R.string.typing_title);
+            }
+        }
+        
         collector = new TypingSpeedCollector();
         repository = new TypingSpeedRepository(this);
         mainHandler = new Handler(Looper.getMainLooper());
@@ -86,7 +99,7 @@ public class TypingSpeedActivity extends AppCompatActivity {
                     startTest();
                     // Force a tiny UI update to ensure timer is visible immediately?
                     if (tvTimer != null) tvTimer.setText(String.valueOf(TEST_DURATION_SECONDS));
-                    Toast.makeText(TypingSpeedActivity.this, "Test Started!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(TypingSpeedActivity.this, R.string.typing_test_started, Toast.LENGTH_SHORT).show();
                 }
                 
                 // Record typing after test has started
@@ -101,6 +114,15 @@ public class TypingSpeedActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {}
         });
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
     
     private void initializeViews() {
@@ -127,7 +149,7 @@ public class TypingSpeedActivity extends AppCompatActivity {
         
         // Enable input immediately - will auto-start when typing begins
         etUserInput.setEnabled(true);
-        etUserInput.setHint("Start typing to begin the test...");
+        etUserInput.setHint(R.string.typing_start_hint);
         
         // Hide results card initially
         View cardResult = findViewById(R.id.cardResult);
@@ -149,7 +171,7 @@ public class TypingSpeedActivity extends AppCompatActivity {
         etUserInput.setEnabled(true);
         etUserInput.requestFocus();
         testStarted = false;
-        btnStart.setText("Reset");
+        btnStart.setText(getString(R.string.typing_reset));
         btnStart.setEnabled(true);
         
         // Reset timer display
@@ -169,7 +191,7 @@ public class TypingSpeedActivity extends AppCompatActivity {
             startTime = System.currentTimeMillis();
             collector.startTest();
             testStarted = true;
-            btnStart.setText("Reset");
+            btnStart.setText(getString(R.string.typing_reset));
             btnStart.setEnabled(true);
             
             // Hide results card if visible
@@ -179,7 +201,7 @@ public class TypingSpeedActivity extends AppCompatActivity {
             }
             
             // Clear hint when test starts
-            etUserInput.setHint("Keep typing...");
+            etUserInput.setHint(R.string.typing_keep_typing);
             
             // Start 60 second countdown timer
             startTimer();
@@ -278,7 +300,7 @@ public class TypingSpeedActivity extends AppCompatActivity {
             @Override
             public void onSuccess(Long id) {
                 runOnUiThread(() -> {
-                    Toast.makeText(TypingSpeedActivity.this, "Test saved! Net WPM: " + finalWpm, Toast.LENGTH_LONG).show();
+                    Toast.makeText(TypingSpeedActivity.this, getString(R.string.typing_test_saved, finalWpm), Toast.LENGTH_LONG).show();
                 });
             }
             
@@ -286,7 +308,7 @@ public class TypingSpeedActivity extends AppCompatActivity {
             public void onError(Exception error) {
                 runOnUiThread(() -> {
                     Log.e("TypingSpeedActivity", "Error saving typing test", error);
-                    Toast.makeText(TypingSpeedActivity.this, "Error saving test", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(TypingSpeedActivity.this, R.string.typing_error_saving, Toast.LENGTH_SHORT).show();
                 });
             }
         });
@@ -294,17 +316,10 @@ public class TypingSpeedActivity extends AppCompatActivity {
         // Update UI
         etUserInput.setEnabled(false);
         btnStart.setEnabled(true);
-        btnStart.setText("Start");
+        btnStart.setText(getString(R.string.typing_start));
         testStarted = false;
         
-        String resultText = String.format(
-                "Net Speed\n%d WPM\n\n" +
-                "Accuracy\n%.1f%%\n\n" +
-                "Errors\n%d",
-                wpm,
-                accuracy,
-                errors
-        );
+        String resultText = getString(R.string.typing_result_format, wpm, accuracy, errors);
         tvResult.setText(resultText);
         
         // Show results card with animation

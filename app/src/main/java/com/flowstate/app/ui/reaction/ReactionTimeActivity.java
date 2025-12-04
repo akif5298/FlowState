@@ -19,6 +19,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import androidx.appcompat.widget.Toolbar;
+import android.view.MenuItem;
+
 public class ReactionTimeActivity extends AppCompatActivity {
     
     private static final int NUM_TRIALS = 5;
@@ -41,6 +44,16 @@ public class ReactionTimeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_reaction_time);
         
         initializeViews();
+        
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                getSupportActionBar().setTitle(R.string.reaction_title);
+            }
+        }
+        
         collector = new ReactionTimeCollector();
         repository = new ReactionTimeRepository(this);
         mainHandler = new Handler(Looper.getMainLooper());
@@ -55,6 +68,15 @@ public class ReactionTimeActivity extends AppCompatActivity {
         btnTap.setOnClickListener(v -> recordReaction());
         
         resetTest();
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
     
     private void initializeViews() {
@@ -77,14 +99,14 @@ public class ReactionTimeActivity extends AppCompatActivity {
         btnStart.setEnabled(true);
         btnTap.setEnabled(false);
         updateButtonColorHex("#4CAF50");
-        tvInstructions.setText("Press Start to begin test");
-        tvResult.setText("Ready to test");
+        tvInstructions.setText(R.string.reaction_press_start);
+        tvResult.setText(R.string.reaction_ready);
         updateTrialCount();
     }
     
     private void updateTrialCount() {
         if (tvTrialCount != null) {
-            tvTrialCount.setText(String.format("Trial %d/%d", currentTrial, NUM_TRIALS));
+            tvTrialCount.setText(getString(R.string.reaction_trial_format, currentTrial, NUM_TRIALS));
         }
     }
     
@@ -98,7 +120,7 @@ public class ReactionTimeActivity extends AppCompatActivity {
         waitingForColorChange = true;
         btnStart.setEnabled(false);
         btnTap.setEnabled(true);
-        tvInstructions.setText("⏳ Wait for the color to change...");
+        tvInstructions.setText(R.string.reaction_wait_color);
         updateButtonColorHex("#F44336"); // Red
         
         // Random delay between 2-5 seconds
@@ -108,7 +130,7 @@ public class ReactionTimeActivity extends AppCompatActivity {
             if (waitingForColorChange) {
                 waitingForColorChange = false;
                 runOnUiThread(() -> {
-                    tvInstructions.setText("TAP NOW!");
+                    tvInstructions.setText(R.string.tap_now);
                     updateButtonColorHex("#4CAF50"); // Green
                     startTime = System.nanoTime(); // Start timing exactly when visual change is requested
                 });
@@ -119,7 +141,7 @@ public class ReactionTimeActivity extends AppCompatActivity {
     private void recordReaction() {
         if (waitingForColorChange) {
             // Too early - reset this trial
-            tvInstructions.setText("Too early! Wait for the color change...");
+            tvInstructions.setText(R.string.reaction_too_early);
             updateButtonColorHex("#F44336"); // Red
             // Restart this trial after a short delay
             mainHandler.postDelayed(() -> startTest(), 1000);
@@ -135,7 +157,7 @@ public class ReactionTimeActivity extends AppCompatActivity {
         currentTrial++;
         
         // Show result for this trial
-        String resultText = String.format("Trial %d: %d ms", currentTrial, reactionTimeMs);
+        String resultText = getString(R.string.reaction_trial_result, currentTrial, reactionTimeMs);
         tvResult.setText(resultText);
         updateTrialCount();
         
@@ -146,7 +168,7 @@ public class ReactionTimeActivity extends AppCompatActivity {
             // Continue to next trial
             btnStart.setEnabled(true);
             btnTap.setEnabled(false);
-            tvInstructions.setText("Press Start for next trial");
+            tvInstructions.setText(R.string.reaction_next_trial);
             updateButtonColorHex("#4CAF50");
         }
     }
@@ -155,7 +177,7 @@ public class ReactionTimeActivity extends AppCompatActivity {
         // Validate that we have reaction times
         if (reactionTimes == null || reactionTimes.isEmpty()) {
             android.util.Log.e("ReactionTimeActivity", "No reaction times to save");
-            Toast.makeText(this, "Error: No reaction times recorded. Please complete the test.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.reaction_error_no_times, Toast.LENGTH_LONG).show();
             return;
         }
         
@@ -166,7 +188,7 @@ public class ReactionTimeActivity extends AppCompatActivity {
         int medianMs;
         if (sortedTimes.size() == 0) {
             android.util.Log.e("ReactionTimeActivity", "Empty sorted times list");
-            Toast.makeText(this, "Error: No valid reaction times to save.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.reaction_error_no_valid, Toast.LENGTH_LONG).show();
             return;
         } else if (sortedTimes.size() % 2 == 0) {
             // Even number of trials - average of two middle values
@@ -202,7 +224,7 @@ public class ReactionTimeActivity extends AppCompatActivity {
                 android.util.Log.d("ReactionTimeActivity", "Successfully saved reaction test with id: " + id);
                 runOnUiThread(() -> {
                     // Show success message
-                    Toast.makeText(ReactionTimeActivity.this, "Test saved to database! (Median: " + finalMedianMs + " ms)", Toast.LENGTH_LONG).show();
+                    Toast.makeText(ReactionTimeActivity.this, getString(R.string.reaction_saved_format, finalMedianMs), Toast.LENGTH_LONG).show();
                 });
             }
             
@@ -214,21 +236,16 @@ public class ReactionTimeActivity extends AppCompatActivity {
                     if (errorMsg == null || errorMsg.isEmpty()) {
                         errorMsg = error.getClass().getSimpleName();
                     }
-                    Toast.makeText(ReactionTimeActivity.this, "Error saving test: " + errorMsg, Toast.LENGTH_LONG).show();
+                    Toast.makeText(ReactionTimeActivity.this, getString(R.string.reaction_error_saving, errorMsg), Toast.LENGTH_LONG).show();
                 });
             }
         });
         
         // Show final results
-        String resultText = String.format(
-                "Median: %d ms\n\n" +
-                "All Trials:\n%s",
-                medianMs,
-                formatReactionTimes()
-        );
+        String resultText = getString(R.string.reaction_final_result_format, medianMs, formatReactionTimes());
         tvResult.setText(resultText);
-        tvInstructions.setText("🎉 Test Complete!");
-        btnStart.setText("Start New Test");
+        tvInstructions.setText(R.string.reaction_complete);
+        btnStart.setText(R.string.reaction_start_new);
         btnStart.setEnabled(true);
         btnTap.setEnabled(false);
         updateButtonColorHex("#4CAF50");
@@ -240,7 +257,7 @@ public class ReactionTimeActivity extends AppCompatActivity {
     private String formatReactionTimes() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < reactionTimes.size(); i++) {
-            sb.append(String.format("Trial %d: %d ms", i + 1, reactionTimes.get(i)));
+            sb.append(getString(R.string.reaction_trial_result, i + 1, reactionTimes.get(i)));
             if (i < reactionTimes.size() - 1) {
                 sb.append("\n");
             }

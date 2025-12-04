@@ -47,6 +47,12 @@ public interface ReactionDao {
      */
     @Query("DELETE FROM reaction_local")
     void deleteAll();
+
+    /**
+     * Delete a single record by ID
+     */
+    @Query("DELETE FROM reaction_local WHERE id = :id")
+    void deleteById(long id);
     
     @Update
     void update(ReactionLocal reactionLocal);

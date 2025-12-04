@@ -19,18 +19,54 @@
     <string name="typing_result">Results</string>
     <string name="typing_wpm">Words per minute: %1$d</string>
     <string name="typing_accuracy">Accuracy: %1$d%%</string>
-    
+    <string name="typing_title">Typing Speed</string>
+    <string name="typing_start_hint">Start typing to automatically begin the test...</string>
+    <string name="typing_card_instructions">Start typing to automatically begin the test. Type the text below as quickly and accurately as possible.</string>
+    <string name="typing_waiting_text">Waiting for text...</string>
+    <string name="typing_reset">Reset</string>
+    <string name="typing_start">Start</string>
+    <string name="typing_test_started">Test Started!</string>
+    <string name="typing_keep_typing">Keep typing...</string>
+    <string name="typing_test_saved">Test saved! Net WPM: %1$d</string>
+    <string name="typing_error_saving">Error saving test</string>
+    <string name="typing_result_format">Net Speed\n%1$d WPM\n\nAccuracy\n%2$.1f%%\n\nErrors\n%3$d</string>
+
     <!-- Reaction Time -->
+    <string name="reaction_title">Reaction Time Test</string>
     <string name="reaction_instructions">Tap the screen when the color changes</string>
     <string name="waiting">Wait for the color to change...</string>
     <string name="tap_now">TAP NOW!</string>
     <string name="reaction_result">Your reaction time: %1$d ms</string>
+    <string name="reaction_wait_color">⏳ Wait for the color to change...</string>
+    <string name="reaction_too_early">Too early! Wait for the color change...</string>
+    <string name="reaction_ready">Ready to test</string>
+    <string name="reaction_press_start">Press Start to begin test</string>
+    <string name="reaction_trial_format">Trial %1$d/%2$d</string>
+    <string name="reaction_trial_result">Trial %1$d: %2$d ms</string>
+    <string name="reaction_next_trial">Press Start for next trial</string>
+    <string name="reaction_error_no_times">Error: No reaction times recorded. Please complete the test.</string>
+    <string name="reaction_error_no_valid">Error: No valid reaction times to save.</string>
+    <string name="reaction_saved_format">Test saved to database! (Median: %1$d ms)</string>
+    <string name="reaction_error_saving">Error saving test: %1$s</string>
+    <string name="reaction_final_result_format">Median: %1$d ms\n\nAll Trials:\n%2$s</string>
+    <string name="reaction_complete">🎉 Test Complete!</string>
+    <string name="reaction_start_new">Start New Test</string>
+    <string name="reaction_start_test">Start Test</string>
+    <string name="reaction_your_time">Your reaction time</string>
     
     <!-- Energy Prediction -->
     <string name="predicted_energy_high">High Energy</string>
     <string name="predicted_energy_medium">Medium Energy</string>
     <string name="predicted_energy_low">Low Energy</string>
     <string name="recommended_tasks">Recommended Tasks</string>
+    <string name="calculating_energy">Calculating energy level from health data...</string>
+    <string name="generating_predictions">Generating predictions for today...</string>
+    <string name="tap_generate_forecast">Tap generate to create forecast</string>
+    <string name="forecast_available">Forecast available for today</string>
+    <string name="predictions_updated">Predictions updated!</string>
+    <string name="error_generating">Error generating predictions: %1$s</string>
+    <string name="forecast_from_cache">Forecast loaded from cache</string>
+    <string name="error_prefix">Error: %1$s</string>
     
     <!-- Charts -->
     <string name="heart_rate_chart">Heart Rate Trend</string>
@@ -40,5 +76,80 @@
     <!-- Errors -->
     <string name="error_loading_data">Error loading data. Please try again.</string>
     <string name="error_fit_not_connected">Please connect to Google Fit first</string>
+    
+    <!-- Dashboard & Help -->
+    <string name="help_title">Help &amp; About</string>
+    <string name="help_message_format">FlowState v1.0\n\nAuthors: %1$s\n\nInstructions:\n• Complete daily check-ins to track energy.\n• Take cognitive tests (Typing/Reaction) to calibrate.\n• Important: You must set up Google Fit and add your health data there first. Then return to this app and tap \'Sync Now\' to import that data.\n• Once data is synced, tap \'Update\' on the forecast card to generate your energy prediction.</string>
+    <string name="authors_list">Kush Jain, Bibek Chugh, Akif Rahman</string>
+    <string name="close">Close</string>
+    <string name="sync_now">Sync Now</string>
+    <string name="update">Update</string>
+    <string name="tap_update_forecast">Tap update to refresh forecast</string>
+    <string name="forecast_updated">Forecast updated!</string>
+    <string name="ai_error_prefix">AI Error</string>
+    <string name="energy_score_analysis">Energy Score Analysis: %1$s</string>
+    <string name="input_details_not_available">(Detailed input variables not available)</string>
+    <string name="self_reported_energy">• Self-Reported Energy: %1$s/10</string>
+    <string name="physical_tiredness">• Physical Tiredness: %1$s/10</string>
+    <string name="mental_tiredness">• Mental Tiredness: %1$s/10</string>
+    <string name="meal_impact">• Meal Impact: %1$s</string>
+    <string name="current_emotion">• Current Emotion: %1$s</string>
+    <string name="caffeine_intake">• Caffeine: %1$s cups</string>
+    <string name="recent_task">• Recent Task: %1$s</string>
+    <string name="last_prediction_accuracy">• Last Prediction Accuracy: %1$s</string>
+    <string name="accuracy_accurate">Accurate</string>
+    <string name="accuracy_high">Inaccurately High</string>
+    <string name="accuracy_low">Inaccurately Low</string>
+    <string name="insight_high">Great energy levels! Perfect time for focused work or exercise.</string>
+    <string name="insight_medium">Moderate energy. Consider taking breaks and staying hydrated.</string>
+    <string name="insight_low">Low energy detected. Rest, hydrate, or take a short walk to recharge.</string>
+    <string name="check_in_saved">Daily check-in saved!</string>
+    <string name="error_saving_check_in">Error saving check-in</string>
+    <string name="no_data_to_save">No data to save</string>
+    <string name="manual_entry_title">Daily Check-in</string>
+    <string name="manual_entry_subtitle">Log your energy, mood, and context to improve predictions.</string>
+    <string name="start_check_in">Start Check-in</string>
+    <string name="no_check_ins_yet">No check-ins yet</string>
+    <string name="sync_data_insight">Sync data to view insights.</string>
+    <string name="cognitive_check">Cognitive Check</string>
+    <string name="typing_label">Typing</string>
+    <string name="reaction_label">Reaction</string>
+    
+    <!-- History -->
+    <string name="history_empty_state">No history found.\nComplete a test to see it here.</string>
+    <string name="history_item_typing">%1$d WPM (Typing)</string>
+    <string name="history_item_reaction">%1$d ms (Reaction)</string>
+    <string name="item_deleted">Item deleted</string>
+    <string name="details_title">Details</string>
+    <string name="typing_test_details">Typing Test Details</string>
+    <string name="reaction_test_details">Reaction Test Details</string>
+    <string name="details_wpm">WPM: %1$d</string>
+    <string name="details_accuracy">Accuracy: %1$s</string>
+    <string name="details_errors">Errors: %1$d</string>
+    <string name="details_date">Date: %1$s</string>
+    <string name="details_median">Median Time: %1$d ms</string>
+    <string name="details_count">Tests Count: %1$d</string>
+    <string name="title_cognitive_history">Cognitive Test History</string>
+    
+    <!-- More Data Dialog -->
+    <string name="more_data_needed_title">More Data Needed</string>
+    <string name="more_data_needed_msg">To generate an accurate energy forecast, we need a bit more data. Please provide at least 3 of the following:\n\n%1$s</string>
+    <string name="missing_hr">• Heart Rate (from Watch/Health Connect)\n</string>
+    <string name="missing_sleep">• Sleep Data (from Watch/Health Connect)\n</string>
+    <string name="missing_typing">• Typing Speed Test (in App)\n</string>
+    <string name="missing_reaction">• Reaction Time Test (in App)\n</string>
+    <string name="add_data_btn">I\'ll add data</string>
+    
+    <!-- Onboarding / No Data -->
+    <string name="no_data_found_title">No Data Found</string>
+    <string name="no_data_found_msg">Oh! Looks like we have no data for you. Get started with our onboarding to begin tracking your energy levels!</string>
+    <string name="go_to_onboarding">Go to Onboarding</string>
+    <string name="cancel">Cancel</string>
+    
+    <!-- MainActivity Strings -->
+    <string name="health_connect_not_available">Health Connect is not available</string>
+    <string name="syncing_data">Syncing health data...</string>
+    <string name="hc_available">Health Connect Available</string>
+    <string name="hc_debug">Debug Health Connect</string>
+    <string name="hc_unavailable">Health Connect Unavailable</string>
 </resources>
-

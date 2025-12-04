@@ -156,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
     
     private void syncNow() {
         if (!hcManager.isAvailable()) {
-            Toast.makeText(this, "Health Connect is not available", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.health_connect_not_available, Toast.LENGTH_SHORT).show();
             return;
         }
         
@@ -164,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
         workManager.enqueue(HeartRateSyncWorker.createWorkRequest());
         workManager.enqueue(SleepSyncWorker.createWorkRequest());
         
-        Toast.makeText(this, "Syncing health data...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.syncing_data, Toast.LENGTH_SHORT).show();
         android.util.Log.d("MainActivity", "Sync workers enqueued");
     }
     
@@ -177,8 +177,8 @@ public class MainActivity extends AppCompatActivity {
         boolean isAvailable = hcManager.isAvailable();
         
         if (isAvailable) {
-            tvStatus.setText("Health Connect Available");
-            btnConnectFit.setText("Debug Health Connect");
+            tvStatus.setText(R.string.hc_available);
+            btnConnectFit.setText(R.string.hc_debug);
             if (btnSyncNow != null) {
                 btnSyncNow.setEnabled(true);
                 btnSyncNow.setVisibility(View.VISIBLE);
@@ -186,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
             // Schedule hourly sync
             SyncScheduler.scheduleHourlySync(this);
         } else {
-            tvStatus.setText("Health Connect Unavailable");
+            tvStatus.setText(R.string.hc_unavailable);
             btnConnectFit.setEnabled(false);
              if (btnSyncNow != null) {
                 btnSyncNow.setEnabled(false);

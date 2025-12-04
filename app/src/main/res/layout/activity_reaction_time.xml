@@ -1,118 +1,151 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#F5F7FA"
-    android:gravity="center"
-    android:padding="20dp">
+    android:background="@color/background_light"
+    android:fitsSystemWindows="true">
 
-    <com.google.android.material.card.MaterialCardView
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="20dp"
-        app:cardElevation="4dp"
-        android:layout_marginBottom="40dp">
+        android:theme="@style/ThemeOverlay.Material3.Dark">
 
-        <LinearLayout
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:title="@string/reaction_title"
+            app:titleTextColor="@android:color/white" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="#F5F7FA"
+        android:gravity="center"
+        android:padding="20dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="20dp">
+            app:cardCornerRadius="20dp"
+            app:cardElevation="4dp"
+            android:layout_marginBottom="40dp">
 
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Reaction Time Test"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:textColor="@android:color/black"
-                android:layout_marginBottom="12dp" />
+                android:orientation="vertical"
+                android:padding="20dp">
 
-            <TextView
-                android:id="@+id/tvInstructions"
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/reaction_title"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"
+                    android:layout_marginBottom="12dp" />
+
+                <TextView
+                    android:id="@+id/tvInstructions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/reaction_instructions"
+                    android:textSize="16sp"
+                    android:textColor="#666666"
+                    android:textAlignment="center" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="280dp"
+            android:layout_height="280dp"
+            app:cardCornerRadius="140dp"
+            app:cardElevation="12dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="32dp"
+            android:background="@android:color/transparent"
+            app:strokeWidth="0dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnTap"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text=""
+                app:cornerRadius="140dp"
+                android:backgroundTint="#636363" />
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:id="@+id/tvTrialCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Trial 0/5"
+            android:textSize="16sp"
+            android:textColor="#555555"
+            android:layout_marginBottom="12dp" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="24dp">
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Tap when the button turns green"
-                android:textSize="16sp"
-                android:textColor="#666666"
-                android:textAlignment="center" />
+                android:orientation="vertical"
+                android:padding="20dp"
+                android:gravity="center">
 
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/tvResult"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/primary"
+                    android:layout_marginBottom="8dp" />
 
-    </com.google.android.material.card.MaterialCardView>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/reaction_your_time"
+                    android:textSize="14sp"
+                    android:textColor="#666666" />
 
-    <com.google.android.material.card.MaterialCardView
-        android:layout_width="280dp"
-        android:layout_height="280dp"
-        app:cardCornerRadius="140dp"
-        app:cardElevation="12dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginBottom="32dp"
-        android:background="@android:color/transparent"
-        app:strokeWidth="0dp">
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnTap"
+            android:id="@+id/btnStart"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text=""
-            app:cornerRadius="140dp"
-            android:backgroundTint="#636363" />
+            android:layout_height="64dp"
+            android:text="@string/reaction_start_test"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:backgroundTint="#636363"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:layout_marginTop="16dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            app:cornerRadius="16dp"
+            style="@style/Widget.Material3.Button" />
 
-    </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
 
-    <com.google.android.material.card.MaterialCardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="4dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="24dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="20dp"
-            android:gravity="center">
-
-            <TextView
-                android:id="@+id/tvResult"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@color/primary"
-                android:layout_marginBottom="8dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Your reaction time"
-                android:textSize="14sp"
-                android:textColor="#666666" />
-
-        </LinearLayout>
-
-    </com.google.android.material.card.MaterialCardView>
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnStart"
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:text="Start Test"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:textColor="@android:color/white"
-        android:backgroundTint="#636363"
-        android:paddingStart="24dp"
-        android:paddingEnd="24dp"
-        android:layout_marginTop="16dp"
-        android:insetTop="0dp"
-        android:insetBottom="0dp"
-        app:cornerRadius="16dp"
-        style="@style/Widget.Material3.Button" />
-
-</LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

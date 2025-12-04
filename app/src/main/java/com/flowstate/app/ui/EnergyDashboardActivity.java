@@ -68,6 +68,12 @@ import com.flowstate.services.WeatherCollector;
 import android.widget.ProgressBar; // Added import
 
 import com.flowstate.services.PredictionManager; // Added
+import com.google.android.material.snackbar.Snackbar; // Added
+
+import com.flowstate.app.ui.history.HistoryActivity; // Added
+import androidx.appcompat.widget.Toolbar; // Added
+import android.view.Menu; // Added
+import android.view.MenuItem; // Added
 
 public class EnergyDashboardActivity extends AppCompatActivity {
     
@@ -139,6 +145,11 @@ public class EnergyDashboardActivity extends AppCompatActivity {
         weatherCollector = new WeatherCollector(this);
         
         initializeViews();
+        
+        // Setup Toolbar
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        
         setupBottomNavigation();
         setupClickListeners();
         setupObservers(); // Added
@@ -149,6 +160,35 @@ public class EnergyDashboardActivity extends AppCompatActivity {
         refreshLastCheckInSummary();
     }
     
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        
+        if (id == R.id.action_history) {
+            startActivity(new Intent(this, HistoryActivity.class));
+            return true;
+        } else if (id == R.id.action_help) {
+            showHelpDialog();
+            return true;
+        }
+        
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void showHelpDialog() {
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(R.string.help_title)
+            .setMessage(getString(R.string.help_message_format, getString(R.string.authors_list)))
+            .setPositiveButton(R.string.close, null)
+            .show();
+    }
+
     private void setupObservers() {
         predictionManager.getStatus().observe(this, status -> {
             switch (status) {
@@ -165,7 +205,7 @@ public class EnergyDashboardActivity extends AppCompatActivity {
                     if (status == PredictionManager.PredictionStatus.SUCCESS) {
                          // Refresh data from repository/cache
                          loadEnergyData();
-                         Toast.makeText(this, "Forecast updated!", Toast.LENGTH_SHORT).show();
+                         Toast.makeText(this, R.string.forecast_updated, Toast.LENGTH_SHORT).show();
                     }
                     break;
                 default:
@@ -537,7 +577,11 @@ public class EnergyDashboardActivity extends AppCompatActivity {
                 // and we'll fix the aggregator to look back.
                 
                 runOnUiThread(() -> {
-                    Toast.makeText(this, "Daily check-in saved!", Toast.LENGTH_SHORT).show();
+                    // Toast.makeText(this, "Daily check-in saved!", Toast.LENGTH_SHORT).show();
+                    // Requirement: Snackbar
+                    View rootView = findViewById(android.R.id.content);
+                    Snackbar.make(rootView, "Daily check-in saved!", Snackbar.LENGTH_LONG).show();
+                    
                     updateLastCheckInSummaryText(input);
                 });
             } catch (Exception e) {
@@ -829,7 +873,7 @@ public class EnergyDashboardActivity extends AppCompatActivity {
 
                     if (!hourlyValues.isEmpty()) {
                         updateUIWithPrediction(finalAnchor.predictedLevel, finalAnchor.explanation, finalAnchor.actionableInsight, hourlyValues);
-                        updateStatus("Forecast loaded from cache");
+                        updateStatus(getString(R.string.forecast_from_cache));
                     } else {
                         fetchPredictionsFromApi();
                     }
@@ -845,7 +889,7 @@ public class EnergyDashboardActivity extends AppCompatActivity {
 
     private void fetchPredictionsFromApi() {
         if (tvAIInsight != null) {
-            tvAIInsight.setText("Calculating energy level from health data...");
+            tvAIInsight.setText(R.string.calculating_energy);
         }
         
         // Use PredictionManager to fetch predictions
@@ -936,15 +980,15 @@ public class EnergyDashboardActivity extends AppCompatActivity {
      */
     private void showInsufficientDataDialog(DataChecker.DataCheckResult result) {
         StringBuilder missing = new StringBuilder();
-        if (!result.hasHrData) missing.append("• Heart Rate (from Watch/Health Connect)\n");
-        if (!result.hasSleepData) missing.append("• Sleep Data (from Watch/Health Connect)\n");
-        if (!result.hasTypingData) missing.append("• Typing Speed Test (in App)\n");
-        if (!result.hasReactionData) missing.append("• Reaction Time Test (in App)\n");
+        if (!result.hasHrData) missing.append(getString(R.string.missing_hr));
+        if (!result.hasSleepData) missing.append(getString(R.string.missing_sleep));
+        if (!result.hasTypingData) missing.append(getString(R.string.missing_typing));
+        if (!result.hasReactionData) missing.append(getString(R.string.missing_reaction));
         
         android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
-        builder.setTitle("More Data Needed")
-                .setMessage("To generate an accurate energy forecast, we need a bit more data. Please provide at least 3 of the following:\n\n" + missing.toString())
-                .setPositiveButton("I'll add data", (dialog, which) -> {
+        builder.setTitle(R.string.more_data_needed_title)
+                .setMessage(getString(R.string.more_data_needed_msg, missing.toString()))
+                .setPositiveButton(R.string.add_data_btn, (dialog, which) -> {
                     dialog.dismiss();
                 })
                 .setCancelable(true)
@@ -1038,9 +1082,9 @@ public class EnergyDashboardActivity extends AppCompatActivity {
                         public void onSuccess(List<PredictionLocal> predictions) {
                             mainHandler.post(() -> {
                                 if (predictions.isEmpty()) {
-                                    updateStatus("Tap generate to create forecast");
+                                    updateStatus(getString(R.string.tap_generate_forecast));
                                 } else {
-                                    updateStatus("Forecast available for today");
+                                    updateStatus(getString(R.string.forecast_available));
                                 }
                             });
                         }
@@ -1094,45 +1138,45 @@ public class EnergyDashboardActivity extends AppCompatActivity {
                 if (summary == null) {
                     // Handle null summary
                     new androidx.appcompat.app.AlertDialog.Builder(this)
-                        .setTitle("Energy Score Analysis: " + score)
-                        .setMessage(explanation + "\n\n(Detailed input variables not available)")
-                        .setPositiveButton("Got it", null)
+                        .setTitle(getString(R.string.energy_score_analysis, score))
+                        .setMessage(explanation + "\n\n" + getString(R.string.input_details_not_available))
+                        .setPositiveButton(R.string.close, null)
                         .show();
                     return;
                 }
 
                 StringBuilder inputDetails = new StringBuilder();
                 if (summary.getManualEnergyLevel() != null) {
-                    inputDetails.append("• Self-Reported Energy: ").append(summary.getManualEnergyLevel()).append("/10\n");
+                    inputDetails.append(getString(R.string.self_reported_energy, summary.getManualEnergyLevel())).append("\n");
                 }
                 if (summary.getPhysicalTiredness() != null) {
-                    inputDetails.append("• Physical Tiredness: ").append(summary.getPhysicalTiredness()).append("/10\n");
+                    inputDetails.append(getString(R.string.physical_tiredness, summary.getPhysicalTiredness())).append("\n");
                 }
                 if (summary.getMentalTiredness() != null) {
-                    inputDetails.append("• Mental Tiredness: ").append(summary.getMentalTiredness()).append("/10\n");
+                    inputDetails.append(getString(R.string.mental_tiredness, summary.getMentalTiredness())).append("\n");
                 }
                 if (summary.getMealImpact() != null) {
-                    inputDetails.append("• Meal Impact: ").append(summary.getMealImpact()).append("\n");
+                    inputDetails.append(getString(R.string.meal_impact, summary.getMealImpact())).append("\n");
                 }
                 if (summary.getCurrentEmotion() != null) {
-                    inputDetails.append("• Current Emotion: ").append(summary.getCurrentEmotion()).append("\n");
+                    inputDetails.append(getString(R.string.current_emotion, summary.getCurrentEmotion())).append("\n");
                 }
                 if (summary.getCaffeineIntakeCups() != null) {
-                    inputDetails.append("• Caffeine: ").append(summary.getCaffeineIntakeCups()).append(" cups\n");
+                    inputDetails.append(getString(R.string.caffeine_intake, summary.getCaffeineIntakeCups())).append("\n");
                 }
                 if (summary.getRecentTask() != null) {
-                    inputDetails.append("• Recent Task: ").append(summary.getRecentTask()).append("\n");
+                    inputDetails.append(getString(R.string.recent_task, summary.getRecentTask())).append("\n");
                 }
                 if (summary.getPredictionAccuracyRating() != null) {
                     String accuracyText;
                     if (summary.getPredictionAccuracyRating() == 0) {
-                        accuracyText = "Accurate";
+                        accuracyText = getString(R.string.accuracy_accurate);
                     } else if (summary.getPredictionAccuracyRating() > 0) {
-                        accuracyText = "Inaccurately High";
+                        accuracyText = getString(R.string.accuracy_high);
                     } else {
-                        accuracyText = "Inaccurately Low";
+                        accuracyText = getString(R.string.accuracy_low);
                     }
-                    inputDetails.append("• Last Prediction Accuracy: ").append(accuracyText).append("\n");
+                    inputDetails.append(getString(R.string.last_prediction_accuracy, accuracyText)).append("\n");
                 }
                 
                 inputDetails.append("• Sleep: ").append(summary.getLastNightSleepHours() != null && summary.getLastNightSleepHours() > 0 ? String.format(Locale.getDefault(), "%.1fh", summary.getLastNightSleepHours()) : "N/A").append("\n");
@@ -1143,9 +1187,9 @@ public class EnergyDashboardActivity extends AppCompatActivity {
                 inputDetails.append("• Reaction: ").append(summary.getRecentReactionTimeMs() != null && summary.getRecentReactionTimeMs() > 0 ? summary.getRecentReactionTimeMs() + " ms" : "N/A").append("\n");
                 
                 new androidx.appcompat.app.AlertDialog.Builder(this)
-                    .setTitle("Energy Score Analysis: " + score)
+                    .setTitle(getString(R.string.energy_score_analysis, score))
                     .setMessage(explanation + "\n\n" + inputDetails.toString())
-                    .setPositiveButton("Got it", null)
+                    .setPositiveButton(R.string.close, null)
                     .show();
             });
         });
@@ -1156,11 +1200,11 @@ public class EnergyDashboardActivity extends AppCompatActivity {
      */
     private String generateInsight(double energyLevel, EnergyLevel level) {
         if (level == EnergyLevel.HIGH) {
-            return "Great energy levels! Perfect time for focused work or exercise.";
+            return getString(R.string.insight_high);
         } else if (level == EnergyLevel.MEDIUM) {
-            return "Moderate energy. Consider taking breaks and staying hydrated.";
+            return getString(R.string.insight_medium);
         } else {
-            return "Low energy detected. Rest, hydrate, or take a short walk to recharge.";
+            return getString(R.string.insight_low);
         }
     }
 }

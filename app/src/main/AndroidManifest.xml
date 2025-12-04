@@ -149,6 +149,12 @@
             android:theme="@style/Theme.FlowState" />
 
         <activity
+            android:name="com.flowstate.app.ui.history.HistoryActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FlowState"
+            android:label="History" />
+
+        <activity
             android:name="com.flowstate.app.ui.EnergyDashboardActivity"
             android:exported="true"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
