@@ -1,0 +1,24 @@
+Welcome to FlowState!
+
+TESTING INSTRUCTIONS
+====================
+
+You have two options to access the app:
+
+OPTION 1: Use Test Credentials (Will have data)
+-------------------------------
+Username: akifrahman102@gmail.com
+Password: Syed5298!
+
+OPTION 2: Create Your Own Account (Won't have data to view)
+----------------------------------
+The sign-up feature is fully functional. You can create a new account by:
+1. Clicking "Create Account" on the login screen
+2. Filling in your details
+3. Completing the registration process
+
+NOTES
+-----
+- All authentication features are working (login, signup)
+- Your account data will be securely stored
+- You can switch between accounts at any time

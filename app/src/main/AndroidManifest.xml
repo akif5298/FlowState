@@ -4,8 +4,8 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.BODY_SENSORS" />
-    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <!-- BODY_SENSORS and ACTIVITY_RECOGNITION removed - we use Health Connect API instead -->
+    <!-- Health Connect handles these permissions through its own permission system -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" 
         android:maxSdkVersion="32" />
@@ -15,6 +15,15 @@
     <uses-permission android:name="android.permission.WRITE_CALENDAR" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    
+    <!-- Health Connect permissions -->
+    <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
+    <uses-permission android:name="android.permission.health.READ_SLEEP" />
+    
+    <!-- Query Health Connect package -->
+    <queries>
+        <package android:name="com.google.android.apps.healthdata" />
+    </queries>
 
     <application
         android:name=".EnergyPredictorApplication"
@@ -132,6 +141,40 @@
             android:name="com.personaleenergy.app.ui.calendar.SimpleCalendarOnboardingActivity"
             android:exported="false"
             android:theme="@style/Theme.FlowState" />
+
+        <!-- Health Connect onboarding activity (required for Health Connect integration) -->
+        <activity
+            android:name="com.personaleenergy.app.ui.settings.HealthConnectOnboardingActivity"
+            android:exported="true"
+            android:permission="com.google.android.apps.healthdata.permission.START_ONBOARDING"
+            android:theme="@style/Theme.FlowState">
+            <intent-filter>
+                <action android:name="androidx.health.ACTION_SHOW_ONBOARDING" />
+            </intent-filter>
+        </activity>
+        
+        <!-- Health Connect onboarding activity alias for Android U+ -->
+        <activity-alias
+            android:name="UAndAboveOnboardingActivity"
+            android:exported="true"
+            android:targetActivity="com.personaleenergy.app.ui.settings.HealthConnectOnboardingActivity"
+            android:permission="android.permission.health.START_ONBOARDING">
+            <intent-filter>
+                <action android:name="android.health.connect.action.SHOW_ONBOARDING" />
+            </intent-filter>
+        </activity-alias>
+        
+        <!-- Health Connect permission usage activity (required for Android 14+) -->
+        <!-- This handles the privacy/rationale screen when user taps privacy link in Health Connect UI -->
+        <activity
+            android:name="com.personaleenergy.app.ui.settings.HealthConnectPermissionUsageActivity"
+            android:exported="true"
+            android:theme="@style/Theme.FlowState">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
+                <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
+            </intent-filter>
+        </activity>
 
     </application>
 

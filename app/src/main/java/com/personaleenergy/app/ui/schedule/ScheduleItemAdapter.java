@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import com.flowstate.app.R;
 import com.flowstate.app.ai.SmartCalendarAI;
@@ -84,68 +85,69 @@ public class ScheduleItemAdapter extends RecyclerView.Adapter<ScheduleItemAdapte
 
         void bind(SmartCalendarAI.ScheduledItem item, SimpleDateFormat timeFormat, 
                   OnTaskDeleteListener deleteListener, int position) {
-            // Set time
+            // Set task title (just the task name, no time)
+            tvTaskTitle.setText(item.title);
+            
+            // Set time - show time range on the right (same line as task title)
             java.util.Date startDate = new java.util.Date(item.startTime);
             java.util.Date endDate = new java.util.Date(item.endTime);
             tvTime.setText(timeFormat.format(startDate) + " - " + timeFormat.format(endDate));
+            tvTime.setVisibility(View.VISIBLE);
 
-            // Set task title
-            tvTaskTitle.setText(item.title);
-
-            // Set energy level and icon
+            // Set energy level and icon - combine emoji and text in chip
             if (item.energyLevel != null && item.type == SmartCalendarAI.ScheduledItemType.AI_SCHEDULED_TASK) {
                 chipEnergyLevel.setVisibility(View.VISIBLE);
-                ivEnergyIcon.setVisibility(View.VISIBLE);
+                ivEnergyIcon.setVisibility(View.GONE); // Hide separate icon, combine in chip
                 
                 String energyText = "";
                 int energyColorRes = R.color.energy_medium;
-                String energyEmoji = "⚡";
                 
                 switch (item.energyLevel) {
                     case HIGH:
                         energyText = "High energy";
-                        energyColorRes = R.color.energy_high;
-                        energyEmoji = "🔥";
+                        energyColorRes = R.color.energy_high; // Red
                         break;
                     case MEDIUM:
                         energyText = "Medium energy";
-                        energyColorRes = R.color.energy_medium;
-                        energyEmoji = "⚡";
+                        energyColorRes = R.color.energy_medium; // Green
                         break;
                     case LOW:
                         energyText = "Low energy";
-                        energyColorRes = R.color.energy_low;
-                        energyEmoji = "🔋";
+                        energyColorRes = R.color.energy_low; // Deep Blue
                         break;
                 }
                 
+                // Set text without emoji
                 chipEnergyLevel.setText(energyText);
-                chipEnergyLevel.setChipBackgroundColorResource(energyColorRes);
-                ivEnergyIcon.setText(energyEmoji);
-                ivEnergyIcon.setVisibility(View.VISIBLE);
+                // Set background color - use ColorStateList to ensure it applies
+                int colorValue = ContextCompat.getColor(
+                    chipEnergyLevel.getContext(), energyColorRes);
+                android.content.res.ColorStateList colorStateList = 
+                    android.content.res.ColorStateList.valueOf(colorValue);
+                chipEnergyLevel.setChipBackgroundColor(colorStateList);
+                // Also set the chip stroke to 0 to ensure clean appearance
+                chipEnergyLevel.setChipStrokeWidth(0f);
+                // Force refresh
+                chipEnergyLevel.invalidate();
             } else {
                 chipEnergyLevel.setVisibility(View.GONE);
                 ivEnergyIcon.setVisibility(View.GONE);
             }
 
-            // Set type indicator
+            // Set type indicator - show "AI Scheduled" with lightbulb for AI tasks
             if (item.type == SmartCalendarAI.ScheduledItemType.EXISTING_EVENT) {
                 tvType.setText("📅 Existing Event");
                 tvType.setVisibility(View.VISIBLE);
             } else if (item.type == SmartCalendarAI.ScheduledItemType.AI_SCHEDULED_TASK) {
-                tvType.setText("✨ AI Scheduled");
+                // Show "AI Scheduled" with lightbulb emoji
+                tvType.setText("💡 AI Scheduled");
                 tvType.setVisibility(View.VISIBLE);
             } else {
                 tvType.setVisibility(View.GONE);
             }
 
-            // Set reasoning
-            if (item.reasoning != null && !item.reasoning.trim().isEmpty()) {
-                tvReasoning.setText("💡 " + item.reasoning);
-                tvReasoning.setVisibility(View.VISIBLE);
-            } else {
-                tvReasoning.setVisibility(View.GONE);
-            }
+            // Hide reasoning text view - we're showing it in tvType instead
+            tvReasoning.setVisibility(View.GONE);
 
             // Show delete button only for AI-scheduled tasks (not existing events)
             if (item.type == SmartCalendarAI.ScheduledItemType.AI_SCHEDULED_TASK) {

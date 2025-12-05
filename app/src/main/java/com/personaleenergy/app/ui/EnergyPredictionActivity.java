@@ -15,7 +15,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ArrayAdapter;
-import com.flowstate.app.utils.HelpDialogHelper;
+// import com.flowstate.app.utils.HelpDialogHelper; // Removed - class deleted
 import com.google.android.material.snackbar.Snackbar;
 import androidx.appcompat.app.AppCompatActivity;
 import com.flowstate.app.R;
@@ -26,6 +26,7 @@ import com.flowstate.app.supabase.repository.EnergyPredictionRepository;
 import com.flowstate.app.supabase.api.SupabasePostgrestApi;
 import com.flowstate.app.ai.SmartCalendarAI;
 import com.personaleenergy.app.ml.EnergyMLPredictor;
+import com.personaleenergy.app.api.ChronosApiService;
 import retrofit2.Callback;
 import retrofit2.Response;
 import com.github.mikephil.charting.charts.LineChart;
@@ -65,11 +66,12 @@ public class EnergyPredictionActivity extends AppCompatActivity {
     private SupabaseClient supabaseClient;
     private Handler mainHandler;
     private SimpleDateFormat timeFormat;
-    private com.personaleenergy.app.api.AdviceSlipService adviceSlipService;
+    // private com.personaleenergy.app.api.AdviceSlipService adviceSlipService; // Removed - class deleted
     
     // CP470 Requirements: ProgressBar and ListView
     private ProgressBar progressBarPredictions;
     private ListView listViewPredictions;
+    private List<EnergyPrediction> currentPredictions; // Store current predictions for click handling
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,14 +92,35 @@ public class EnergyPredictionActivity extends AppCompatActivity {
             btnGenerateToday.setOnClickListener(v -> generateTodayPredictions());
         }
         
-        // Load existing predictions for today
-        loadTodayPredictions();
+        // Set up FAB to go back to dashboard
+        com.google.android.material.button.MaterialButton fabBackToDashboard = 
+            findViewById(R.id.fabBackToDashboard);
+        if (fabBackToDashboard != null) {
+            fabBackToDashboard.setOnClickListener(v -> {
+                Intent intent = new Intent(this, EnergyDashboardActivity.class);
+                startActivity(intent);
+                finish();
+            });
+        }
+        
+        // Show placeholders until user generates predictions
+        showPlaceholders();
     }
     
     /**
      * Load daily advice from Advice Slip API
      */
     private void loadDailyAdvice() {
+        if (tvAdvice == null) {
+            return;
+        }
+        
+        // AdviceSlipService removed - show default message
+        if (tvAdvice != null) {
+            tvAdvice.setText("Daily advice feature temporarily unavailable.");
+        }
+        
+        /* Removed - AdviceSlipService class deleted
         if (tvAdvice == null || adviceSlipService == null) {
             return;
         }
@@ -125,6 +148,7 @@ public class EnergyPredictionActivity extends AppCompatActivity {
                 });
             }
         });
+        */
     }
     
     private void initializeViews() {
@@ -142,8 +166,10 @@ public class EnergyPredictionActivity extends AppCompatActivity {
         // Setup ListView click listener (CP470 Requirement #4)
         if (listViewPredictions != null) {
             listViewPredictions.setOnItemClickListener((parent, view, position, id) -> {
-                String item = (String) parent.getItemAtPosition(position);
-                showPredictionDetailDialog(item);
+                if (currentPredictions != null && position < currentPredictions.size()) {
+                    EnergyPrediction prediction = currentPredictions.get(position);
+                    showEnergyAdviceDialog(prediction);
+                }
             });
         }
         
@@ -152,22 +178,50 @@ public class EnergyPredictionActivity extends AppCompatActivity {
             setupChart();
         }
         
-        // Initialize Advice Slip service
-        adviceSlipService = new com.personaleenergy.app.api.AdviceSlipService();
+        // Initialize Advice Slip service - Removed (class deleted)
+        // adviceSlipService = new com.personaleenergy.app.api.AdviceSlipService();
         
         // Load daily advice
         loadDailyAdvice();
     }
     
     /**
-     * Show custom dialog with prediction details (CP470 Requirement #11 - Custom Dialog)
+     * Show custom dialog with energy-specific advice (CP470 Requirement #11 - Custom Dialog)
      */
-    private void showPredictionDetailDialog(String predictionInfo) {
+    private void showEnergyAdviceDialog(EnergyPrediction prediction) {
+        if (prediction == null) {
+            return;
+        }
+        
+        String time = timeFormat.format(prediction.getTimestamp());
+        String title = "Energy at " + time;
+        String advice = getEnergyAdvice(prediction.getPredictedLevel());
+        
         android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
-        builder.setTitle("Energy Prediction Details");
-        builder.setMessage(predictionInfo);
+        builder.setTitle(title);
+        builder.setMessage(advice);
         builder.setPositiveButton("OK", null);
         builder.show();
+    }
+    
+    /**
+     * Get energy-specific advice based on energy level
+     */
+    private String getEnergyAdvice(EnergyLevel energyLevel) {
+        if (energyLevel == null) {
+            return "No energy prediction available.";
+        }
+        
+        switch (energyLevel) {
+            case HIGH:
+                return "Perfect time for high-intensity tasks! Focus on important work, creative projects, or challenging activities. Take advantage of this peak energy to maximize productivity.";
+            case MEDIUM:
+                return "Good time for moderate activities. Schedule routine tasks, meetings, or light exercise. Consider taking short breaks to maintain your energy throughout the day.";
+            case LOW:
+                return "Rest and recovery time. Focus on low-intensity tasks, take breaks, or consider a short nap. Avoid demanding activities and prioritize self-care to recharge.";
+            default:
+                return "Energy level not determined.";
+        }
     }
     
     @Override
@@ -179,11 +233,12 @@ public class EnergyPredictionActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_help) {
-            HelpDialogHelper.showHelpDialog(
-                this,
-                "Energy Prediction",
-                HelpDialogHelper.getDefaultInstructions("Energy Prediction")
-            );
+            // HelpDialogHelper removed - show simple dialog instead
+            new android.app.AlertDialog.Builder(this)
+                .setTitle("Energy Prediction Help")
+                .setMessage("This screen shows your predicted energy levels throughout the day. Use it to plan your activities at optimal times.")
+                .setPositiveButton("OK", null)
+                .show();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -462,32 +517,88 @@ public class EnergyPredictionActivity extends AppCompatActivity {
             List<EnergyPrediction> historicalPredictions,
             List<com.flowstate.app.data.models.TypingSpeedData> typingData,
             List<com.flowstate.app.data.models.ReactionTimeData> reactionData) {
+        
+        Log.d(TAG, "Generating predictions using Chronos API - Biometrics: " + 
+            (biometrics != null ? biometrics.size() : 0) + 
+            ", Historical: " + (historicalPredictions != null ? historicalPredictions.size() : 0) +
+            ", Typing: " + (typingData != null ? typingData.size() : 0) +
+            ", Reaction: " + (reactionData != null ? reactionData.size() : 0));
+        
+        // Get today's date range - generate predictions for next 24 hours
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        Date now = cal.getTime();
+        
+        // Build list of target times (24 hours)
+        List<Date> targetTimes = new ArrayList<>();
+        for (int hour = 0; hour < 24; hour++) {
+            Calendar hourCal = Calendar.getInstance();
+            hourCal.setTime(now);
+            hourCal.add(Calendar.HOUR_OF_DAY, hour);
+            targetTimes.add(hourCal.getTime());
+        }
+        
+        // Use Chronos API as primary method, with local ML as fallback
+        ChronosApiService chronosService = new ChronosApiService();
+        
+        chronosService.predictEnergy(
+            biometrics,
+            typingData,
+            reactionData,
+            historicalPredictions,
+            targetTimes,
+            new ChronosApiService.PredictionCallback() {
+                @Override
+                public void onSuccess(List<EnergyPrediction> predictions) {
+                    Log.d(TAG, "Successfully generated " + predictions.size() + " predictions from Chronos API");
+                    
+                    // Save predictions to database
+                    savePredictions(userId, predictions);
+                    
+                    // Display predictions
+                    mainHandler.post(() -> {
+                        displayPredictions(predictions);
+                        calculateAndDisplayOptimalTimes(predictions);
+                        resetButton();
+                        Toast.makeText(EnergyPredictionActivity.this, 
+                            "Predictions generated successfully! 🚀", 
+                            Toast.LENGTH_SHORT).show();
+                    });
+                }
+                
+                @Override
+                public void onError(Exception error) {
+                    Log.e(TAG, "Error generating predictions from Chronos API", error);
+                    
+                    // Fallback to local ML predictor if API fails
+                    Log.w(TAG, "Falling back to local ML predictor...");
+                    fallbackToLocalML(userId, biometrics, historicalPredictions, typingData, reactionData, targetTimes);
+                }
+            }
+        );
+    }
+    
+    /**
+     * Fallback to local ML predictor if Chronos API fails
+     */
+    private void fallbackToLocalML(String userId,
+            List<com.flowstate.app.data.models.BiometricData> biometrics,
+            List<EnergyPrediction> historicalPredictions,
+            List<com.flowstate.app.data.models.TypingSpeedData> typingData,
+            List<com.flowstate.app.data.models.ReactionTimeData> reactionData,
+            List<Date> targetTimes) {
         new Thread(() -> {
             try {
-                Log.d(TAG, "Generating ML-based predictions with data - Biometrics: " + 
-                    (biometrics != null ? biometrics.size() : 0) + 
-                    ", Historical: " + (historicalPredictions != null ? historicalPredictions.size() : 0) +
-                    ", Typing: " + (typingData != null ? typingData.size() : 0) +
-                    ", Reaction: " + (reactionData != null ? reactionData.size() : 0));
+                Log.d(TAG, "Using local ML predictor as fallback");
                 
                 // Initialize ML predictor
                 EnergyMLPredictor mlPredictor = new EnergyMLPredictor(this);
                 
-                // Get today's date range - generate predictions for next 24 hours
-                Calendar cal = Calendar.getInstance();
-                cal.set(Calendar.MINUTE, 0);
-                cal.set(Calendar.SECOND, 0);
-                cal.set(Calendar.MILLISECOND, 0);
-                Date now = cal.getTime();
-                
                 // Generate hourly predictions using ML model
                 List<EnergyPrediction> predictions = new ArrayList<>();
-                for (int hour = 0; hour < 24; hour++) {
-                    Calendar hourCal = Calendar.getInstance();
-                    hourCal.setTime(now);
-                    hourCal.add(Calendar.HOUR_OF_DAY, hour);
-                    Date targetTime = hourCal.getTime();
-                    
+                for (Date targetTime : targetTimes) {
                     // Use ML predictor to generate prediction for this hour
                     EnergyPrediction prediction = mlPredictor.predict(
                         biometrics,
@@ -503,7 +614,7 @@ public class EnergyPredictionActivity extends AppCompatActivity {
                 // Clean up ML predictor
                 mlPredictor.close();
                 
-                Log.d(TAG, "Generated " + predictions.size() + " ML-based predictions for today");
+                Log.d(TAG, "Generated " + predictions.size() + " ML-based predictions (fallback)");
                 
                 // Save predictions to database
                 savePredictions(userId, predictions);
@@ -513,11 +624,13 @@ public class EnergyPredictionActivity extends AppCompatActivity {
                     displayPredictions(predictions);
                     calculateAndDisplayOptimalTimes(predictions);
                     resetButton();
-                    Toast.makeText(this, "ML predictions generated using TensorFlow Lite!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, 
+                        "Predictions generated using local ML (Chronos API unavailable)", 
+                        Toast.LENGTH_LONG).show();
                 });
                 
             } catch (Exception e) {
-                Log.e(TAG, "Error generating ML predictions", e);
+                Log.e(TAG, "Error generating ML predictions (fallback)", e);
                 mainHandler.post(() -> {
                     Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     resetButton();
@@ -840,47 +953,36 @@ public class EnergyPredictionActivity extends AppCompatActivity {
     }
     
     /**
-     * Load existing predictions for today
+     * Show placeholders until user generates predictions
      */
-    private void loadTodayPredictions() {
-        String userId = supabaseClient.getUserId();
-        if (userId == null || userId.isEmpty()) {
-            return;
+    private void showPlaceholders() {
+        // Clear chart
+        if (chartEnergy != null) {
+            chartEnergy.clear();
+            chartEnergy.invalidate();
         }
         
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        Date todayStart = cal.getTime();
+        // Clear list view
+        if (listViewPredictions != null) {
+            listViewPredictions.setAdapter(null);
+            listViewPredictions.setVisibility(View.GONE);
+        }
         
-        cal.add(Calendar.DAY_OF_MONTH, 1);
-        Date todayEnd = cal.getTime();
+        // Set placeholder text for optimal times
+        if (tvOptimalWorkTime != null) {
+            tvOptimalWorkTime.setText("Tap 'Generate Today's Predictions' to see optimal work time");
+        }
+        if (tvOptimalNapTime != null) {
+            tvOptimalNapTime.setText("Tap 'Generate Today's Predictions' to see optimal nap time");
+        }
+        if (tvOptimalBedtime != null) {
+            tvOptimalBedtime.setText("Tap 'Generate Today's Predictions' to see optimal bedtime");
+        }
         
-        energyRepo.getEnergyPredictions(userId, todayStart, todayEnd, new EnergyPredictionRepository.DataCallback() {
-            @Override
-            public void onSuccess(Object data) {
-                mainHandler.post(() -> {
-                    @SuppressWarnings("unchecked")
-                    List<EnergyPrediction> predictions = (List<EnergyPrediction>) data;
-                    if (predictions != null && !predictions.isEmpty()) {
-                        displayPredictions(predictions);
-                        calculateAndDisplayOptimalTimes(predictions);
-                    } else {
-                        // No predictions yet
-                        if (tvOptimalWorkTime != null) {
-                            tvOptimalWorkTime.setText("Tap 'Generate Today's Predictions' to see optimal times");
-                        }
-                    }
-                });
-            }
-            
-            @Override
-            public void onError(Throwable error) {
-                Log.e(TAG, "Error loading predictions", error);
-            }
-        });
+        // Hide progress bar
+        if (progressBarPredictions != null) {
+            progressBarPredictions.setVisibility(View.GONE);
+        }
     }
     
     /**
@@ -893,11 +995,14 @@ public class EnergyPredictionActivity extends AppCompatActivity {
         
         // Populate ListView (CP470 Requirement #3)
         if (listViewPredictions != null) {
+            // Store predictions for click handling
+            currentPredictions = new ArrayList<>(predictions);
+            
             List<String> predictionItems = new ArrayList<>();
             for (EnergyPrediction pred : predictions) {
                 String time = timeFormat.format(pred.getTimestamp());
                 predictionItems.add(String.format(Locale.getDefault(), 
-                    "%s: %s (%.0f%%)", time, pred.getPredictedLevel(), pred.getConfidence() * 100));
+                    "%s: %s", time, pred.getPredictedLevel()));
             }
             
             if (!predictionItems.isEmpty()) {

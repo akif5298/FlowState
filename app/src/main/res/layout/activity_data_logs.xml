@@ -412,6 +412,7 @@
         app:itemIconTint="?attr/colorOnSurface"
         android:layout_gravity="bottom"
         android:paddingTop="8dp"
-        android:paddingBottom="8dp" />
+        android:paddingBottom="0dp"
+        android:fitsSystemWindows="true" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

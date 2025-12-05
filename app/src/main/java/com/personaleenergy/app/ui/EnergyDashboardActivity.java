@@ -37,7 +37,9 @@ import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 
 import android.view.Menu;
 import android.view.MenuItem;
-import com.flowstate.app.utils.HelpDialogHelper;
+// import com.flowstate.app.utils.HelpDialogHelper; // Removed - class deleted
+import com.personaleenergy.app.data.collection.HealthConnectManager;
+import com.flowstate.app.supabase.repository.BiometricDataRepository;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -61,6 +63,7 @@ public class EnergyDashboardActivity extends AppCompatActivity {
     private EnergyPredictionRepository energyRepo;
     private SupabaseClient supabaseClient;
     private SimpleDateFormat timeFormat;
+    private HealthConnectManager healthConnectManager;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +83,9 @@ public class EnergyDashboardActivity extends AppCompatActivity {
         initializeViews();
         setupBottomNavigation();
         setupClickListeners();
+        
+        // Sync Health Connect data on app open (if permissions granted)
+        syncHealthConnectDataOnStartup();
         
         // Load initial data
         loadEnergyData();
@@ -101,6 +107,7 @@ public class EnergyDashboardActivity extends AppCompatActivity {
         supabaseClient = SupabaseClient.getInstance(this);
         energyRepo = new EnergyPredictionRepository(this);
         timeFormat = new SimpleDateFormat("h:mm a", Locale.getDefault());
+        healthConnectManager = new HealthConnectManager(this);
         
         // Setup chart
         if (energyChart != null) {
@@ -259,6 +266,94 @@ public class EnergyDashboardActivity extends AppCompatActivity {
             String period = hour < 12 ? "AM" : "PM";
             int displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
             return String.format(Locale.getDefault(), "%d:00 %s", displayHour, period);
+        }
+    }
+    
+    /**
+     * Sync Health Connect data on app startup if permissions are granted
+     */
+    private void syncHealthConnectDataOnStartup() {
+        // Check if Health Connect is available and permissions are granted
+        if (healthConnectManager == null) {
+            healthConnectManager = new HealthConnectManager(this);
+        }
+        
+        if (!healthConnectManager.isAvailable()) {
+            return; // Health Connect not available, skip sync
+        }
+        
+        // Check permissions asynchronously
+        healthConnectManager.hasPermissionsJava().thenAccept(hasPermissions -> {
+            if (hasPermissions) {
+                // Permissions granted, sync new data
+                android.util.Log.d("EnergyDashboard", "Health Connect permissions granted, syncing new data...");
+                healthConnectManager.readNewBiometricDataSinceLastSync(
+                    new HealthConnectManager.BiometricCallback() {
+                        @Override
+                        public void onSuccess(java.util.List<com.flowstate.app.data.models.BiometricData> data) {
+                            if (data != null && !data.isEmpty()) {
+                                android.util.Log.d("EnergyDashboard", "Found " + data.size() + " new records from Health Connect");
+                                // Save to Supabase
+                                saveHealthConnectDataToSupabase(data);
+                            } else {
+                                android.util.Log.d("EnergyDashboard", "No new data from Health Connect");
+                            }
+                        }
+                        
+                        @Override
+                        public void onError(Exception e) {
+                            android.util.Log.e("EnergyDashboard", "Failed to sync Health Connect data on startup", e);
+                            // Don't show error to user on startup - silent sync
+                        }
+                    }
+                );
+            } else {
+                android.util.Log.d("EnergyDashboard", "Health Connect permissions not granted, skipping sync");
+            }
+        });
+    }
+    
+    /**
+     * Save Health Connect data to Supabase
+     */
+    private void saveHealthConnectDataToSupabase(java.util.List<com.flowstate.app.data.models.BiometricData> data) {
+        // Get user ID
+        String userId = supabaseClient.getUserId();
+        if (userId == null || userId.isEmpty()) {
+            android.util.Log.e("EnergyDashboard", "Cannot save data: user not authenticated");
+            return;
+        }
+        
+        // Use BiometricDataRepository to save data
+        com.flowstate.app.supabase.repository.BiometricDataRepository repo = 
+            new com.flowstate.app.supabase.repository.BiometricDataRepository(this);
+        
+        final int[] successCount = {0};
+        final int[] errorCount = {0};
+        final int totalCount = data.size();
+        
+        for (com.flowstate.app.data.models.BiometricData biometric : data) {
+            repo.upsertBiometricData(userId, biometric, new com.flowstate.app.supabase.repository.BiometricDataRepository.DataCallback() {
+                @Override
+                public void onSuccess(Object result) {
+                    successCount[0]++;
+                    android.util.Log.d("EnergyDashboard", "Saved biometric data to Supabase (" + successCount[0] + "/" + totalCount + ")");
+                    
+                    if (successCount[0] + errorCount[0] >= totalCount) {
+                        android.util.Log.d("EnergyDashboard", "Health Connect sync complete: " + successCount[0] + " saved, " + errorCount[0] + " errors");
+                    }
+                }
+                
+                @Override
+                public void onError(Throwable error) {
+                    errorCount[0]++;
+                    android.util.Log.e("EnergyDashboard", "Failed to save biometric data to Supabase", error);
+                    
+                    if (successCount[0] + errorCount[0] >= totalCount) {
+                        android.util.Log.d("EnergyDashboard", "Health Connect sync complete: " + successCount[0] + " saved, " + errorCount[0] + " errors");
+                    }
+                }
+            });
         }
     }
     
@@ -435,11 +530,12 @@ public class EnergyDashboardActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_help) {
-            HelpDialogHelper.showHelpDialog(
-                this,
-                "Energy Dashboard",
-                HelpDialogHelper.getDefaultInstructions("Dashboard")
-            );
+            // HelpDialogHelper removed - show simple dialog instead
+            new android.app.AlertDialog.Builder(this)
+                .setTitle("Energy Dashboard Help")
+                .setMessage("This dashboard shows your current energy level and recent activity. Monitor your energy throughout the day to optimize your productivity.")
+                .setPositiveButton("OK", null)
+                .show();
             return true;
         }
         return super.onOptionsItemSelected(item);

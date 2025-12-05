@@ -16,7 +16,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ArrayAdapter;
-import com.flowstate.app.utils.HelpDialogHelper;
+// import com.flowstate.app.utils.HelpDialogHelper; // Removed - class deleted
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -66,6 +66,11 @@ public class AIScheduleActivity extends AppCompatActivity {
     private Set<String> recentlyCreatedTaskNames = new HashSet<>();
     private static final String PREFS_RECENT_TASKS_DATE = "recent_tasks_date";
     private static final String PREFS_RECENT_TASKS_NAMES = "recent_tasks_names";
+    
+    // Track schedule items added to calendar today to prevent duplicates when reloading
+    private Set<String> calendarAddedItems = new HashSet<>(); // Format: "title|startTime"
+    private static final String PREFS_CALENDAR_ADDED_DATE = "calendar_added_date";
+    private static final String PREFS_CALENDAR_ADDED_ITEMS = "calendar_added_items";
     // Flag to prevent loading scheduled tasks from calendar right after generating a schedule
     // This prevents duplicates when tasks are first created and scheduled
     private boolean scheduleJustGenerated = false;
@@ -93,6 +98,7 @@ public class AIScheduleActivity extends AppCompatActivity {
         
         // Load recently created task names (persists across sessions, resets daily)
         loadRecentlyCreatedTaskNames();
+        loadCalendarAddedItems();
         
         setupBottomNavigation();
         initializeViews();
@@ -120,6 +126,7 @@ public class AIScheduleActivity extends AppCompatActivity {
         super.onResume();
         // Check if date has changed (new day) and reset recently created task names if needed
         loadRecentlyCreatedTaskNames();
+        loadCalendarAddedItems();
         
         // Reset the flag when resuming (allows loading scheduled tasks from calendar)
         scheduleJustGenerated = false;
@@ -241,47 +248,14 @@ public class AIScheduleActivity extends AppCompatActivity {
                 // Check if midnight has passed before adding new tasks
                 checkAndResetIfNewDay();
                 
-                // Merge new tasks with existing tasks (avoid duplicates)
-                Set<String> existingTaskNames = new HashSet<>();
-                for (com.personaleenergy.app.ui.schedule.TaskWithEnergy existingTask : userTasks) {
-                    existingTaskNames.add(existingTask.getTaskName());
+                // Check calendar for duplicates before adding
+                if (simpleCalendarService.hasPermissions() && tasks.size() == 1) {
+                    // For single task addition, check calendar first
+                    checkCalendarAndAddTask(tasks.get(0));
+                } else {
+                    // For multiple tasks or no permissions, use existing logic
+                    addTasksWithDuplicateCheck(tasks);
                 }
-                
-                List<com.personaleenergy.app.ui.schedule.TaskWithEnergy> newTasksToAdd = new ArrayList<>();
-                for (com.personaleenergy.app.ui.schedule.TaskWithEnergy task : tasks) {
-                    // Only add if it doesn't already exist
-                    if (!existingTaskNames.contains(task.getTaskName())) {
-                        newTasksToAdd.add(task);
-                        existingTaskNames.add(task.getTaskName());
-                        // Track these task names as recently created today
-                        recentlyCreatedTaskNames.add(task.getTaskName());
-                    } else {
-                        android.util.Log.d("AIScheduleActivity", 
-                            "Skipping duplicate task when adding: " + task.getTaskName());
-                    }
-                }
-                
-                // Add new tasks to userTasks (merge, don't replace)
-                userTasks.addAll(newTasksToAdd);
-                
-                // Save to SharedPreferences so it persists across app sessions
-                saveRecentlyCreatedTaskNames();
-                
-                // Mark that dialog has been shown
-                SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
-                prefs.edit().putBoolean("has_shown_task_dialog", true).apply();
-                
-                // DON'T save tasks to calendar here - user must click "Add to Calendar" button
-                // after reviewing and potentially regenerating the schedule. This gives them control.
-                
-                Toast.makeText(AIScheduleActivity.this, 
-                    "Added " + newTasksToAdd.size() + " task(s). Generating schedule...", 
-                    Toast.LENGTH_SHORT).show();
-                
-                // Generate schedule immediately with the new tasks
-                // Load calendar events first (to get existing events), then generate schedule
-                // This ensures we have both the new tasks and existing calendar events
-                loadCalendarEvents();
             }
             
             @Override
@@ -297,6 +271,131 @@ public class AIScheduleActivity extends AppCompatActivity {
         });
         
         dialog.show(getSupportFragmentManager(), "TaskInputDialog");
+    }
+    
+    /**
+     * Check calendar for duplicate task before adding (for single task additions)
+     * If duplicate exists in calendar, ignore the add and show calendar task instead
+     */
+    private void checkCalendarAndAddTask(com.personaleenergy.app.ui.schedule.TaskWithEnergy task) {
+        Calendar startOfDay = Calendar.getInstance();
+        startOfDay.set(Calendar.HOUR_OF_DAY, 0);
+        startOfDay.set(Calendar.MINUTE, 0);
+        startOfDay.set(Calendar.SECOND, 0);
+        startOfDay.set(Calendar.MILLISECOND, 0);
+        
+        Calendar endOfDay = Calendar.getInstance();
+        endOfDay.set(Calendar.HOUR_OF_DAY, 23);
+        endOfDay.set(Calendar.MINUTE, 59);
+        endOfDay.set(Calendar.SECOND, 59);
+        endOfDay.set(Calendar.MILLISECOND, 999);
+        
+        simpleCalendarService.getEvents(
+            startOfDay.getTimeInMillis(),
+            endOfDay.getTimeInMillis(),
+            new SimpleCalendarService.CalendarEventsCallback() {
+                @Override
+                public void onSuccess(List<SimpleCalendarService.CalendarEvent> events) {
+                    runOnUiThread(() -> {
+                        // Check if task name exists in calendar
+                        boolean foundInCalendar = false;
+                        for (SimpleCalendarService.CalendarEvent event : events) {
+                            if (event.title.equals(task.getTaskName())) {
+                                foundInCalendar = true;
+                                android.util.Log.d("AIScheduleActivity", 
+                                    "Task '" + task.getTaskName() + "' already exists in calendar, ignoring add");
+                                break;
+                            }
+                        }
+                        
+                        if (foundInCalendar) {
+                            // Task exists in calendar, show dialog asking if they want to try again
+                            showDuplicateTaskDialog(task);
+                        } else {
+                            // No duplicate in calendar, add the task normally
+                            List<com.personaleenergy.app.ui.schedule.TaskWithEnergy> taskList = new ArrayList<>();
+                            taskList.add(task);
+                            addTasksWithDuplicateCheck(taskList);
+                        }
+                    });
+                }
+                
+                @Override
+                public void onError(Exception error) {
+                    android.util.Log.e("AIScheduleActivity", "Error checking calendar for duplicate", error);
+                    // If check fails, proceed with normal add
+                    runOnUiThread(() -> {
+                        List<com.personaleenergy.app.ui.schedule.TaskWithEnergy> taskList = new ArrayList<>();
+                        taskList.add(task);
+                        addTasksWithDuplicateCheck(taskList);
+                    });
+                }
+            });
+    }
+    
+    /**
+     * Show dialog when duplicate task is detected
+     */
+    private void showDuplicateTaskDialog(com.personaleenergy.app.ui.schedule.TaskWithEnergy task) {
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+        builder.setTitle("Duplicate Task Name");
+        builder.setMessage("No duplicate task names allowed. The task '" + task.getTaskName() + "' already exists in your calendar.\n\nWould you like to try again?");
+        builder.setNegativeButton("Cancel", (dialog, which) -> {
+            dialog.dismiss();
+        });
+        builder.setPositiveButton("Add", (dialog, which) -> {
+            // User wants to try again, open task input dialog (same as top right add button)
+            dialog.dismiss();
+            showTaskInputDialog();
+        });
+        builder.show();
+    }
+    
+    /**
+     * Add tasks with duplicate checking (existing logic for multiple tasks)
+     */
+    private void addTasksWithDuplicateCheck(List<com.personaleenergy.app.ui.schedule.TaskWithEnergy> tasks) {
+        // Merge new tasks with existing tasks (avoid duplicates)
+        Set<String> existingTaskNames = new HashSet<>();
+        for (com.personaleenergy.app.ui.schedule.TaskWithEnergy existingTask : userTasks) {
+            existingTaskNames.add(existingTask.getTaskName());
+        }
+        
+        List<com.personaleenergy.app.ui.schedule.TaskWithEnergy> newTasksToAdd = new ArrayList<>();
+        for (com.personaleenergy.app.ui.schedule.TaskWithEnergy task : tasks) {
+            // Only add if it doesn't already exist
+            if (!existingTaskNames.contains(task.getTaskName())) {
+                newTasksToAdd.add(task);
+                existingTaskNames.add(task.getTaskName());
+                // Track these task names as recently created today
+                recentlyCreatedTaskNames.add(task.getTaskName());
+            } else {
+                android.util.Log.d("AIScheduleActivity", 
+                    "Skipping duplicate task when adding: " + task.getTaskName());
+            }
+        }
+        
+        // Add new tasks to userTasks (merge, don't replace)
+        userTasks.addAll(newTasksToAdd);
+        
+        // Save to SharedPreferences so it persists across app sessions
+        saveRecentlyCreatedTaskNames();
+        
+        // Mark that dialog has been shown
+        SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
+        prefs.edit().putBoolean("has_shown_task_dialog", true).apply();
+        
+        // DON'T save tasks to calendar here - user must click "Add to Calendar" button
+        // after reviewing and potentially regenerating the schedule. This gives them control.
+        
+        Toast.makeText(AIScheduleActivity.this, 
+            "Added " + newTasksToAdd.size() + " task(s). Generating schedule...", 
+            Toast.LENGTH_SHORT).show();
+        
+        // Generate schedule immediately with the new tasks
+        // Load calendar events first (to get existing events), then generate schedule
+        // This ensures we have both the new tasks and existing calendar events
+        loadCalendarEvents();
     }
     
     /**
@@ -430,11 +529,32 @@ public class AIScheduleActivity extends AppCompatActivity {
                         checkAndResetIfNewDay();
                         
                         // Filter events created by this app (check description)
-                        // Load ALL FlowState tasks from calendar, filtering only duplicates by name
+                        // Load ALL FlowState tasks from calendar, prioritizing calendar tasks over app tasks
                         List<com.personaleenergy.app.ui.schedule.TaskWithEnergy> loadedTasks = new ArrayList<>();
-                        Set<String> existingTaskNames = new HashSet<>();
+                        Set<String> calendarTaskNames = new HashSet<>();
                         
-                        // Track existing task names in userTasks to avoid duplicates
+                        // First, collect all calendar task names
+                        for (SimpleCalendarService.CalendarEvent event : events) {
+                            if (event.description != null && 
+                                event.description.contains("Created by FlowState AI Schedule") &&
+                                !event.description.contains("AI Reasoning:")) {
+                                calendarTaskNames.add(event.title);
+                            }
+                        }
+                        
+                        // Remove app tasks that have duplicate names in calendar (prioritize calendar)
+                        List<com.personaleenergy.app.ui.schedule.TaskWithEnergy> tasksToRemove = new ArrayList<>();
+                        for (com.personaleenergy.app.ui.schedule.TaskWithEnergy existingTask : userTasks) {
+                            if (calendarTaskNames.contains(existingTask.getTaskName())) {
+                                tasksToRemove.add(existingTask);
+                                android.util.Log.d("AIScheduleActivity", 
+                                    "Removing app task with duplicate name (prioritizing calendar): " + existingTask.getTaskName());
+                            }
+                        }
+                        userTasks.removeAll(tasksToRemove);
+                        
+                        // Now load tasks from calendar
+                        Set<String> existingTaskNames = new HashSet<>();
                         for (com.personaleenergy.app.ui.schedule.TaskWithEnergy existingTask : userTasks) {
                             existingTaskNames.add(existingTask.getTaskName());
                         }
@@ -451,7 +571,7 @@ public class AIScheduleActivity extends AppCompatActivity {
                                     continue;
                                 }
                                 
-                                // Skip duplicates (same task name) - already in userTasks or already loaded
+                                // Skip if already in userTasks
                                 if (existingTaskNames.contains(event.title)) {
                                     android.util.Log.d("AIScheduleActivity", 
                                         "Skipping duplicate task: " + event.title);
@@ -521,6 +641,14 @@ public class AIScheduleActivity extends AppCompatActivity {
             return;
         }
         
+        // Don't load if we already have a current schedule with items (prevents duplicates)
+        // Only load from calendar if we don't have a schedule displayed
+        if (currentSchedule != null && currentSchedule.scheduledItems != null && !currentSchedule.scheduledItems.isEmpty()) {
+            android.util.Log.d("AIScheduleActivity", "Skipping loadScheduledTasksFromCalendar - current schedule already exists with " + 
+                currentSchedule.scheduledItems.size() + " items");
+            return;
+        }
+        
         if (!simpleCalendarService.hasPermissions()) {
             return;
         }
@@ -559,6 +687,14 @@ public class AIScheduleActivity extends AppCompatActivity {
                             if (event.description != null && 
                                 event.description.contains("Created by FlowState AI Schedule") &&
                                 event.description.contains("AI Reasoning:")) {
+                                
+                                // Check if this item was already added to calendar today (prevent duplicates)
+                                String itemKey = event.title + "|" + event.startTime;
+                                if (calendarAddedItems.contains(itemKey)) {
+                                    android.util.Log.d("AIScheduleActivity", 
+                                        "Skipping calendar item already added today: " + event.title);
+                                    continue;
+                                }
                                 
                                 // Extract energy level from description
                                 com.flowstate.app.data.models.EnergyLevel energyLevel = 
@@ -604,8 +740,58 @@ public class AIScheduleActivity extends AppCompatActivity {
                             scheduledItems.add(item);
                         }
                         
-                        // Display the schedule if we have items
-                        if (!scheduledItems.isEmpty()) {
+                        // Check for duplicates with current schedule before displaying
+                        // Prioritize calendar tasks - remove app tasks with duplicate names
+                        if (currentSchedule != null && currentSchedule.scheduledItems != null && !currentSchedule.scheduledItems.isEmpty()) {
+                            // First, collect all calendar task names
+                            Set<String> calendarTaskNames = new HashSet<>();
+                            for (SmartCalendarAI.ScheduledItem calendarItem : scheduledItems) {
+                                calendarTaskNames.add(calendarItem.title);
+                            }
+                            
+                            // Remove app tasks that have duplicate names in calendar (prioritize calendar)
+                            List<SmartCalendarAI.ScheduledItem> itemsToRemove = new ArrayList<>();
+                            for (SmartCalendarAI.ScheduledItem existingItem : currentSchedule.scheduledItems) {
+                                if (calendarTaskNames.contains(existingItem.title)) {
+                                    itemsToRemove.add(existingItem);
+                                    android.util.Log.d("AIScheduleActivity", 
+                                        "Removing app task with duplicate name (prioritizing calendar): " + existingItem.title);
+                                }
+                            }
+                            currentSchedule.scheduledItems.removeAll(itemsToRemove);
+                            
+                            // Merge intelligently - only add items that don't already exist
+                            List<SmartCalendarAI.ScheduledItem> newItems = new ArrayList<>();
+                            for (SmartCalendarAI.ScheduledItem calendarItem : scheduledItems) {
+                                boolean isDuplicate = false;
+                                for (SmartCalendarAI.ScheduledItem existingItem : currentSchedule.scheduledItems) {
+                                    // Check if item already exists (same title and similar time - within 1 minute)
+                                    if (existingItem.title.equals(calendarItem.title) && 
+                                        Math.abs(existingItem.startTime - calendarItem.startTime) < 60000) {
+                                        isDuplicate = true;
+                                        android.util.Log.d("AIScheduleActivity", 
+                                            "Skipping duplicate: " + calendarItem.title + " at " + new java.util.Date(calendarItem.startTime));
+                                        break;
+                                    }
+                                }
+                                if (!isDuplicate) {
+                                    newItems.add(calendarItem);
+                                }
+                            }
+                            
+                            if (!newItems.isEmpty()) {
+                                // Add new items to current schedule
+                                currentSchedule.scheduledItems.addAll(newItems);
+                                displaySchedule(currentSchedule);
+                                android.util.Log.d("AIScheduleActivity", 
+                                    "Merged " + newItems.size() + " new items from calendar into existing schedule (skipped " + 
+                                    (scheduledItems.size() - newItems.size()) + " duplicates)");
+                            } else {
+                                android.util.Log.d("AIScheduleActivity", 
+                                    "All " + scheduledItems.size() + " calendar items already exist in current schedule, no duplicates added");
+                            }
+                        } else if (!scheduledItems.isEmpty()) {
+                            // No current schedule, display the loaded schedule
                             SmartCalendarAI.SmartSchedule schedule = new SmartCalendarAI.SmartSchedule();
                             schedule.scheduledItems = scheduledItems;
                             schedule.summary = "Loaded from calendar";
@@ -725,6 +911,87 @@ public class AIScheduleActivity extends AppCompatActivity {
             return;
         }
         
+        // Before generating schedule, check calendar for existing tasks and remove duplicates
+        // This prioritizes calendar tasks over app tasks
+        if (simpleCalendarService.hasPermissions()) {
+            checkAndRemoveCalendarDuplicates(() -> {
+                // After checking duplicates, proceed with schedule generation
+                generateScheduleInternal(userId);
+            });
+        } else {
+            // No permissions, proceed directly
+            generateScheduleInternal(userId);
+        }
+    }
+    
+    /**
+     * Check calendar for existing tasks and remove app tasks with duplicate names
+     * Prioritizes calendar tasks over app tasks
+     */
+    private void checkAndRemoveCalendarDuplicates(Runnable onComplete) {
+        Calendar startOfDay = Calendar.getInstance();
+        startOfDay.set(Calendar.HOUR_OF_DAY, 0);
+        startOfDay.set(Calendar.MINUTE, 0);
+        startOfDay.set(Calendar.SECOND, 0);
+        startOfDay.set(Calendar.MILLISECOND, 0);
+        
+        Calendar endOfDay = Calendar.getInstance();
+        endOfDay.set(Calendar.HOUR_OF_DAY, 23);
+        endOfDay.set(Calendar.MINUTE, 59);
+        endOfDay.set(Calendar.SECOND, 59);
+        endOfDay.set(Calendar.MILLISECOND, 999);
+        
+        simpleCalendarService.getEvents(
+            startOfDay.getTimeInMillis(),
+            endOfDay.getTimeInMillis(),
+            new SimpleCalendarService.CalendarEventsCallback() {
+                @Override
+                public void onSuccess(List<SimpleCalendarService.CalendarEvent> events) {
+                    runOnUiThread(() -> {
+                        // Collect all calendar task names (both scheduled and unscheduled)
+                        Set<String> calendarTaskNames = new HashSet<>();
+                        for (SimpleCalendarService.CalendarEvent event : events) {
+                            // Include all calendar events (both FlowState and existing events)
+                            calendarTaskNames.add(event.title);
+                        }
+                        
+                        // Remove app tasks that have duplicate names in calendar (prioritize calendar)
+                        List<com.personaleenergy.app.ui.schedule.TaskWithEnergy> tasksToRemove = new ArrayList<>();
+                        for (com.personaleenergy.app.ui.schedule.TaskWithEnergy existingTask : userTasks) {
+                            if (calendarTaskNames.contains(existingTask.getTaskName())) {
+                                tasksToRemove.add(existingTask);
+                                android.util.Log.d("AIScheduleActivity", 
+                                    "Removing app task with duplicate name (prioritizing calendar): " + existingTask.getTaskName());
+                            }
+                        }
+                        userTasks.removeAll(tasksToRemove);
+                        
+                        if (!tasksToRemove.isEmpty()) {
+                            android.util.Log.d("AIScheduleActivity", 
+                                "Removed " + tasksToRemove.size() + " duplicate app tasks before generating schedule");
+                            Toast.makeText(AIScheduleActivity.this, 
+                                "Removed " + tasksToRemove.size() + " duplicate task(s) - calendar tasks prioritized", 
+                                Toast.LENGTH_SHORT).show();
+                        }
+                        
+                        // Continue with schedule generation
+                        onComplete.run();
+                    });
+                }
+                
+                @Override
+                public void onError(Exception error) {
+                    android.util.Log.e("AIScheduleActivity", "Error checking calendar for duplicates", error);
+                    // Continue with schedule generation even if check fails
+                    runOnUiThread(() -> onComplete.run());
+                }
+            });
+    }
+    
+    /**
+     * Internal method to generate schedule after duplicate checking
+     */
+    private void generateScheduleInternal(String userId) {
         // Filter tasks: only include tasks that need scheduling
         // Remove duplicates - tasks that already have AI-assigned times are filtered out
         // in loadTasksFromCalendar (they have "AI Reasoning" in description)
@@ -987,6 +1254,11 @@ public class AIScheduleActivity extends AppCompatActivity {
                             android.util.Log.d("AIScheduleActivity", "✅ Calendar event created successfully: " + event.title + " (ID: " + event.id + ")");
                             android.util.Log.d("AIScheduleActivity", "   Start: " + new java.util.Date(item.startTime));
                             android.util.Log.d("AIScheduleActivity", "   End: " + new java.util.Date(item.endTime));
+                            
+                            // Mark this item as added to calendar to prevent duplicates when reloading
+                            String itemKey = item.title + "|" + item.startTime;
+                            calendarAddedItems.add(itemKey);
+                            saveCalendarAddedItems();
                             if (onSuccess != null) {
                                 onSuccess.run();
                             }
@@ -1512,6 +1784,60 @@ public class AIScheduleActivity extends AppCompatActivity {
             " recently created task names to SharedPreferences");
     }
     
+    /**
+     * Load calendar added items from SharedPreferences
+     * This tracks which schedule items have been added to calendar today to prevent duplicates
+     */
+    private void loadCalendarAddedItems() {
+        SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
+        
+        // Get today's date as a string (YYYY-MM-DD format)
+        Calendar today = Calendar.getInstance();
+        String todayDateStr = String.format(Locale.getDefault(), "%04d-%02d-%02d",
+            today.get(Calendar.YEAR),
+            today.get(Calendar.MONTH) + 1, // Month is 0-indexed
+            today.get(Calendar.DAY_OF_MONTH));
+        
+        // Check if the saved date matches today
+        String savedDate = prefs.getString(PREFS_CALENDAR_ADDED_DATE, "");
+        if (!todayDateStr.equals(savedDate)) {
+            // New day, reset the set
+            calendarAddedItems.clear();
+            android.util.Log.d("AIScheduleActivity", "New day detected, cleared calendar added items");
+        } else {
+            // Load the set from SharedPreferences (same day)
+            Set<String> savedItems = prefs.getStringSet(PREFS_CALENDAR_ADDED_ITEMS, new HashSet<String>());
+            calendarAddedItems.clear();
+            calendarAddedItems.addAll(savedItems);
+            android.util.Log.d("AIScheduleActivity", "Loaded " + calendarAddedItems.size() + 
+                " calendar added items from SharedPreferences");
+        }
+    }
+    
+    /**
+     * Save calendar added items to SharedPreferences
+     * Also saves today's date to check for day changes
+     */
+    private void saveCalendarAddedItems() {
+        SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
+        
+        // Get today's date as a string (YYYY-MM-DD format)
+        Calendar today = Calendar.getInstance();
+        String todayDateStr = String.format(Locale.getDefault(), "%04d-%02d-%02d",
+            today.get(Calendar.YEAR),
+            today.get(Calendar.MONTH) + 1, // Month is 0-indexed
+            today.get(Calendar.DAY_OF_MONTH));
+        
+        // Save both the date and the items
+        prefs.edit()
+            .putString(PREFS_CALENDAR_ADDED_DATE, todayDateStr)
+            .putStringSet(PREFS_CALENDAR_ADDED_ITEMS, calendarAddedItems)
+            .apply();
+        
+        android.util.Log.d("AIScheduleActivity", "Saved " + calendarAddedItems.size() + 
+            " calendar added items to SharedPreferences");
+    }
+    
     private void setupBottomNavigation() {
         bottomNav = findViewById(R.id.bottomNavigation);
         bottomNav.setOnNavigationItemSelectedListener(item -> {
@@ -1561,11 +1887,12 @@ public class AIScheduleActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_help) {
-            HelpDialogHelper.showHelpDialog(
-                this,
-                "AI Schedule",
-                HelpDialogHelper.getDefaultInstructions("Schedule")
-            );
+            // HelpDialogHelper removed - show simple dialog instead
+            new android.app.AlertDialog.Builder(this)
+                .setTitle("AI Schedule Help")
+                .setMessage("This screen shows your AI-generated schedule based on your energy predictions. The schedule optimizes your activities for times when you have the most energy.")
+                .setPositiveButton("OK", null)
+                .show();
             return true;
         }
         return super.onOptionsItemSelected(item);

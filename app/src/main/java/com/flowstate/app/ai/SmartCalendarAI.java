@@ -668,6 +668,9 @@ public class SmartCalendarAI {
         // Sort by start time
         schedule.scheduledItems.sort((a, b) -> Long.compare(a.startTime, b.startTime));
         
+        // Validate and fix any overlaps in the schedule
+        schedule = validateAndFixOverlaps(schedule);
+        
         // Generate summary
         schedule.summary = generateSummary(schedule, energyPattern, tasks.size());
         
@@ -731,6 +734,106 @@ public class SmartCalendarAI {
         }
         
         return null;
+    }
+    
+    /**
+     * Validate and fix overlaps in the schedule
+     * Ensures each task has its own time slot and no tasks overlap
+     */
+    private SmartSchedule validateAndFixOverlaps(SmartSchedule schedule) {
+        if (schedule == null || schedule.scheduledItems == null || schedule.scheduledItems.isEmpty()) {
+            return schedule;
+        }
+        
+        // Sort by start time
+        schedule.scheduledItems.sort((a, b) -> Long.compare(a.startTime, b.startTime));
+        
+        List<ScheduledItem> fixedItems = new ArrayList<>();
+        long lastEndTime = 0;
+        long minDuration = 30 * 60 * 1000L; // Minimum 30 minutes between tasks
+        
+        for (ScheduledItem item : schedule.scheduledItems) {
+            // For existing events, keep them as-is (they're immutable)
+            if (item.type == ScheduledItemType.EXISTING_EVENT) {
+                fixedItems.add(item);
+                lastEndTime = Math.max(lastEndTime, item.endTime);
+                continue;
+            }
+            
+            // For AI-scheduled tasks, ensure no overlap
+            long itemStart = item.startTime;
+            long itemEnd = item.endTime;
+            
+            // If this task overlaps with the previous item, adjust its start time
+            if (itemStart < lastEndTime) {
+                // Move start time to after the previous item ends (with minimum gap)
+                itemStart = lastEndTime + minDuration;
+                itemEnd = itemStart + (60 * 60 * 1000L); // 1 hour duration
+                
+                // Update the item
+                item.startTime = itemStart;
+                item.endTime = itemEnd;
+                
+                // Update reasoning to reflect the adjustment
+                if (item.reasoning != null && !item.reasoning.contains("(adjusted")) {
+                    item.reasoning += " (adjusted to avoid overlap)";
+                }
+                
+                Log.d(TAG, "Adjusted task '" + item.title + "' to avoid overlap. New time: " + 
+                    new java.util.Date(itemStart) + " - " + new java.util.Date(itemEnd));
+            }
+            
+            // Ensure minimum duration
+            if (itemEnd <= itemStart) {
+                itemEnd = itemStart + (60 * 60 * 1000L); // Default to 1 hour
+                item.endTime = itemEnd;
+            }
+            
+            fixedItems.add(item);
+            lastEndTime = itemEnd;
+        }
+        
+        schedule.scheduledItems = fixedItems;
+        
+        // Final validation: check for any remaining overlaps and ensure proper spacing
+        for (int i = 0; i < fixedItems.size() - 1; i++) {
+            ScheduledItem current = fixedItems.get(i);
+            ScheduledItem next = fixedItems.get(i + 1);
+            
+            // Check if tasks overlap or are too close together
+            long gap = next.startTime - current.endTime;
+            
+            if (gap < minDuration) {
+                // Tasks are too close or overlapping, adjust next item
+                next.startTime = current.endTime + minDuration;
+                next.endTime = next.startTime + (60 * 60 * 1000L); // Ensure 1 hour duration
+                
+                // Update reasoning if not already adjusted
+                if (next.reasoning != null && !next.reasoning.contains("(adjusted")) {
+                    next.reasoning += " (adjusted to avoid overlap)";
+                }
+                
+                Log.w(TAG, "Final adjustment: Task '" + next.title + "' moved to " + 
+                    new java.util.Date(next.startTime) + " to ensure proper spacing");
+            }
+            
+            // Ensure each task has a valid duration (at least 15 minutes)
+            long taskDuration = next.endTime - next.startTime;
+            if (taskDuration < 15 * 60 * 1000L) {
+                next.endTime = next.startTime + (60 * 60 * 1000L); // Default to 1 hour
+                Log.d(TAG, "Extended duration for task '" + next.title + "' to ensure minimum time slot");
+            }
+        }
+        
+        // Update lastEndTime for the last item
+        if (!fixedItems.isEmpty()) {
+            ScheduledItem lastItem = fixedItems.get(fixedItems.size() - 1);
+            if (lastItem.endTime <= lastItem.startTime) {
+                lastItem.endTime = lastItem.startTime + (60 * 60 * 1000L);
+            }
+        }
+        
+        return schedule;
     }
     
     /**
@@ -905,8 +1008,21 @@ public class SmartCalendarAI {
                             }
                         }
                         
-                        // Only add if it doesn't conflict with existing events
-                        if (!conflictsWithExisting) {
+                        // CRITICAL: Check if this time conflicts with already scheduled tasks (prevent overlaps)
+                        boolean conflictsWithScheduled = false;
+                        for (ScheduledItem scheduledItem : schedule.scheduledItems) {
+                            // Check if the task time overlaps with any already scheduled item
+                            if ((taskStartTime >= scheduledItem.startTime && taskStartTime < scheduledItem.endTime) ||
+                                (taskEndTime > scheduledItem.startTime && taskEndTime <= scheduledItem.endTime) ||
+                                (taskStartTime <= scheduledItem.startTime && taskEndTime >= scheduledItem.endTime)) {
+                                conflictsWithScheduled = true;
+                                Log.d(TAG, "Skipping task '" + matchedTask + "' at " + hour + ":00 - overlaps with scheduled task: " + scheduledItem.title);
+                                break;
+                            }
+                        }
+                        
+                        // Only add if it doesn't conflict with existing events or scheduled tasks
+                        if (!conflictsWithExisting && !conflictsWithScheduled) {
                             // Find energy level from user's task specification (not from predictions)
                             EnergyLevel energyLevel = EnergyLevel.MEDIUM; // Default
                             for (com.personaleenergy.app.ui.schedule.TaskWithEnergy taskWithEnergy : userTasksWithEnergy) {
@@ -934,6 +1050,9 @@ public class SmartCalendarAI {
         
         // Sort by start time
         schedule.scheduledItems.sort((a, b) -> Long.compare(a.startTime, b.startTime));
+        
+        // Validate and fix any overlaps
+        schedule = validateAndFixOverlaps(schedule);
         
         // Generate summary with AI schedule text
         schedule.summary = "📅 AI-Generated Schedule (Powered by ChatGPT)\n\n" + 

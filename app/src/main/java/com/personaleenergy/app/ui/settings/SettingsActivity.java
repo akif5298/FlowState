@@ -26,20 +26,30 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import android.widget.ArrayAdapter;
-import com.flowstate.app.utils.HelpDialogHelper;
+// import com.flowstate.app.utils.HelpDialogHelper; // Removed - class deleted
+import com.personaleenergy.app.data.collection.HealthConnectManager;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.appcompat.app.AlertDialog;
+import android.widget.Button;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 public class SettingsActivity extends AppCompatActivity {
     
     private BottomNavigationView bottomNav;
-    private SwitchMaterial switchGoogleFit, switchDarkMode, switchAdaptiveLearning, switchDailyAdvice;
-    private SwitchMaterial switchGoogleCalendar, switchPushNotifications, switchEmailNotifications;
+    private SwitchMaterial switchGoogleFit, switchDarkMode;
+    private SwitchMaterial switchGoogleCalendar, switchPushNotifications;
     private AuthService authService;
     private View rootView;
     private UserSettingsService settingsService;
     private UserSettingsService.UserSettings currentSettings;
     private boolean isLoadingSettings = false;
+    private HealthConnectManager healthConnectManager;
+    
+    // Health Connect permission launcher
+    private ActivityResultLauncher<Set<String>> healthConnectPermissionLauncher;
     
     // CP470 Requirements: ProgressBar and ListView
     private ProgressBar progressBarSettings;
@@ -64,6 +74,9 @@ public class SettingsActivity extends AppCompatActivity {
         
         settingsService = new UserSettingsService(this);
         
+        // Initialize Health Connect permission launcher
+        initializeHealthConnectPermissionLauncher();
+        
         setupBottomNavigation();
         initializeViews();
         
@@ -79,11 +92,8 @@ public class SettingsActivity extends AppCompatActivity {
     private void initializeViews() {
         switchGoogleFit = findViewById(R.id.switchGoogleFit);
         switchDarkMode = findViewById(R.id.switchDarkMode);
-        switchAdaptiveLearning = findViewById(R.id.switchAdaptiveLearning);
-        switchDailyAdvice = findViewById(R.id.switchDailyAdvice);
         switchGoogleCalendar = findViewById(R.id.switchGoogleCalendar);
         switchPushNotifications = findViewById(R.id.switchPushNotifications);
-        switchEmailNotifications = findViewById(R.id.switchEmailNotifications);
         
         // Set up toggle listeners
         setupToggleListeners();
@@ -118,11 +128,12 @@ public class SettingsActivity extends AppCompatActivity {
         if (btnHelp != null) {
             btnHelp.setOnClickListener(v -> {
                 // Show custom dialog (CP470 Requirement #11)
-                HelpDialogHelper.showHelpDialog(
-                    this,
-                    "Settings",
-                    HelpDialogHelper.getDefaultInstructions("Settings")
-                );
+                // HelpDialogHelper removed - show simple dialog instead
+                new android.app.AlertDialog.Builder(this)
+                    .setTitle("Settings Help")
+                    .setMessage("Configure your app settings including data sources, notifications, and preferences. Connect to Health Connect to sync your health data.")
+                    .setPositiveButton("OK", null)
+                    .show();
             });
         }
         
@@ -146,13 +157,76 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
     
+    /**
+     * Initialize Health Connect permission launcher
+     */
+    private void initializeHealthConnectPermissionLauncher() {
+        if (healthConnectManager == null) {
+            healthConnectManager = new HealthConnectManager(this);
+        }
+        
+        // Use Health Connect's permission contract via Kotlin helper (Java-compatible)
+        healthConnectPermissionLauncher = healthConnectManager.createPermissionLauncherJava(this,
+            new HealthConnectManager.PermissionCallback() {
+                @Override
+                public void onResult(Set<String> grantedPermissions) {
+                    android.util.Log.d("SettingsActivity", "Permission callback received with " + 
+                        (grantedPermissions != null ? grantedPermissions.size() : 0) + " permissions");
+                    
+                    Set<String> requiredPermissions = healthConnectManager.getRequiredPermissions();
+                    
+                    boolean allGranted = requiredPermissions != null && grantedPermissions != null &&
+                        requiredPermissions.stream()
+                            .allMatch(grantedPermissions::contains);
+                    
+                    if (allGranted) {
+                        android.util.Log.d("SettingsActivity", "All permissions granted");
+                        Snackbar.make(rootView, 
+                            "Health Connect permissions granted! Syncing data...", 
+                            Snackbar.LENGTH_SHORT).show();
+                        syncDataFromHealthConnect();
+                    } else {
+                        android.util.Log.d("SettingsActivity", "Not all permissions granted");
+                        android.util.Log.d("SettingsActivity", "Required: " + requiredPermissions);
+                        android.util.Log.d("SettingsActivity", "Granted: " + grantedPermissions);
+                        
+                        // Show failure dialog
+                        runOnUiThread(() -> showPermissionFailureDialog());
+                        
+                        // Turn off the switch if permissions not granted
+                        if (switchGoogleFit != null && currentSettings != null) {
+                            switchGoogleFit.setChecked(false);
+                            currentSettings.googleFitEnabled = false;
+                            saveSettings();
+                        }
+                    }
+                }
+            }
+        );
+        
+        if (healthConnectPermissionLauncher == null) {
+            android.util.Log.e("SettingsActivity", "Failed to create permission launcher");
+        } else {
+            android.util.Log.d("SettingsActivity", "Permission launcher created successfully");
+        }
+    }
+    
     private void setupToggleListeners() {
-        // Google Fit toggle
+        // Health Connect toggle
         if (switchGoogleFit != null) {
             switchGoogleFit.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 if (!isLoadingSettings && currentSettings != null) {
                     currentSettings.googleFitEnabled = isChecked;
                     saveSettings();
+                    
+                    if (isChecked) {
+                        // Show onboarding and request permissions
+                        showHealthConnectOnboarding();
+                    } else {
+                        Snackbar.make(rootView, 
+                            "Health Connect integration disabled.", 
+                            Snackbar.LENGTH_SHORT).show();
+                    }
                 }
             });
         }
@@ -175,34 +249,7 @@ public class SettingsActivity extends AppCompatActivity {
             });
         }
         
-        // Adaptive Learning toggle
-        if (switchAdaptiveLearning != null) {
-            switchAdaptiveLearning.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (!isLoadingSettings && currentSettings != null) {
-                    // Store adaptive learning preference
-                    SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
-                    prefs.edit().putBoolean("adaptive_learning", isChecked).apply();
-                    Snackbar.make(rootView, 
-                        isChecked ? "Adaptive learning enabled" : "Adaptive learning disabled", 
-                        Snackbar.LENGTH_SHORT).show();
-                }
-            });
-        }
-        
-        // Daily Advice toggle
-        if (switchDailyAdvice != null) {
-            switchDailyAdvice.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (!isLoadingSettings && currentSettings != null) {
-                    currentSettings.notificationEnabled = isChecked;
-                    saveSettings();
-                    Snackbar.make(rootView, 
-                        isChecked ? "Daily advice notifications enabled" : "Daily advice notifications disabled", 
-                        Snackbar.LENGTH_SHORT).show();
-                }
-            });
-        }
-        
-        // Google Calendar toggle
+        // Calendar Sync toggle
         if (switchGoogleCalendar != null) {
             switchGoogleCalendar.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 if (!isLoadingSettings) {
@@ -242,18 +289,6 @@ public class SettingsActivity extends AppCompatActivity {
             });
         }
         
-        // Email Notifications toggle
-        if (switchEmailNotifications != null) {
-            switchEmailNotifications.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (!isLoadingSettings) {
-                    SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
-                    prefs.edit().putBoolean("email_notifications", isChecked).apply();
-                    Snackbar.make(rootView, 
-                        isChecked ? "Email notifications enabled" : "Email notifications disabled", 
-                        Snackbar.LENGTH_SHORT).show();
-                }
-            });
-        }
     }
     
     private void loadSettings() {
@@ -301,13 +336,7 @@ public class SettingsActivity extends AppCompatActivity {
             }
         }
         
-        // Load adaptive learning preference
-        boolean adaptiveLearning = prefs.getBoolean("adaptive_learning", false);
-        if (switchAdaptiveLearning != null) {
-            switchAdaptiveLearning.setChecked(adaptiveLearning);
-        }
-        
-        // Load Google Calendar preference
+        // Load Calendar Sync preference
         boolean googleCalendar = prefs.getBoolean("google_calendar_enabled", false);
         if (switchGoogleCalendar != null) {
             try {
@@ -334,11 +363,6 @@ public class SettingsActivity extends AppCompatActivity {
             switchPushNotifications.setChecked(pushNotifications);
         }
         
-        boolean emailNotifications = prefs.getBoolean("email_notifications", false);
-        if (switchEmailNotifications != null) {
-            switchEmailNotifications.setChecked(emailNotifications);
-        }
-        
         // Load settings from Supabase
         settingsService.fetch(new UserSettingsService.SettingsCallback() {
             @Override
@@ -349,9 +373,6 @@ public class SettingsActivity extends AppCompatActivity {
                     // Update toggles with loaded settings
                     if (switchGoogleFit != null) {
                         switchGoogleFit.setChecked(settings.googleFitEnabled);
-                    }
-                    if (switchDailyAdvice != null) {
-                        switchDailyAdvice.setChecked(settings.notificationEnabled);
                     }
                     
                     isLoadingSettings = false;
@@ -370,9 +391,6 @@ public class SettingsActivity extends AppCompatActivity {
                     if (switchGoogleFit != null) {
                         switchGoogleFit.setChecked(currentSettings.googleFitEnabled);
                     }
-                    if (switchDailyAdvice != null) {
-                        switchDailyAdvice.setChecked(currentSettings.notificationEnabled);
-                    }
                     
                     isLoadingSettings = false;
                     android.util.Log.e("SettingsActivity", "Failed to load settings", error);
@@ -389,9 +407,7 @@ public class SettingsActivity extends AppCompatActivity {
         settingsService.save(currentSettings, new UserSettingsService.SettingsCallback() {
             @Override
             public void onSuccess(UserSettingsService.UserSettings settings) {
-                runOnUiThread(() -> {
-                    Snackbar.make(rootView, "Settings saved", Snackbar.LENGTH_SHORT).show();
-                });
+                // Settings saved silently in background
             }
             
             @Override
@@ -409,6 +425,406 @@ public class SettingsActivity extends AppCompatActivity {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         } else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
+    }
+    
+    /**
+     * Show Health Connect onboarding dialog
+     */
+    private void showHealthConnectOnboarding() {
+        if (healthConnectManager == null) {
+            healthConnectManager = new HealthConnectManager(this);
+        }
+        
+        // Check if Health Connect is available
+        if (!healthConnectManager.isAvailable()) {
+            new AlertDialog.Builder(this)
+                .setTitle("Health Connect Not Available")
+                .setMessage("Health Connect is not installed on your device. " +
+                    "It's required to sync health data from various sources like fitness apps, Samsung Health, etc.\n\n" +
+                    "Please install Health Connect from the Play Store and come back after you've downloaded it.")
+                .setPositiveButton("OK", (dialog, which) -> {
+                    // Turn off switch
+                    if (switchGoogleFit != null && currentSettings != null) {
+                        switchGoogleFit.setChecked(false);
+                        currentSettings.googleFitEnabled = false;
+                        saveSettings();
+                    }
+                })
+                .setCancelable(false)
+                .show();
+            return;
+        }
+        
+        // Check if permissions are already granted
+        healthConnectManager.hasPermissionsJava().thenAccept(hasPermissions -> {
+            runOnUiThread(() -> {
+                if (hasPermissions) {
+                    // Already have permissions, just sync
+                    syncDataFromHealthConnect();
+                } else {
+                    // Show onboarding dialog
+                    showHealthConnectPermissionDialog();
+                }
+            });
+        });
+    }
+    
+    /**
+     * Show Health Connect permission request dialog
+     * Follows the Health Connect guide pattern: check permissions first, then request if needed
+     */
+    private void showHealthConnectPermissionDialog() {
+        // Ensure permission launcher is initialized before showing dialog
+        if (healthConnectPermissionLauncher == null) {
+            initializeHealthConnectPermissionLauncher();
+        }
+        
+        // Get Health Connect client and check permissions first (following guide pattern)
+        if (healthConnectManager == null) {
+            healthConnectManager = new HealthConnectManager(this);
+        }
+        
+        // Check if we already have permissions (following guide pattern)
+        healthConnectManager.hasPermissionsJava().thenAccept(hasPermissions -> {
+            runOnUiThread(() -> {
+                if (hasPermissions) {
+                    // Already have permissions - just sync
+                    android.util.Log.d("SettingsActivity", "Permissions already granted, syncing data");
+                    syncDataFromHealthConnect();
+                    return;
+                }
+                
+                // Don't have permissions - show dialog to request them
+                AlertDialog.Builder builder = new AlertDialog.Builder(SettingsActivity.this);
+                builder.setTitle("Grant Health Connect Permissions");
+                builder.setMessage("FlowState needs permission to access your heart rate and sleep data from Health Connect.\n\n" +
+                    "A permission dialog will appear. Please grant the requested permissions.");
+                
+                builder.setPositiveButton("Grant Permissions", (dialog, which) -> {
+                    // Get required permissions
+                    Set<String> permissions = healthConnectManager.getRequiredPermissions();
+                    if (permissions == null || permissions.isEmpty()) {
+                        android.util.Log.e("SettingsActivity", "No permissions to request");
+                        showPermissionFailureDialog();
+                        return;
+                    }
+                    
+                    // Ensure permission launcher is ready
+                    if (healthConnectPermissionLauncher == null) {
+                        android.util.Log.e("SettingsActivity", "Permission launcher is null");
+                        showPermissionFailureDialog();
+                        return;
+                    }
+                    
+                    // Ensure we're on the UI thread and activity is ready
+                    if (isFinishing() || isDestroyed()) {
+                        android.util.Log.e("SettingsActivity", "Activity is finishing/destroyed, cannot launch permissions");
+                        showPermissionFailureDialog();
+                        return;
+                    }
+                    
+                    try {
+                        android.util.Log.d("SettingsActivity", "Launching permission request with " + permissions.size() + " permissions");
+                        android.util.Log.d("SettingsActivity", "Permissions: " + permissions.toString());
+                        
+                        // Launch the permission request using Health Connect's API
+                        // This follows the guide pattern: PermissionController.createRequestPermissionResultContract()
+                        healthConnectPermissionLauncher.launch(permissions);
+                        android.util.Log.d("SettingsActivity", "Permission request launched successfully");
+                        
+                        // Note: The callback will handle success/failure
+                    } catch (IllegalStateException e) {
+                        android.util.Log.e("SettingsActivity", "IllegalStateException launching permissions", e);
+                        showPermissionFailureDialog();
+                    } catch (Exception e) {
+                        android.util.Log.e("SettingsActivity", "Error launching permission request", e);
+                        e.printStackTrace();
+                        showPermissionFailureDialog();
+                    }
+                });
+                
+                builder.setNegativeButton("Cancel", (dialog, which) -> {
+                    // Turn off switch
+                    if (switchGoogleFit != null && currentSettings != null) {
+                        switchGoogleFit.setChecked(false);
+                        currentSettings.googleFitEnabled = false;
+                        saveSettings();
+                    }
+                });
+                
+                builder.setCancelable(false);
+                builder.show();
+            });
+        });
+    }
+    
+    /**
+     * Show dialog when permission request fails
+     */
+    private void showPermissionFailureDialog() {
+        new AlertDialog.Builder(this)
+            .setTitle("Permission Request Failed")
+            .setMessage("The permission dialog did not appear. This can happen if:\n\n" +
+                "• Health Connect needs to be restarted\n" +
+                "• The app hasn't been registered with Health Connect yet\n\n" +
+                "Please try these steps:\n\n" +
+                "1. Close and restart the Health Connect app\n" +
+                "2. Open Health Connect → App permissions\n" +
+                "3. Look for FlowState in the list\n" +
+                "4. If FlowState appears, grant the permissions\n" +
+                "5. If FlowState doesn't appear, try the permission request again")
+            .setPositiveButton("Open Health Connect", (dialog, which) -> {
+                healthConnectManager.openHealthConnectForPermissions(SettingsActivity.this);
+            })
+            .setNeutralButton("Try Again", (dialog, which) -> {
+                // Try the permission request again
+                if (healthConnectPermissionLauncher != null) {
+                    Set<String> permissions = healthConnectManager.getRequiredPermissions();
+                    if (permissions != null && !permissions.isEmpty()) {
+                        try {
+                            android.util.Log.d("SettingsActivity", "Retrying permission request");
+                            healthConnectPermissionLauncher.launch(permissions);
+                        } catch (Exception e) {
+                            android.util.Log.e("SettingsActivity", "Error retrying permission request", e);
+                            showPermissionFailureDialog();
+                        }
+                    }
+                }
+            })
+            .setNegativeButton("Cancel", (dialog, which) -> {
+                // Turn off switch
+                if (switchGoogleFit != null && currentSettings != null) {
+                    switchGoogleFit.setChecked(false);
+                    currentSettings.googleFitEnabled = false;
+                    saveSettings();
+                }
+            })
+            .setCancelable(false)
+            .show();
+    }
+    
+    /**
+     * Request Health Connect permissions
+     */
+    private void requestHealthConnectPermissions() {
+        android.util.Log.d("SettingsActivity", "requestHealthConnectPermissions called");
+        
+        if (healthConnectManager == null) {
+            healthConnectManager = new HealthConnectManager(this);
+        }
+        
+        if (!healthConnectManager.isAvailable()) {
+            android.util.Log.e("SettingsActivity", "Health Connect is not available");
+            Snackbar.make(rootView, "Health Connect is not available", Snackbar.LENGTH_SHORT).show();
+            // Turn off switch
+            if (switchGoogleFit != null && currentSettings != null) {
+                switchGoogleFit.setChecked(false);
+                currentSettings.googleFitEnabled = false;
+                saveSettings();
+            }
+            return;
+        }
+        
+        if (healthConnectPermissionLauncher == null) {
+            android.util.Log.d("SettingsActivity", "Initializing permission launcher");
+            // Re-initialize if needed
+            initializeHealthConnectPermissionLauncher();
+        }
+        
+        if (healthConnectPermissionLauncher == null) {
+            android.util.Log.e("SettingsActivity", "Permission launcher is still null after initialization");
+            Snackbar.make(rootView, "Unable to request permissions. Please try again.", Snackbar.LENGTH_SHORT).show();
+            // Turn off switch
+            if (switchGoogleFit != null && currentSettings != null) {
+                switchGoogleFit.setChecked(false);
+                currentSettings.googleFitEnabled = false;
+                saveSettings();
+            }
+            return;
+        }
+        
+        // Get permissions from HealthConnectManager (Kotlin helper method)
+        Set<String> permissions = healthConnectManager.getRequiredPermissions();
+        
+        if (permissions == null || permissions.isEmpty()) {
+            android.util.Log.e("SettingsActivity", "No permissions to request");
+            Snackbar.make(rootView, "No permissions to request", Snackbar.LENGTH_SHORT).show();
+            // Turn off switch
+            if (switchGoogleFit != null && currentSettings != null) {
+                switchGoogleFit.setChecked(false);
+                currentSettings.googleFitEnabled = false;
+                saveSettings();
+            }
+            return;
+        }
+        
+        android.util.Log.d("SettingsActivity", "Launching permission request with " + permissions.size() + " permissions");
+        android.util.Log.d("SettingsActivity", "Permissions: " + permissions.toString());
+        
+        // Ensure we're on the main thread and Activity is resumed
+        if (isFinishing() || isDestroyed()) {
+            android.util.Log.e("SettingsActivity", "Activity is finishing or destroyed, cannot launch permissions");
+            return;
+        }
+        
+        // Post to main thread with a small delay to ensure Activity is fully resumed
+        // and any dialogs are dismissed
+        rootView.postDelayed(() -> {
+            runOnUiThread(() -> {
+                try {
+                    android.util.Log.d("SettingsActivity", "About to launch permission request on UI thread");
+                    android.util.Log.d("SettingsActivity", "Permission launcher: " + (healthConnectPermissionLauncher != null ? "not null" : "null"));
+                    android.util.Log.d("SettingsActivity", "Permissions set: " + permissions.toString());
+                    android.util.Log.d("SettingsActivity", "Activity state - isFinishing: " + isFinishing() + ", isDestroyed: " + isDestroyed());
+                    
+                    // Ensure we have a valid launcher
+                    if (healthConnectPermissionLauncher == null) {
+                        android.util.Log.e("SettingsActivity", "Permission launcher is null on UI thread");
+                        Snackbar.make(rootView, 
+                            "Permission launcher not available. Please try again.", 
+                            Snackbar.LENGTH_SHORT).show();
+                        return;
+                    }
+                    
+                    // Launch the permission request
+                    // This should trigger Health Connect's permission dialog
+                    android.util.Log.d("SettingsActivity", "Calling launcher.launch() with permissions");
+                    android.util.Log.d("SettingsActivity", "Launcher object: " + healthConnectPermissionLauncher.toString());
+                    
+                    try {
+                        healthConnectPermissionLauncher.launch(permissions);
+                        android.util.Log.d("SettingsActivity", "launcher.launch() called successfully");
+                        android.util.Log.d("SettingsActivity", "If dialog doesn't appear, Health Connect may need the app to be registered first");
+                        
+                        // Wait a moment to see if dialog appears
+                        rootView.postDelayed(() -> {
+                            // Check if we got a result (if not, dialog might not have appeared)
+                            android.util.Log.d("SettingsActivity", "Checking if permission dialog appeared...");
+                        }, 1000);
+                    } catch (IllegalStateException e) {
+                        android.util.Log.e("SettingsActivity", "IllegalStateException: Activity may not be in valid state", e);
+                        throw e;
+                    } catch (Exception e) {
+                        android.util.Log.e("SettingsActivity", "Unexpected exception launching permissions", e);
+                        throw e;
+                    }
+                    
+                } catch (IllegalStateException e) {
+                    android.util.Log.e("SettingsActivity", "IllegalStateException launching permission request", e);
+                    android.util.Log.e("SettingsActivity", "This might mean the Activity is not in a valid state");
+                    e.printStackTrace();
+                    
+                    // Show error with option to open Health Connect manually
+                    Snackbar.make(rootView, 
+                        "Could not open permission dialog. Please grant permissions manually in Health Connect settings.", 
+                        Snackbar.LENGTH_LONG)
+                        .setAction("Open Settings", v -> {
+                            healthConnectManager.openHealthConnectSettings();
+                        })
+                        .show();
+                    
+                    // Turn off switch
+                    if (switchGoogleFit != null && currentSettings != null) {
+                        switchGoogleFit.setChecked(false);
+                        currentSettings.googleFitEnabled = false;
+                        saveSettings();
+                    }
+                } catch (Exception e) {
+                    android.util.Log.e("SettingsActivity", "Error launching permission request", e);
+                    e.printStackTrace();
+                    
+                    // Show error with option to open Health Connect manually
+                    Snackbar.make(rootView, 
+                        "Could not open permission dialog. Please grant permissions manually in Health Connect settings.", 
+                        Snackbar.LENGTH_LONG)
+                        .setAction("Open Settings", v -> {
+                            healthConnectManager.openHealthConnectSettings();
+                        })
+                        .show();
+                    
+                    // Turn off switch
+                    if (switchGoogleFit != null && currentSettings != null) {
+                        switchGoogleFit.setChecked(false);
+                        currentSettings.googleFitEnabled = false;
+                        saveSettings();
+                    }
+                }
+            });
+        }, 300); // Small delay to ensure Activity is ready
+    }
+    
+    /**
+     * Sync biometric data from Health Connect
+     * This syncs only new data since the last sync
+     */
+    private void syncDataFromHealthConnect() {
+        if (healthConnectManager == null) {
+            healthConnectManager = new HealthConnectManager(this);
+        }
+        
+        Snackbar.make(rootView, 
+            "Syncing data from Health Connect...", 
+            Snackbar.LENGTH_SHORT).show();
+        
+        // Sync new data since last sync (this will update the last sync timestamp automatically)
+        healthConnectManager.syncNewDataSinceLastSync(new HealthConnectManager.BiometricCallback() {
+            @Override
+            public void onSuccess(java.util.List<com.flowstate.app.data.models.BiometricData> data) {
+                runOnUiThread(() -> {
+                    if (data != null && !data.isEmpty()) {
+                        // Save data to Supabase
+                        saveBiometricDataToSupabase(data);
+                        Snackbar.make(rootView, 
+                            "Successfully synced " + data.size() + " new records from Health Connect", 
+                            Snackbar.LENGTH_LONG).show();
+                    } else {
+                        Snackbar.make(rootView, 
+                            "No new data to sync. All data is up to date.", 
+                            Snackbar.LENGTH_LONG).show();
+                    }
+                });
+            }
+            
+            @Override
+            public void onError(Exception e) {
+                runOnUiThread(() -> {
+                    android.util.Log.e("SettingsActivity", "Failed to sync Health Connect data", e);
+                    Snackbar.make(rootView, 
+                        "Failed to sync data: " + e.getMessage(), 
+                        Snackbar.LENGTH_LONG).show();
+                });
+            }
+        });
+    }
+    
+    /**
+     * Save synced biometric data to Supabase
+     */
+    private void saveBiometricDataToSupabase(java.util.List<com.flowstate.app.data.models.BiometricData> data) {
+        // Get user ID
+        String userId = com.flowstate.app.supabase.SupabaseClient.getInstance(this).getUserId();
+        if (userId == null || userId.isEmpty()) {
+            android.util.Log.e("SettingsActivity", "Cannot save data: user not authenticated");
+            return;
+        }
+        
+        // Use BiometricDataRepository to save data
+        com.flowstate.app.supabase.repository.BiometricDataRepository repo = 
+            new com.flowstate.app.supabase.repository.BiometricDataRepository(this);
+        
+        for (com.flowstate.app.data.models.BiometricData biometric : data) {
+            repo.upsertBiometricData(userId, biometric, new com.flowstate.app.supabase.repository.BiometricDataRepository.DataCallback() {
+                @Override
+                public void onSuccess(Object result) {
+                    android.util.Log.d("SettingsActivity", "Saved biometric data to Supabase");
+                }
+                
+                @Override
+                public void onError(Throwable error) {
+                    android.util.Log.e("SettingsActivity", "Failed to save biometric data", error);
+                }
+            });
         }
     }
     
@@ -440,9 +856,9 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         
-        if (requestCode == 4001) { // Google Calendar onboarding result
+        if (requestCode == 4001) { // Calendar onboarding result
             if (resultCode == RESULT_OK) {
-                Snackbar.make(rootView, "Google Calendar connected successfully!", Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(rootView, "Calendar connected successfully!", Snackbar.LENGTH_SHORT).show();
                 // Refresh the switch state
                 if (switchGoogleCalendar != null) {
                     switchGoogleCalendar.setChecked(true);
@@ -507,11 +923,12 @@ public class SettingsActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_help) {
-            HelpDialogHelper.showHelpDialog(
-                this,
-                "Settings",
-                HelpDialogHelper.getDefaultInstructions("Settings")
-            );
+            // HelpDialogHelper removed - show simple dialog instead
+            new android.app.AlertDialog.Builder(this)
+                .setTitle("Settings Help")
+                .setMessage("Configure your app settings including data sources, notifications, and preferences. Connect to Health Connect to sync your health data.")
+                .setPositiveButton("OK", null)
+                .show();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -564,13 +981,10 @@ public class SettingsActivity extends AppCompatActivity {
                 // ListView is kept hidden by default to avoid UI duplication
                 // It's available for CP470 requirement compliance but doesn't interfere with the UI
                 List<String> settingsList = new ArrayList<>();
-                settingsList.add("Google Fit Integration");
+                settingsList.add("Health Connect Integration");
                 settingsList.add("Dark Mode");
-                settingsList.add("Adaptive Learning");
-                settingsList.add("Daily Advice");
-                settingsList.add("Google Calendar");
+                settingsList.add("Calendar Sync");
                 settingsList.add("Push Notifications");
-                settingsList.add("Email Notifications");
                 
                 if (listViewSettings != null) {
                     ArrayAdapter<String> adapter = new ArrayAdapter<>(SettingsActivity.this,
@@ -581,9 +995,7 @@ public class SettingsActivity extends AppCompatActivity {
                     listViewSettings.setVisibility(View.GONE);
                 }
                 
-                // Show Toast (CP470 Requirement #11)
-                Toast.makeText(SettingsActivity.this, 
-                    "Settings loaded", Toast.LENGTH_SHORT).show();
+                // Settings loaded silently
             } else {
                 // Show Snackbar (CP470 Requirement #11)
                 String errorMsg = error != null ? error.getMessage() : "Unknown error";

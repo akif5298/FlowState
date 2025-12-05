@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Energy Level Colors -->
-    <color name="energy_high">#10B981</color>
-    <color name="energy_medium">#F59E0B</color>
-    <color name="energy_low">#EF4444</color>
+    <color name="energy_high">#EF4444</color>
+    <color name="energy_medium">#10B981</color>
+    <color name="energy_low">#9333EA</color>
     
     <!-- Primary Color Palette - Modern Blue/Purple -->
     <color name="primary">#6366F1</color>

@@ -56,56 +56,7 @@
             android:padding="16dp"
             android:paddingBottom="160dp">
 
-            <!-- Weekly Summary Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardSummary"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="2dp"
-                app:strokeWidth="0dp"
-                android:layout_marginBottom="16dp"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="24dp">
-
-                    <TextView
-                        android:id="@+id/tvTrendTitle"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:text="📊 Weekly Trend Summary"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:textColor="?attr/colorOnSurface"
-                        android:letterSpacing="-0.01"
-                        android:layout_marginBottom="16dp"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent" />
-
-                    <TextView
-                        android:id="@+id/tvTrendSummary"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:text="Average energy peaked at 10:45 AM this week.\nReaction time dropped after late nights."
-                        android:textSize="16sp"
-                        android:textColor="@color/text_secondary"
-                        android:lineSpacingMultiplier="1.6"
-                        android:paddingTop="8dp"
-                        app:layout_constraintTop_toBottomOf="@+id/tvTrendTitle"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent" />
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Highlights Card -->
+            <!-- Highlights Card - Now at the top -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardHighlights"
                 android:layout_width="0dp"
@@ -114,7 +65,7 @@
                 app:cardElevation="2dp"
                 app:strokeWidth="0dp"
                 android:layout_marginBottom="16dp"
-                app:layout_constraintTop_toBottomOf="@+id/cardSummary"
+                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
 
@@ -154,16 +105,65 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- AI Recommendation Card -->
+            <!-- Weekly Summary Card - Now second -->
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardAI"
+                android:id="@+id/cardSummary"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="6dp"
-                android:backgroundTint="#2A2A2A"
-                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp"
+                android:layout_marginBottom="16dp"
                 app:layout_constraintTop_toBottomOf="@+id/cardHighlights"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="24dp">
+
+                    <TextView
+                        android:id="@+id/tvTrendTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="📊 Weekly Trend Summary"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="?attr/colorOnSurface"
+                        android:letterSpacing="-0.01"
+                        android:layout_marginBottom="16dp"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tvTrendSummary"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Average energy peaked at 10:45 AM this week.\nReaction time dropped after late nights."
+                        android:textSize="16sp"
+                        android:textColor="@color/text_secondary"
+                        android:lineSpacingMultiplier="1.6"
+                        android:paddingTop="8dp"
+                        app:layout_constraintTop_toBottomOf="@+id/tvTrendTitle"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Metrics Graph Card - Now third -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardMetrics"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp"
+                android:layout_marginBottom="16dp"
+                app:layout_constraintTop_toBottomOf="@+id/cardSummary"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
 
@@ -203,16 +203,16 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Metrics Graph Card -->
+            <!-- AI Recommendation Card - Now at the bottom -->
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardMetrics"
+                android:id="@+id/cardAI"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="2dp"
-                app:strokeWidth="0dp"
-                android:layout_marginBottom="16dp"
-                app:layout_constraintTop_toBottomOf="@+id/cardAI"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="6dp"
+                android:backgroundTint="#2A2A2A"
+                android:layout_marginBottom="24dp"
+                app:layout_constraintTop_toBottomOf="@+id/cardMetrics"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
 
@@ -272,6 +272,7 @@
         app:itemIconTint="?attr/colorOnSurface"
         android:layout_gravity="bottom"
         android:paddingTop="8dp"
-        android:paddingBottom="8dp" />
+        android:paddingBottom="0dp"
+        android:fitsSystemWindows="true" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

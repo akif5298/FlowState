@@ -15,7 +15,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ArrayAdapter;
-import com.flowstate.app.utils.HelpDialogHelper;
+// import com.flowstate.app.utils.HelpDialogHelper; // Removed - class deleted
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -117,8 +117,18 @@ public class DataLogsActivity extends AppCompatActivity {
             cardAISummary.setFocusable(true);
         }
         
+        // Sync Health Connect data first, then load data
+        syncHealthConnectData();
+        
         // Load data
         loadData();
+    }
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Sync Health Connect data when returning to this activity
+        syncHealthConnectData();
     }
     
     @Override
@@ -199,11 +209,12 @@ public class DataLogsActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_help) {
-            HelpDialogHelper.showHelpDialog(
-                this,
-                "Data Logs & Trends",
-                HelpDialogHelper.getDefaultInstructions("Data Logs")
-            );
+            // HelpDialogHelper removed - show simple dialog instead
+            new android.app.AlertDialog.Builder(this)
+                .setTitle("Data Logs & Trends Help")
+                .setMessage("View your historical data including heart rate, sleep, and activity logs. Use the charts to identify patterns and trends in your energy levels.")
+                .setPositiveButton("OK", null)
+                .show();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -1135,10 +1146,8 @@ public class DataLogsActivity extends AppCompatActivity {
         
         // Analyze predictions
         int highCount = 0, mediumCount = 0, lowCount = 0;
-        double totalConfidence = 0;
         
         for (EnergyPrediction pred : predictions) {
-            totalConfidence += pred.getConfidence();
             switch (pred.getPredictedLevel()) {
                 case HIGH:
                     highCount++;
@@ -1152,22 +1161,18 @@ public class DataLogsActivity extends AppCompatActivity {
             }
         }
         
-        double avgConfidence = totalConfidence / predictions.size();
-        
         // Generate summary
         String summary = String.format(Locale.getDefault(),
             "Based on %d energy predictions over the last 30 days:\n\n" +
-            "• High Energy: %d times (%.0f%%)\n" +
-            "• Medium Energy: %d times (%.0f%%)\n" +
-            "• Low Energy: %d times (%.0f%%)\n\n" +
-            "Average Confidence: %.0f%%\n\n" +
+            "• High Energy: %d times\n" +
+            "• Medium Energy: %d times\n" +
+            "• Low Energy: %d times\n\n" +
             "Your energy patterns show %s periods. " +
             "Consider scheduling high-intensity tasks during your peak energy times.",
             predictions.size(),
-            highCount, (highCount * 100.0 / predictions.size()),
-            mediumCount, (mediumCount * 100.0 / predictions.size()),
-            lowCount, (lowCount * 100.0 / predictions.size()),
-            avgConfidence * 100,
+            highCount,
+            mediumCount,
+            lowCount,
             highCount > mediumCount && highCount > lowCount ? "consistent high-energy" :
             lowCount > highCount && lowCount > mediumCount ? "frequent low-energy" :
             "balanced");
@@ -1183,6 +1188,9 @@ public class DataLogsActivity extends AppCompatActivity {
             int itemId = item.getItemId();
             
             if (itemId == R.id.nav_data) {
+                // User clicked data tab while already on this screen - trigger sync and reload
+                syncHealthConnectData();
+                loadData();
                 return true;
             } else if (itemId == R.id.nav_dashboard) {
                 startActivity(new Intent(this, EnergyDashboardActivity.class));
@@ -1204,6 +1212,100 @@ public class DataLogsActivity extends AppCompatActivity {
             return false;
         });
         bottomNav.setSelectedItemId(R.id.nav_data);
+    }
+    
+    /**
+     * Sync Health Connect data and save to Supabase
+     */
+    private void syncHealthConnectData() {
+        try {
+            com.personaleenergy.app.data.collection.HealthConnectManager healthConnectManager = 
+                new com.personaleenergy.app.data.collection.HealthConnectManager(this);
+            
+            // Check permissions asynchronously
+            healthConnectManager.hasPermissionsJava().thenAccept(hasPermissions -> {
+                if (hasPermissions) {
+                    // Permissions granted, sync new data
+                    Log.d(TAG, "Health Connect permissions granted, syncing new data...");
+                    healthConnectManager.readNewBiometricDataSinceLastSync(
+                        new com.personaleenergy.app.data.collection.HealthConnectManager.BiometricCallback() {
+                            @Override
+                            public void onSuccess(java.util.List<com.flowstate.app.data.models.BiometricData> data) {
+                                if (data != null && !data.isEmpty()) {
+                                    Log.d(TAG, "Found " + data.size() + " new records from Health Connect");
+                                    // Save to Supabase
+                                    saveHealthConnectDataToSupabase(data);
+                                } else {
+                                    Log.d(TAG, "No new data from Health Connect");
+                                }
+                            }
+                            
+                            @Override
+                            public void onError(Exception e) {
+                                Log.e(TAG, "Failed to sync Health Connect data", e);
+                                // Don't show error to user - silent sync
+                            }
+                        }
+                    );
+                } else {
+                    Log.d(TAG, "Health Connect permissions not granted, skipping sync");
+                }
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "Error initializing Health Connect sync", e);
+        }
+    }
+    
+    /**
+     * Save Health Connect data to Supabase
+     */
+    private void saveHealthConnectDataToSupabase(java.util.List<com.flowstate.app.data.models.BiometricData> data) {
+        // Get user ID
+        String userId = supabaseClient.getUserId();
+        if (userId == null || userId.isEmpty()) {
+            Log.e(TAG, "Cannot save data: user not authenticated");
+            return;
+        }
+        
+        // Use BiometricDataRepository to save data
+        com.flowstate.app.supabase.repository.BiometricDataRepository repo = 
+            new com.flowstate.app.supabase.repository.BiometricDataRepository(this);
+        
+        final int totalCount = data.size();
+        final int[] successCount = {0};
+        final int[] errorCount = {0};
+        
+        for (com.flowstate.app.data.models.BiometricData biometric : data) {
+            repo.upsertBiometricData(userId, biometric, new com.flowstate.app.supabase.repository.BiometricDataRepository.DataCallback() {
+                @Override
+                public void onSuccess(Object result) {
+                    successCount[0]++;
+                    Log.d(TAG, "Saved biometric data to Supabase (" + successCount[0] + "/" + totalCount + ")");
+                    
+                    if (successCount[0] + errorCount[0] >= totalCount) {
+                        Log.d(TAG, "Health Connect sync complete: " + successCount[0] + " saved, " + errorCount[0] + " errors");
+                        // Reload data after sync to show updated information
+                        runOnUiThread(() -> {
+                            loadData();
+                        });
+                    }
+                }
+                
+                @Override
+                public void onError(Throwable error) {
+                    errorCount[0]++;
+                    Log.e(TAG, "Failed to save biometric data to Supabase", error);
+                    
+                    if (successCount[0] + errorCount[0] >= totalCount) {
+                        Log.d(TAG, "Health Connect sync complete: " + successCount[0] + " saved, " + errorCount[0] + " errors");
+                        // Reload data even if there were errors to show what was saved
+                        runOnUiThread(() -> {
+                            loadData();
+                        });
+                    }
+                }
+            });
+        }
     }
 }
 
